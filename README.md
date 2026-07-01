@@ -1,2 +1,0 @@
-# SyahmiPortfolio
-My portfolio
