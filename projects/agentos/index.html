@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgentOS — AI Agent Orchestration UI</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text y='52' font-size='56'>◆</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    .hub-back {
+      display: inline-flex; align-items: center; gap: 8px; position: fixed; top: 18px; left: 20px; z-index: 9999;
+      padding: 8px 18px 8px 14px; background: rgba(4, 7, 15, 0.85); backdrop-filter: blur(12px);
+      border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 8px; font-family: 'Orbitron', monospace;
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #00f0ff;
+      text-decoration: none; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); transition: all 0.25s ease;
+    }
+    .hub-back:hover { border-color: rgba(0, 240, 255, 0.8); box-shadow: 0 0 20px rgba(0, 240, 255, 0.4); transform: translateX(-2px); }
+    .hub-back-arrow { font-size: 1rem; line-height: 1; }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #03050c; --surface: #0a0f1d; --card-bg: rgba(10, 16, 32, 0.8);
+      --cyan: #00f0ff; --purple: #a855f7; --green: #22d3a5; --amber: #f59e0b; --danger: #ef4444;
+      --text: #ccd6f6; --text-dim: #8892b0; --radius: 12px;
+    }
+    body {
+      background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100vh; overflow-x: hidden;
+    }
+    .container { max-width: 1300px; margin: 0 auto; padding: 80px 24px 60px; }
+    .hero { text-align: center; margin-bottom: 30px; }
+    .title {
+      font-family: 'Orbitron', sans-serif; font-size: clamp(2rem, 4.5vw, 3.4rem); font-weight: 900;
+      background: linear-gradient(135deg, #fff, var(--purple) 70%, var(--cyan) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 12px;
+    }
+    .sub { color: var(--text-dim); max-width: 720px; margin: 0 auto 24px; font-size: 1.05rem; }
+
+    .top-actions { display: flex; justify-content: center; gap: 14px; margin-bottom: 30px; }
+    .btn-action {
+      background: linear-gradient(135deg, var(--purple), #7c3aed); color: #fff; border: none;
+      font-family: 'Orbitron', sans-serif; font-size: 0.85rem; font-weight: 700; padding: 12px 24px;
+      border-radius: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+    }
+    .btn-action:hover { box-shadow: 0 0 30px rgba(168, 85, 247, 0.7); transform: translateY(-2px); }
+
+    /* Canvas Grid & Pipeline */
+    .pipeline-board {
+      background: #060a16; border: 1px solid rgba(0, 240, 255, 0.25); border-radius: var(--radius);
+      padding: 30px; position: relative; overflow-x: auto; margin-bottom: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6); min-height: 280px; display: flex; align-items: center; justify-content: space-between; gap: 20px;
+    }
+    .node {
+      background: var(--surface); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 10px;
+      padding: 20px; width: 220px; flex-shrink: 0; position: relative; transition: all 0.3s;
+    }
+    .node.active {
+      border-color: var(--cyan); box-shadow: 0 0 25px rgba(0, 240, 255, 0.4);
+    }
+    .node-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .node-role { font-family: 'Orbitron', monospace; font-size: 0.75rem; color: var(--purple); font-weight: 700; }
+    .node-status { width: 8px; height: 8px; border-radius: 50%; background: #4b5563; }
+    .node-status.live { background: var(--green); box-shadow: 0 0 8px var(--green); }
+    .node-status.busy { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+    .node-title { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 6px; }
+    .node-desc { font-size: 0.78rem; color: var(--text-dim); }
+
+    .node-connector {
+      color: var(--cyan); font-size: 1.4rem; font-family: monospace; font-weight: bold;
+    }
+
+    /* Live Terminal Console */
+    .terminal {
+      background: #020409; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--radius);
+      overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+    }
+    .terminal-head {
+      background: #080d19; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08); font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+    }
+    .terminal-logs {
+      height: 240px; overflow-y: auto; padding: 18px; font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; line-height: 1.7; color: #94a3b8;
+    }
+    .log-line { margin-bottom: 4px; }
+    .log-time { color: #64748b; margin-right: 8px; }
+    .log-agent { color: var(--purple); font-weight: 600; margin-right: 8px; }
+    .log-action { color: var(--cyan); }
+  </style>
+</head>
+<body>
+
+  <a class="hub-back" href="../../index.html" aria-label="Back to Project Hub">
+    <span class="hub-back-arrow">←</span> Hub
+  </a>
+
+  <div class="container">
+    <header class="hero">
+      <h1 class="title">AGENTOS</h1>
+      <p class="sub">
+        Visual AI Agent Orchestrator. Construct directed acyclic graphs of autonomous LLM reasoning nodes, monitor execution flows, and inspect inter-agent telemetry in real time.
+      </p>
+
+      <div class="top-actions">
+        <button class="btn-action" id="btnRun" onclick="runPipeline()">▶ Execute Pipeline</button>
+        <button class="btn-action" style="background: rgba(11,22,40,0.8); border: 1px solid var(--cyan);" onclick="resetPipeline()">↺ Reset Flow</button>
+      </div>
+    </header>
+
+    <!-- Visual Nodes Pipeline -->
+    <div class="pipeline-board">
+      <div class="node" id="node1">
+        <div class="node-header">
+          <span class="node-role">DISCOVERY</span>
+          <span class="node-status" id="dot1"></span>
+        </div>
+        <div class="node-title">Research Agent</div>
+        <div class="node-desc">Searches web & academic sources, extracts citations.</div>
+      </div>
+
+      <div class="node-connector">━━▶</div>
+
+      <div class="node" id="node2">
+        <div class="node-header">
+          <span class="node-role">PLANNING</span>
+          <span class="node-status" id="dot2"></span>
+        </div>
+        <div class="node-title">Architect Agent</div>
+        <div class="node-desc">Generates system blueprint & dependency graph.</div>
+      </div>
+
+      <div class="node-connector">━━▶</div>
+
+      <div class="node" id="node3">
+        <div class="node-header">
+          <span class="node-role">SYNTHESIS</span>
+          <span class="node-status" id="dot3"></span>
+        </div>
+        <div class="node-title">Synthesis Agent</div>
+        <div class="node-desc">Cross-validates evidence and compiles code units.</div>
+      </div>
+
+      <div class="node-connector">━━▶</div>
+
+      <div class="node" id="node4">
+        <div class="node-header">
+          <span class="node-role">QA & SHIELD</span>
+          <span class="node-status" id="dot4"></span>
+        </div>
+        <div class="node-title">Reviewer Agent</div>
+        <div class="node-desc">Verifies security policies & tests functionality.</div>
+      </div>
+    </div>
+
+    <!-- Live Execution Logs -->
+    <div class="terminal">
+      <div class="terminal-head">
+        <span>AGENTOS LIVE BUS // STREAM: WS-01</span>
+        <span style="color: var(--green);">● SYSTEM ONLINE</span>
+      </div>
+      <div class="terminal-logs" id="logBox">
+        <div class="log-line"><span class="log-time">[00:00.00]</span> [AgentOS Core] Daemon initialized. Ready to orchestrate agent DAG.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let running = false;
+    function log(agent, msg, action = '') {
+      const box = document.getElementById('logBox');
+      const time = new Date().toLocaleTimeString();
+      const div = document.createElement('div');
+      div.className = 'log-line';
+      div.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-agent">[${agent}]</span> ${msg} <span class="log-action">${action}</span>`;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    async function runPipeline() {
+      if (running) return;
+      running = true;
+      document.getElementById('btnRun').disabled = true;
+
+      // Node 1
+      setNodeState(1, 'busy');
+      log('ResearchAgent', 'Initiating search query...', 'search_web("TurboBoost performance benchmarks")');
+      await sleep(1000);
+      log('ResearchAgent', 'Retrieved 8 relevant sources on ZRAM & kernel compactor.', 'DONE');
+      setNodeState(1, 'live');
+
+      // Node 2
+      setNodeState(2, 'busy');
+      log('ArchitectAgent', 'Synthesizing pipeline schema...', 'compile_graph()');
+      await sleep(1100);
+      log('ArchitectAgent', 'Architecture validated. Safe bounds established.', 'DONE');
+      setNodeState(2, 'live');
+
+      // Node 3
+      setNodeState(3, 'busy');
+      log('SynthesisAgent', 'Cross-referencing telemetry and package lists...', 'verify_manifest()');
+      await sleep(1200);
+      log('SynthesisAgent', 'Compiled production units without conflicts.', 'DONE');
+      setNodeState(3, 'live');
+
+      // Node 4
+      setNodeState(4, 'busy');
+      log('ReviewerAgent', 'Running safety audit on system app protector...', 'audit_guardrail()');
+      await sleep(1000);
+      log('ReviewerAgent', 'Shield check PASSED. Zero critical vulnerabilities found.', 'SUCCESS');
+      setNodeState(4, 'live');
+
+      log('AgentOS Core', 'Pipeline completed execution successfully.', 'STATUS 200 OK');
+      document.getElementById('btnRun').disabled = false;
+      running = false;
+    }
+
+    function setNodeState(index, state) {
+      const node = document.getElementById(`node${index}`);
+      const dot = document.getElementById(`dot${index}`);
+      node.classList.remove('active');
+      dot.className = 'node-status';
+
+      if (state === 'busy') {
+        node.classList.add('active');
+        dot.classList.add('busy');
+      } else if (state === 'live') {
+        dot.classList.add('live');
+      }
+    }
+
+    function resetPipeline() {
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`node${i}`).classList.remove('active');
+        document.getElementById(`dot${i}`).className = 'node-status';
+      }
+      document.getElementById('logBox').innerHTML = '<div class="log-line"><span class="log-time">[00:00.00]</span> [AgentOS Core] Pipeline reset. Ready to launch.</div>';
+      document.getElementById('btnRun').disabled = false;
+      running = false;
+    }
+
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+  </script>
+</body>
+</html>

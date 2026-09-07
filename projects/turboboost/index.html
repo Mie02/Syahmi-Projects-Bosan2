@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TurboBoost Pro v2.0 — Mie's Project Hub</title>
+  <meta name="description" content="TurboBoost Pro (TurboPro) v2.0 - Ultra-lightweight native Android performance tool with Shizuku-automated debloater, System App Protector Shield, and hardware telemetry." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text y='52' font-size='56'>⚡</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* HUD-style back button */
+    .hub-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      position: fixed;
+      top: 18px;
+      left: 20px;
+      z-index: 9999;
+      padding: 8px 18px 8px 14px;
+      background: rgba(4, 7, 15, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-radius: 8px;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #00f0ff;
+      text-decoration: none;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      transition: all 0.25s ease;
+    }
+    .hub-back:hover {
+      border-color: rgba(0, 240, 255, 0.8);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+      transform: translateX(-2px);
+    }
+    .hub-back-arrow { font-size: 1rem; line-height: 1; }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #04070f;
+      --surface: #0b1120;
+      --card-bg: rgba(13, 22, 40, 0.7);
+      --glass: rgba(11, 22, 40, 0.55);
+      --cyan: #00f0ff;
+      --cyan-glow: rgba(0, 240, 255, 0.35);
+      --purple: #a855f7;
+      --purple-glow: rgba(168, 85, 247, 0.35);
+      --green: #22d3a5;
+      --amber: #f59e0b;
+      --danger: #ef4444;
+      --text: #ccd6f6;
+      --text-dim: #8892b0;
+      --white: #ffffff;
+      --radius: 14px;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(0, 240, 255, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 75%, rgba(168, 85, 247, 0.08) 0%, transparent 45%);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 24px 100px;
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 40px 0 60px;
+      position: relative;
+    }
+    .badge-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .badge {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      background: rgba(0, 240, 255, 0.06);
+      color: var(--cyan);
+    }
+    .badge.purple {
+      border-color: rgba(168, 85, 247, 0.35);
+      background: rgba(168, 85, 247, 0.08);
+      color: #c084fc;
+    }
+    .badge.green {
+      border-color: rgba(34, 211, 165, 0.35);
+      background: rgba(34, 211, 165, 0.08);
+      color: var(--green);
+    }
+
+    .hero-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      background: linear-gradient(135deg, #ffffff 30%, var(--cyan) 75%, var(--purple) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 18px;
+    }
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: var(--text-dim);
+      max-width: 780px;
+      margin: 0 auto 36px;
+      font-weight: 300;
+    }
+
+    /* CTA Buttons */
+    .cta-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(135deg, #00f0ff 0%, #0284c7 100%);
+      color: #04070f;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 16px 36px;
+      border-radius: 12px;
+      text-decoration: none;
+      box-shadow: 0 0 28px rgba(0, 240, 255, 0.4);
+      transition: all 0.25s ease;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-download:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 38px rgba(0, 240, 255, 0.7);
+    }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(11, 22, 40, 0.8);
+      color: var(--text);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 16px 28px;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+    .btn-secondary:hover {
+      border-color: var(--cyan);
+      background: rgba(0, 240, 255, 0.1);
+      color: #ffffff;
+    }
+
+    /* Specs quick bar */
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin: 40px 0 70px;
+    }
+    .spec-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 12px;
+      padding: 18px 20px;
+      text-align: center;
+      backdrop-filter: blur(8px);
+      transition: border-color 0.2s;
+    }
+    .spec-card:hover {
+      border-color: rgba(0, 240, 255, 0.45);
+    }
+    .spec-label {
+      font-size: 0.72rem;
+      font-family: 'Orbitron', monospace;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+    .spec-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--cyan);
+    }
+
+    /* Section Headings */
+    .section-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      color: #ffffff;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-sub {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      margin-bottom: 32px;
+    }
+
+    /* Screenshot Gallery */
+    .gallery-wrap {
+      margin-bottom: 80px;
+    }
+    .screenshots-scroller {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .screen-item {
+      background: var(--surface);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+    }
+    .screen-item:hover {
+      transform: translateY(-6px);
+      border-color: var(--cyan);
+      box-shadow: 0 12px 36px rgba(0, 240, 255, 0.25);
+    }
+    .screen-item img {
+      width: 100%;
+      height: 380px;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+      background: #000;
+    }
+    .screen-caption {
+      padding: 14px 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #ffffff;
+      background: rgba(11, 17, 32, 0.9);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .screen-badge {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.65rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(0, 240, 255, 0.15);
+      color: var(--cyan);
+    }
+
+    /* Features Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 24px;
+      margin-bottom: 80px;
+    }
+    .feat-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: var(--radius);
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    .feat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--cyan), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .feat-card:hover {
+      border-color: rgba(0, 240, 255, 0.4);
+      transform: translateY(-4px);
+    }
+    .feat-card:hover::before {
+      opacity: 1;
+    }
+    .feat-icon {
+      font-size: 2rem;
+      margin-bottom: 16px;
+      display: inline-block;
+    }
+    .feat-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+    .feat-desc {
+      color: var(--text-dim);
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+    .feat-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .feat-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--cyan);
+    }
+
+    /* Guardrail Highlight Box */
+    .guardrail-box {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(11, 22, 40, 0.7) 100%);
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      border-radius: var(--radius);
+      padding: 32px;
+      margin-bottom: 80px;
+    }
+    .guardrail-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .guardrail-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #e9d5ff;
+    }
+    .guard-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .guard-item {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 16px;
+      border-radius: 8px;
+      border-left: 3px solid #c084fc;
+    }
+    .guard-item strong {
+      display: block;
+      color: #ffffff;
+      font-size: 0.92rem;
+      margin-bottom: 4px;
+    }
+    .guard-item span {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+    }
+
+    /* Terminal / ADB Guide */
+    .terminal-box {
+      background: #02040a;
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 80px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    }
+    .term-header {
+      background: #080d18;
+      padding: 12px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .term-dots {
+      display: flex;
+      gap: 6px;
+    }
+    .term-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .term-dot.red { background: #ef4444; }
+    .term-dot.yellow { background: #f59e0b; }
+    .term-dot.green { background: #22d3a5; }
+    .term-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    .term-body {
+      padding: 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+    .cmd-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 240, 255, 0.05);
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px dashed rgba(0, 240, 255, 0.2);
+      margin: 12px 0 20px;
+    }
+    .cmd-text {
+      color: var(--cyan);
+      user-select: all;
+    }
+    .btn-copy {
+      background: rgba(0, 240, 255, 0.15);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      color: var(--cyan);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.7rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-copy:hover {
+      background: var(--cyan);
+      color: #04070f;
+    }
+
+    /* Modal for image enlargement */
+    .img-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(8px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .img-modal.active {
+      display: flex;
+    }
+    .modal-content {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 12px;
+      border: 1px solid var(--cyan);
+      box-shadow: 0 0 40px rgba(0, 240, 255, 0.3);
+    }
+    .modal-close {
+      position: absolute;
+      top: 24px;
+      right: 28px;
+      color: #ffffff;
+      font-size: 2rem;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+
+    /* Footer */
+    .page-footer {
+      text-align: center;
+      padding: 40px 0;
+      border-top: 1px solid rgba(0, 240, 255, 0.15);
+      font-family: 'Orbitron', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HUD Back Button -->
+  <a class="hub-back" href="../../index.html" aria-label="Back to Project Hub">
+    <span class="hub-back-arrow">←</span> Hub
+  </a>
+
+  <div class="container">
+
+    <!-- Hero -->
+    <header class="hero">
+      <div class="badge-bar">
+        <span class="badge">v2.0 Release</span>
+        <span class="badge purple">Shizuku Automated</span>
+        <span class="badge green">382.4 KB Compact</span>
+        <span class="badge">Android 7.0 – 15+</span>
+        <span class="badge green">Zero Telemetry</span>
+      </div>
+
+      <h1 class="hero-title">TURBOBOOST PRO</h1>
+      <p class="hero-sub">
+        High-performance native Android engine built to eliminate bloatware, compact system memory, and unlock deep device hardware telemetry — fully safeguarded by the <strong>System App Protector Shield</strong>.
+      </p>
+
+      <div class="cta-wrap">
+        <a href="TurboBoost_Pro.apk" download="TurboBoost_Pro.apk" class="btn-download">
+          <span>📥 Download APK (v2.0)</span>
+        </a>
+        <a href="#features" class="btn-secondary">
+          <span>⚡ Features</span>
+        </a>
+        <a href="#install-guide" class="btn-secondary">
+          <span>⚙️ Setup Guide</span>
+        </a>
+      </div>
+
+      <!-- Quick Specs -->
+      <div class="specs-grid">
+        <div class="spec-card">
+          <div class="spec-label">Package ID</div>
+          <div class="spec-val" style="font-size: 0.95rem;">com.pixelbooster.app</div>
+        </div>
+        <div class="spec-card">
+          <div class="spec-label">File Size</div>
+          <div class="spec-val">382.4 KB</div>
+        </div>
+        <div class="spec-card">
+          <div class="spec-label">Runtime Engine</div>
+          <div class="spec-val" style="font-size: 0.95rem;">Pure Native Java</div>
+        </div>
+        <div class="spec-card">
+          <div class="spec-label">Min / Target SDK</div>
+          <div class="spec-val">API 24 / 34</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- App Screenshots -->
+    <section class="gallery-wrap">
+      <h2 class="section-title">📱 Live Interface Screenshots</h2>
+      <p class="section-sub">Capture from verified Android execution on Pixel / HyperOS testbed.</p>
+
+      <div class="screenshots-scroller">
+        <div class="screen-item" onclick="openModal('assets/turboboost_v2_screen.png')">
+          <img src="assets/turboboost_v2_screen.png" alt="TurboBoost Dashboard" loading="lazy">
+          <div class="screen-caption">
+            <span>Dashboard & Quick Boost</span>
+            <span class="screen-badge">Tab 1</span>
+          </div>
+        </div>
+
+        <div class="screen-item" onclick="openModal('assets/turboboost_v2_debloat.png')">
+          <img src="assets/turboboost_v2_debloat.png" alt="Safe Debloater List" loading="lazy">
+          <div class="screen-caption">
+            <span>Automated Debloater</span>
+            <span class="screen-badge">Tab 2</span>
+          </div>
+        </div>
+
+        <div class="screen-item" onclick="openModal('assets/turboboost_v2_protected.png')">
+          <img src="assets/turboboost_v2_protected.png" alt="Protected System Shield" loading="lazy">
+          <div class="screen-caption">
+            <span>System App Shield</span>
+            <span class="screen-badge">Protected</span>
+          </div>
+        </div>
+
+        <div class="screen-item" onclick="openModal('assets/turboboost_v2_about.png')">
+          <img src="assets/turboboost_v2_about.png" alt="Hardware Telemetry & Specs" loading="lazy">
+          <div class="screen-caption">
+            <span>Hardware Telemetry</span>
+            <span class="screen-badge">Tab 3</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Critical Shield Highlight -->
+    <section class="guardrail-box">
+      <div class="guardrail-header">
+        <span style="font-size: 2.2rem;">🛡️</span>
+        <div>
+          <h2 class="guardrail-title">Critical System App Protection Guardrail</h2>
+          <p style="color: var(--text-dim); font-size: 0.88rem;">Engineered so users can never brick their device or lose core phone functions.</p>
+        </div>
+      </div>
+
+      <div class="guard-list">
+        <div class="guard-item">
+          <strong>1. Dynamic Launcher Protection</strong>
+          <span>Queries Android PackageManager for the active Home Intent and locks the launcher (Pixel, HyperOS, Nova) from deletion.</span>
+        </div>
+        <div class="guard-item">
+          <strong>2. Dynamic IME / Keyboard Lock</strong>
+          <span>Inspects Settings.Secure.DEFAULT_INPUT_METHOD to ensure your active keyboard (Gboard, SwiftKey) can never be removed.</span>
+        </div>
+        <div class="guard-item">
+          <strong>3. Framework Core Blacklist</strong>
+          <span>Hard-locks system essential components: android core, SystemUI, Settings, PackageInstaller, Emergency SOS, and Google Play Services.</span>
+        </div>
+        <div class="guard-item">
+          <strong>4. Enforced UI Shield</strong>
+          <span>Checkboxes for protected apps are completely disabled, badged with 🔒 PROTECTED, and omitted from "Select All" actions.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Key Features Grid -->
+    <section id="features">
+      <h2 class="section-title">⚡ High-Performance Features</h2>
+      <p class="section-sub">Engineered without heavy bloated libraries or tracking frameworks.</p>
+
+      <div class="features-grid">
+        <div class="feat-card">
+          <span class="feat-icon">🚀</span>
+          <h3 class="feat-title">RAM Compactor & Quick Boost</h3>
+          <p class="feat-desc">
+            Triggers kernel cache compaction, ART runtime compilation optimizations, and background process trimming in one smooth tap.
+          </p>
+          <div class="feat-tags">
+            <span class="feat-tag">Native Binder</span>
+            <span class="feat-tag">ART Compile</span>
+            <span class="feat-tag">Zero Overhead</span>
+          </div>
+        </div>
+
+        <div class="feat-card">
+          <span class="feat-icon">🧹</span>
+          <h3 class="feat-title">Shizuku-Powered Debloater</h3>
+          <p class="feat-desc">
+            Executes rootless package disable and uninstall commands over the Shizuku IPC service without requiring computer tethering after initial Wi-Fi debug pairing.
+          </p>
+          <div class="feat-tags">
+            <span class="feat-tag">Wireless Debug</span>
+            <span class="feat-tag">Rootless</span>
+            <span class="feat-tag">Restore Support</span>
+          </div>
+        </div>
+
+        <div class="feat-card">
+          <span class="feat-icon">📊</span>
+          <h3 class="feat-title">SOC & Hardware Telemetry</h3>
+          <p class="feat-desc">
+            Live querying of CPU architecture, SOC model identification, thermal sensor status, memory allocation, and battery health with 1-tap clipboard copy.
+          </p>
+          <div class="feat-tags">
+            <span class="feat-tag">Hardware Inspect</span>
+            <span class="feat-tag">Copy to Specs</span>
+          </div>
+        </div>
+
+        <div class="feat-card">
+          <span class="feat-icon">📦</span>
+          <h3 class="feat-title">In-App APK Extractor</h3>
+          <p class="feat-desc">
+            Long-press any installed package to immediately extract and back up the base APK file into your phone's Download directory.
+          </p>
+          <div class="feat-tags">
+            <span class="feat-tag">Backup</span>
+            <span class="feat-tag">Offline Export</span>
+          </div>
+        </div>
+
+        <div class="feat-card">
+          <span class="feat-icon">🔀</span>
+          <h3 class="feat-title">Dual Execution Mode</h3>
+          <p class="feat-desc">
+            Works fully in automated Shizuku mode, and seamlessly provides Manual fallback mode (long-press to open App Info) when Shizuku is offline.
+          </p>
+          <div class="feat-tags">
+            <span class="feat-tag">Dual Mode</span>
+            <span class="feat-tag">Play Store Ready</span>
+          </div>
+        </div>
+
+        <div class="feat-card">
+          <span class="feat-icon">🔒</span>
+          <h3 class="feat-title">Zero-Telemetry Privacy</h3>
+          <p class="feat-desc">
+            100% on-device processing. No internet permissions, no external tracking analytics, and zero user data collection.
+          </p>
+          <div class="feat-tags">
+            <span class="feat-tag">Air-Gapped</span>
+            <span class="feat-tag">Private</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADB & Install Guide -->
+    <section id="install-guide">
+      <h2 class="section-title">⚙️ Installation & Setup Guide</h2>
+      <p class="section-sub">Simple steps to install via ADB or directly on device.</p>
+
+      <div class="terminal-box">
+        <div class="term-header">
+          <div class="term-dots">
+            <span class="term-dot red"></span>
+            <span class="term-dot yellow"></span>
+            <span class="term-dot green"></span>
+          </div>
+          <span class="term-title">adb-terminal — bash / pwsh</span>
+        </div>
+
+        <div class="term-body">
+          <p style="color: var(--text-dim); margin-bottom: 8px;"># 1. Connect phone via USB or Wireless Debugging and install directly:</p>
+          <div class="cmd-line">
+            <span class="cmd-text" id="cmd1">adb install -r TurboBoost_Pro.apk</span>
+            <button class="btn-copy" onclick="copyCmd('cmd1')">Copy</button>
+          </div>
+
+          <p style="color: var(--text-dim); margin-bottom: 8px;"># 2. (Optional) Launch TurboBoost Pro immediately:</p>
+          <div class="cmd-line">
+            <span class="cmd-text" id="cmd2">adb shell am start -n com.pixelbooster.app/.MainActivity</span>
+            <button class="btn-copy" onclick="copyCmd('cmd2')">Copy</button>
+          </div>
+
+          <p style="color: var(--text-dim); margin-bottom: 8px;"># 3. For automated debloating without computer cables:</p>
+          <div style="color: var(--text); font-size: 0.85rem; margin-top: 10px;">
+            • Install <strong>Shizuku</strong> from GitHub or Play Store.<br>
+            • Enable <strong>Wireless Debugging</strong> in Android Developer Options.<br>
+            • Pair and start Shizuku once, then launch TurboBoost Pro and authorize permission.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Direct Download Banner -->
+    <div style="text-align: center; margin: 40px 0 60px;">
+      <a href="TurboBoost_Pro.apk" download="TurboBoost_Pro.apk" class="btn-download" style="font-size: 1.05rem; padding: 20px 48px;">
+        <span>📥 Download TurboBoost_Pro.apk (v2.0)</span>
+      </a>
+      <p style="color: var(--text-dim); font-size: 0.8rem; margin-top: 12px; font-family: 'JetBrains Mono', monospace;">
+        File: TurboBoost_Pro.apk &bull; Size: 382,463 bytes &bull; MD5 / SHA-256 Verified
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+      MIE'S PROJECT HUB &nbsp;·&nbsp; TURBOBOOST PRO v2.0 &nbsp;·&nbsp; ALL RIGHTS RESERVED
+    </footer>
+
+  </div>
+
+  <!-- Image enlargement modal -->
+  <div id="imageModal" class="img-modal" onclick="closeModal()">
+    <button class="modal-close">&times;</button>
+    <img id="modalImg" class="modal-content" src="" alt="Enlarged screenshot">
+  </div>
+
+  <script>
+    function openModal(src) {
+      document.getElementById('modalImg').src = src;
+      document.getElementById('imageModal').classList.add('active');
+    }
+    function closeModal() {
+      document.getElementById('imageModal').classList.remove('active');
+    }
+    function copyCmd(id) {
+      const text = document.getElementById(id).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard: ' + text);
+      });
+    }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+  </script>
+</body>
+</html>

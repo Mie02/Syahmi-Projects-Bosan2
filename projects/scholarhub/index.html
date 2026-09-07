@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScholarHub — Academic Resource Portal</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text y='52' font-size='56'>◉</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    .hub-back {
+      display: inline-flex; align-items: center; gap: 8px; position: fixed; top: 18px; left: 20px; z-index: 9999;
+      padding: 8px 18px 8px 14px; background: rgba(4, 7, 15, 0.85); backdrop-filter: blur(12px);
+      border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 8px; font-family: 'Orbitron', monospace;
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #00f0ff;
+      text-decoration: none; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); transition: all 0.25s ease;
+    }
+    .hub-back:hover { border-color: rgba(0, 240, 255, 0.8); box-shadow: 0 0 20px rgba(0, 240, 255, 0.4); transform: translateX(-2px); }
+    .hub-back-arrow { font-size: 1rem; line-height: 1; }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #04070f; --surface: #0b1120; --card-bg: rgba(13, 22, 40, 0.7);
+      --cyan: #00f0ff; --purple: #a855f7; --green: #22d3a5; --amber: #f59e0b;
+      --text: #ccd6f6; --text-dim: #8892b0; --radius: 12px;
+    }
+    body {
+      background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100vh; overflow-x: hidden;
+      background-image: radial-gradient(circle at 10% 20%, rgba(34, 211, 165, 0.08) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(0, 240, 255, 0.08) 0%, transparent 40%);
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 80px 24px; }
+    .hero { text-align: center; padding: 30px 0 40px; }
+    .title {
+      font-family: 'Orbitron', sans-serif; font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 900;
+      background: linear-gradient(135deg, #fff, var(--green) 70%, var(--cyan) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 14px;
+    }
+    .sub { color: var(--text-dim); max-width: 700px; margin: 0 auto 30px; font-size: 1.05rem; }
+
+    /* Search & Filter */
+    .search-row { display: flex; gap: 14px; margin-bottom: 30px; flex-wrap: wrap; }
+    .search-box {
+      flex: 1; min-width: 280px; background: #070d1a; border: 1px solid rgba(0, 240, 255, 0.25);
+      border-radius: 8px; padding: 12px 18px; color: #fff; font-size: 0.95rem; outline: none;
+    }
+    .search-box:focus { border-color: var(--cyan); box-shadow: 0 0 14px rgba(0, 240, 255, 0.3); }
+
+    .category-chips { display: flex; gap: 8px; margin-bottom: 30px; flex-wrap: wrap; }
+    .chip {
+      background: rgba(11, 22, 40, 0.8); border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-dim); font-size: 0.85rem; padding: 8px 16px; border-radius: 999px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .chip.active, .chip:hover {
+      border-color: var(--green); color: #fff; background: rgba(34, 211, 165, 0.15);
+    }
+
+    /* Paper Grid */
+    .paper-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+    .paper-card {
+      background: var(--card-bg); border: 1px solid rgba(0, 240, 255, 0.15); border-radius: var(--radius);
+      padding: 24px; display: flex; flex-direction: column; justify-content: space-between;
+      transition: all 0.25s;
+    }
+    .paper-card:hover { border-color: var(--cyan); transform: translateY(-3px); }
+    .paper-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .paper-badge { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--green); background: rgba(34, 211, 165, 0.1); padding: 4px 8px; border-radius: 4px; }
+    .paper-title { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 8px; line-height: 1.4; }
+    .paper-authors { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 14px; }
+    .paper-desc { font-size: 0.9rem; color: var(--text); line-height: 1.6; margin-bottom: 20px; }
+    .paper-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255, 255, 255, 0.06); padding-top: 14px; }
+    .btn-bookmark {
+      background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.3);
+      color: var(--cyan); border-radius: 6px; padding: 6px 12px; font-size: 0.8rem; cursor: pointer;
+    }
+    .btn-bookmark.bookmarked { background: var(--green); color: #04070f; border-color: var(--green); font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <a class="hub-back" href="../../index.html" aria-label="Back to Project Hub">
+    <span class="hub-back-arrow">←</span> Hub
+  </a>
+
+  <div class="container">
+    <header class="hero">
+      <h1 class="title">SCHOLARHUB</h1>
+      <p class="sub">
+        Centralized academic discovery engine for computer science students. Explore curated papers, track peer-reviewed research, and coordinate study sessions.
+      </p>
+
+      <div class="search-row">
+        <input type="text" id="searchInput" class="search-box" placeholder="Search papers, concepts, or authors..." />
+      </div>
+
+      <div class="category-chips">
+        <button class="chip active" onclick="filterCat('All')">All</button>
+        <button class="chip" onclick="filterCat('AR/VR')">AR & Spatial Computing</button>
+        <button class="chip" onclick="filterCat('AI/ML')">AI & Deep Learning</button>
+        <button class="chip" onclick="filterCat('Android')">Mobile Systems</button>
+        <button class="chip" onclick="filterCat('Software')">Software Engineering</button>
+      </div>
+    </header>
+
+    <div class="paper-grid" id="paperGrid"></div>
+  </div>
+
+  <script>
+    const papers = [
+      {
+        id: 1,
+        title: "Evaluating Spatial Anchors for Indoor AR Navigation in University Buildings",
+        authors: "Ahmad Syahmi, FTMK Research Group",
+        cat: "AR/VR",
+        desc: "Comprehensive study evaluating AR Foundation QR re-localization performance and user cognitive load in multi-story academic buildings.",
+        year: "2026",
+        citations: "18 citations"
+      },
+      {
+        id: 2,
+        title: "Kernel-Level Memory Compaction & ZRAM Overhead Optimization on Android",
+        authors: "Systems & Optimization Lab",
+        cat: "Android",
+        desc: "Analysis of ART profile compilation triggers and background daemon pruning using rootless IPC frameworks like Shizuku.",
+        year: "2026",
+        citations: "42 citations"
+      },
+      {
+        id: 3,
+        title: "Autonomous Agent Orchestration and Real-Time State Synthesis with LLMs",
+        authors: "AI Systems Consortium",
+        cat: "AI/ML",
+        desc: "Investigating distributed autonomous agent chains, directed acyclic graph execution, and multi-model consensus verification.",
+        year: "2025",
+        citations: "128 citations"
+      },
+      {
+        id: 4,
+        title: "Automated Timetable Conflict Resolution using Constraint Satisfaction Algorithms",
+        authors: "Department of Software Engineering, UTeM",
+        cat: "Software",
+        desc: "Implementation of heuristic backtracking solvers to resolve faculty classroom overlaps and export synchronised iCal feeds.",
+        year: "2025",
+        citations: "29 citations"
+      },
+      {
+        id: 5,
+        title: "Empirical Analysis of Bloatware Impact on Battery Thermals in HyperOS/MIUI",
+        authors: "Mobile Performance Collective",
+        cat: "Android",
+        desc: "Measuring standby battery drain, thermal throttling, and telemetry overhead across 150 factory-installed system packages.",
+        year: "2026",
+        citations: "54 citations"
+      }
+    ];
+
+    let activeCategory = 'All';
+    let bookmarks = new Set();
+
+    function render() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const grid = document.getElementById('paperGrid');
+      
+      const filtered = papers.filter(p => {
+        const matchCat = activeCategory === 'All' || p.cat === activeCategory;
+        const matchQ = !q || p.title.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q) || p.authors.toLowerCase().includes(q);
+        return matchCat && matchQ;
+      });
+
+      grid.innerHTML = filtered.map(p => `
+        <div class="paper-card">
+          <div>
+            <div class="paper-top">
+              <span class="paper-badge">${p.cat}</span>
+              <span style="font-size:0.75rem; color:var(--text-dim); font-family:'JetBrains Mono'">${p.year}</span>
+            </div>
+            <div class="paper-title">${p.title}</div>
+            <div class="paper-authors">${p.authors}</div>
+            <p class="paper-desc">${p.desc}</p>
+          </div>
+          <div class="paper-footer">
+            <span style="font-size:0.8rem; color:var(--text-dim)">${p.citations}</span>
+            <button class="btn-bookmark ${bookmarks.has(p.id) ? 'bookmarked' : ''}" onclick="toggleBookmark(${p.id})">
+              ${bookmarks.has(p.id) ? '✓ Bookmarked' : '＋ Bookmark'}
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleBookmark(id) {
+      if (bookmarks.has(id)) bookmarks.delete(id);
+      else bookmarks.add(id);
+      render();
+    }
+
+    function filterCat(cat) {
+      activeCategory = cat;
+      document.querySelectorAll('.chip').forEach(c => {
+        c.classList.toggle('active', c.textContent.includes(cat) || (cat === 'All' && c.textContent === 'All'));
+      });
+      render();
+    }
+
+    document.getElementById('searchInput').addEventListener('input', render);
+    render();
+  </script>
+</body>
+</html>

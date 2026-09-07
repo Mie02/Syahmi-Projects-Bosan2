@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+  <defs>
+    <linearGradient id="bgGrad_ScholarHub" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#040711"/>
+      <stop offset="100%" stop-color="#0a1226"/>
+    </linearGradient>
+    <filter id="glow_ScholarHub" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="640" height="360" fill="url(#bgGrad_ScholarHub)"/>
+
+  <!-- Grid lines -->
+  <g stroke="rgba(0, 240, 255, 0.04)" stroke-width="1">
+    <line x1="0" y1="90" x2="640" y2="90"/>
+    <line x1="0" y1="180" x2="640" y2="180"/>
+    <line x1="0" y1="270" x2="640" y2="270"/>
+    <line x1="160" y1="0" x2="160" y2="360"/>
+    <line x1="320" y1="0" x2="320" y2="360"/>
+    <line x1="480" y1="0" x2="480" y2="360"/>
+  </g>
+
+  <!-- Graphic Elements -->
+  <g filter="url(#glow_ScholarHub)">
+    <rect x="140" y="100" width="140" height="170" rx="8" stroke="#22d3a5" stroke-width="3" fill="rgba(34,211,165,0.1)"/>
+           <path d="M165 135 H255 M165 165 H240 M165 195 H220" stroke="#22d3a5" stroke-width="3" opacity="0.7"/>
+           <circle cx="380" cy="150" r="40" stroke="#00f0ff" stroke-width="3" fill="rgba(0,240,255,0.1)"/>
+           <path d="M355 150 L375 170 L415 130" stroke="#22d3a5" stroke-width="4" fill="none"/>
+           <rect x="320" y="210" width="180" height="45" rx="6" stroke="rgba(255,255,255,0.2)" fill="rgba(6,12,24,0.7)"/>
+  </g>
+
+  <!-- Top Bracket & Category -->
+  <rect x="28" y="26" width="70" height="24" rx="4" fill="rgba(0,240,255,0.12)" stroke="#22d3a5" stroke-width="1"/>
+  <text x="63" y="42" font-family="'Orbitron', monospace, sans-serif" font-size="10" font-weight="700" fill="#22d3a5" text-anchor="middle" letter-spacing="1">ACADEMIC</text>
+
+  <!-- HUD Corner Accents -->
+  <path d="M20 30 V20 H30 M610 20 H620 V30 M620 330 V340 H610 M30 340 H20 V330" stroke="rgba(0,240,255,0.4)" stroke-width="2" fill="none"/>
+
+  <!-- Title & Subtitle overlay -->
+  <text x="28" y="305" font-family="'Orbitron', sans-serif" font-size="24" font-weight="900" fill="#ffffff" letter-spacing="1">ScholarHub</text>
+  <text x="28" y="326" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="600" fill="rgba(204,214,246,0.65)" letter-spacing="1.5">ACADEMIC RESOURCE PORTAL</text>
+</svg>

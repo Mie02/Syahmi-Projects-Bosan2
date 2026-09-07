@@ -156,7 +156,7 @@
   /* ─── Card HTML ─────────────────────────────────────────── */
   const CATEGORY_ICONS = {
     'AR/VR': '◈', 'AI/ML': '◆', 'Web': '⬡', 'Academic': '◉',
-    'Game': '▶', 'Tools': '⚙', 'Mobile': '◌',
+    'Game': '▶', 'Tools': '⚙', 'Mobile': '⚡',
   };
 
   function statusClass(s) {

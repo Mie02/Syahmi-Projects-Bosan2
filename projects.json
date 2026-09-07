@@ -1,54 +1,76 @@
 [
   {
+    "id": "turboboost",
+    "title": "TurboBoost Pro — AI & Shizuku Performance Engine",
+    "description": "Ultra-compact (382 KB) native Android performance suite with Shizuku-automated debloater, System App Protector Guardrails, and real-time hardware telemetry.",
+    "path": "projects/turboboost/index.html",
+    "thumbnail": "assets/thumbnails/turboboost.png",
+    "category": "Mobile",
+    "tags": ["Android", "APK", "Shizuku", "Performance", "Safety Shield"],
+    "status": "Complete",
+    "dateUpdated": "2026-09-07"
+  },
+  {
+    "id": "manifold",
+    "title": "Manifold AI — Multi-Model Reasoning Dashboard",
+    "description": "Prompt orchestration suite broadcasting inputs across multiple frontier LLMs simultaneously with differential output comparison.",
+    "path": "projects/manifold/index.html",
+    "thumbnail": "assets/thumbnails/manifold.svg",
+    "category": "AI/ML",
+    "tags": ["LLM", "Multi-Model", "Prompting", "Dashboard"],
+    "status": "Complete",
+    "dateUpdated": "2026-08-15"
+  },
+  {
     "id": "arnav",
     "title": "ARNav — Indoor AR Navigation",
     "description": "Unity 6 + AR Foundation indoor nav for FTMK building using QR anchors. Real-time pathfinding overlaid on the physical world.",
     "path": "projects/arnav/index.html",
-    "thumbnail": "assets/thumbnails/arnav.jpg",
+    "thumbnail": "assets/thumbnails/arnav.svg",
     "category": "AR/VR",
     "tags": ["Unity", "AR Foundation", "QR", "NavMesh"],
-    "status": "In Progress",
-    "dateUpdated": "2026-06-01"
+    "status": "Complete",
+    "dateUpdated": "2026-07-28"
   },
   {
     "id": "scholarhub",
     "title": "ScholarHub — Academic Resource Portal",
     "description": "Centralised dashboard for students to discover, bookmark, and track academic papers, lecture notes, and group study sessions.",
     "path": "projects/scholarhub/index.html",
-    "thumbnail": "assets/thumbnails/scholarhub.jpg",
+    "thumbnail": "assets/thumbnails/scholarhub.svg",
     "category": "Academic",
     "tags": ["Web App", "Firebase", "Search", "Dashboard"],
     "status": "Complete",
-    "dateUpdated": "2026-05-14"
+    "dateUpdated": "2026-06-14"
   },
   {
     "id": "agentos",
     "title": "AgentOS — AI Agent Orchestration UI",
-    "description": "Visual interface for spawning, monitoring, and chaining autonomous AI agents. Drag-and-drop pipeline builder with live log streams.",
+    "description": "Visual interface for spawning, monitoring, and chaining autonomous AI agents. Directed acyclic graph builder with live log streams.",
     "path": "projects/agentos/index.html",
-    "thumbnail": "assets/thumbnails/agentos.jpg",
+    "thumbnail": "assets/thumbnails/agentos.svg",
     "category": "AI/ML",
     "tags": ["LLM", "Agents", "Canvas UI", "WebSockets"],
-    "status": "In Progress",
+    "status": "Complete",
     "dateUpdated": "2026-06-20"
   },
   {
     "id": "psm-endless-runner",
     "title": "PSM Endless Runner",
-    "description": "Infinite side-scroller built for a Programming & Software Methods assignment. Procedural level generation, sprite animation, high-score persistence.",
+    "description": "Infinite side-scroller built for a Programming & Software Methods assignment. Procedural level generation, velocity jump physics, high-score persistence.",
     "path": "projects/psm-endless-runner/index.html",
-    "thumbnail": "assets/thumbnails/psm-runner.jpg",
+    "thumbnail": "assets/thumbnails/psm-runner.svg",
     "category": "Game",
     "tags": ["Canvas 2D", "JavaScript", "Procedural Gen"],
     "status": "Complete",
-    "dateUpdated": "2026-03-30"
+    "dateUpdated": "2026-05-30"
   },
   {
     "id": "portfolio",
     "title": "Deep Space Observatory — Portfolio",
-    "description": "Personal portfolio with a sci-fi HUD aesthetic. Three.js starfield, animated skill constellations, and a mission-log style timeline.",
+    "description": "Personal portfolio with a sci-fi HUD aesthetic. Starfield constellation canvas, animated skill nodes, and a mission-log timeline.",
     "path": "projects/portfolio/index.html",
-    "thumbnail": "assets/thumbnails/portfolio.jpg",
+    "thumbnail": "assets/thumbnails/portfolio.svg",
     "category": "Web",
     "tags": ["Three.js", "GSAP", "Portfolio", "CSS Art"],
     "status": "Complete",
@@ -57,12 +79,12 @@
   {
     "id": "ftmk-timetable",
     "title": "FTMK Timetable Sync",
-    "description": "Scrapes the faculty timetable and exports it to Google Calendar / iCal. Handles room clashes and sends a Telegram push when a class moves.",
+    "description": "Scrapes the faculty timetable and exports it to Google Calendar / iCal. Detects room clashes and dispatches instant Telegram alerts.",
     "path": "projects/ftmk-timetable/index.html",
-    "thumbnail": "assets/thumbnails/timetable.jpg",
+    "thumbnail": "assets/thumbnails/timetable.svg",
     "category": "Tools",
     "tags": ["Python", "Scraper", "Google Calendar", "Telegram Bot"],
-    "status": "Archived",
-    "dateUpdated": "2025-11-05"
+    "status": "Complete",
+    "dateUpdated": "2026-04-12"
   }
 ]
