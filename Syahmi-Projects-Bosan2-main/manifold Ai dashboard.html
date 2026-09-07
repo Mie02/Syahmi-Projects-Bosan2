@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manifold — one prompt, every model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#131320;
+    --panel:#1a1a28;
+    --panel-2:#20202f;
+    --line:#2c2c3d;
+    --line-soft:#242433;
+    --ink:#e9e9f2;
+    --ink-mid:#a6a6bd;
+    --ink-dim:#6f6f8a;
+    --signal:#f0b23c;
+    --signal-dim:#8a6a2c;
+    --danger:#f06c6c;
+    --c1:#f0b23c;
+    --c2:#5cc8e8;
+    --c3:#c88cf0;
+    --c4:#6fe0a0;
+    --radius:10px;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --display:'Space Grotesk',system-ui,sans-serif;
+    --body:'Inter',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:var(--body);font-size:15px;line-height:1.5;
+    display:flex;flex-direction:column;height:100vh;overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit;cursor:pointer;color:inherit}
+  ::selection{background:rgba(240,178,60,.28)}
+  input:focus-visible,textarea:focus-visible,button:focus-visible,[tabindex]:focus-visible{
+    outline:2px solid var(--signal);outline-offset:2px;
+  }
+
+  /* ---------- top bar ---------- */
+  header{
+    display:flex;align-items:center;gap:16px;
+    padding:0 18px;height:56px;flex:0 0 auto;
+    border-bottom:1px solid var(--line);background:var(--panel);
+    position:relative;
+  }
+  .wordmark{display:flex;align-items:baseline;gap:9px;font-family:var(--display)}
+  .wordmark b{font-weight:700;font-size:19px;letter-spacing:-.01em}
+  .wordmark span{font-family:var(--mono);font-size:11px;color:var(--ink-dim);letter-spacing:.04em}
+  .glyph{width:22px;height:22px;flex:0 0 auto}
+  .spacer{flex:1}
+  .keychip{
+    display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;
+    color:var(--ink-mid);background:var(--panel-2);border:1px solid var(--line);
+    padding:6px 11px;border-radius:999px;
+  }
+  .dot{width:7px;height:7px;border-radius:50%;flex:0 0 auto}
+  .dot.on{background:var(--c4);box-shadow:0 0 8px var(--c4)}
+  .dot.off{background:var(--ink-dim)}
+  .keychip button{background:none;border:none;color:var(--signal);font-family:var(--mono);font-size:12px;padding:0}
+  /* signal flow line */
+  .flow{position:absolute;left:0;right:0;bottom:-1px;height:1px;overflow:hidden;pointer-events:none}
+  .flow i{position:absolute;top:0;height:1px;width:26%;
+    background:linear-gradient(90deg,transparent,var(--signal),transparent);
+    transform:translateX(-120%);opacity:0}
+  body.busy .flow i{animation:flow 1.15s linear infinite;opacity:1}
+  @keyframes flow{to{transform:translateX(460%)}}
+
+  /* ---------- channel rack ---------- */
+  .rack{
+    flex:0 0 auto;display:flex;align-items:center;gap:12px;
+    padding:11px 18px;border-bottom:1px solid var(--line-soft);
+    background:var(--bg);overflow-x:auto;
+  }
+  .rack-label{font-family:var(--mono);font-size:11px;color:var(--ink-dim);
+    letter-spacing:.08em;text-transform:uppercase;flex:0 0 auto}
+  .channel{
+    display:flex;align-items:center;gap:9px;flex:0 0 auto;
+    background:var(--panel);border:1px solid var(--line);
+    padding:7px 9px 7px 11px;border-radius:var(--radius);max-width:230px;
+  }
+  .channel .cdot{width:9px;height:9px;border-radius:2px;flex:0 0 auto}
+  .channel .cname{font-family:var(--mono);font-size:12.5px;color:var(--ink);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .channel .x{background:none;border:none;color:var(--ink-dim);font-size:15px;
+    line-height:1;padding:0 2px;border-radius:4px}
+  .channel .x:hover{color:var(--ink)}
+  .add-channel{
+    display:flex;align-items:center;gap:7px;flex:0 0 auto;
+    background:none;border:1px dashed var(--line);color:var(--ink-mid);
+    padding:7px 13px;border-radius:var(--radius);font-family:var(--mono);font-size:12.5px;
+  }
+  .add-channel:hover{border-color:var(--signal);color:var(--signal)}
+  .add-channel:disabled{opacity:.4;cursor:not-allowed}
+  .add-channel:disabled:hover{border-color:var(--line);color:var(--ink-mid)}
+
+  /* ---------- main stage ---------- */
+  .stage{flex:1;min-height:0;display:flex;overflow-x:auto;overflow-y:hidden;
+    scroll-snap-type:x proximity}
+  .col{
+    flex:1 1 0;min-width:min(100%,360px);display:flex;flex-direction:column;
+    min-height:0;border-right:1px solid var(--line-soft);scroll-snap-align:start;
+  }
+  .col:last-child{border-right:none}
+  .col-head{
+    flex:0 0 auto;display:flex;align-items:center;gap:9px;padding:10px 16px;
+    border-bottom:1px solid var(--line-soft);background:var(--panel);
+  }
+  .col-head .cdot{width:9px;height:9px;border-radius:2px}
+  .col-head .cn{font-family:var(--mono);font-size:12.5px;color:var(--ink-mid);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .thread{flex:1;min-height:0;overflow-y:auto;padding:18px 16px 8px;display:flex;flex-direction:column;gap:14px}
+  .msg{max-width:100%}
+  .msg .who{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--ink-dim);margin-bottom:5px}
+  .msg .body{white-space:pre-wrap;word-break:break-word;font-size:14.5px;line-height:1.62}
+  .msg.user .body{color:var(--ink)}
+  .msg.bot .body{color:var(--ink-mid)}
+  .msg.err .body{color:var(--danger);font-size:13.5px}
+  .msg .caret{display:inline-block;width:7px;height:15px;background:var(--signal);
+    vertical-align:-2px;margin-left:1px;animation:blink 1s step-start infinite}
+  @keyframes blink{50%{opacity:0}}
+  .copy{background:none;border:1px solid var(--line);color:var(--ink-dim);
+    font-family:var(--mono);font-size:10.5px;padding:2px 7px;border-radius:5px;margin-top:7px}
+  .copy:hover{color:var(--ink);border-color:var(--line)}
+
+  /* ---------- empty / key states ---------- */
+  .placeholder{flex:1;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;text-align:center;padding:30px;gap:14px}
+  .placeholder .big{font-family:var(--display);font-weight:600;font-size:20px;color:var(--ink)}
+  .placeholder p{color:var(--ink-dim);max-width:360px;margin:0;font-size:14px}
+  .placeholder .glyph-lg{width:44px;height:44px;opacity:.55}
+
+  /* ---------- master input ---------- */
+  .master{
+    flex:0 0 auto;border-top:1px solid var(--line);background:var(--panel);
+    padding:12px 18px;display:flex;gap:11px;align-items:flex-end;
+  }
+  .field{flex:1;position:relative}
+  textarea#prompt{
+    width:100%;resize:none;min-height:46px;max-height:180px;
+    background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius);
+    color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;
+    padding:12px 14px;
+  }
+  textarea#prompt::placeholder{color:var(--ink-dim)}
+  .send{
+    flex:0 0 auto;height:46px;padding:0 22px;border:none;border-radius:var(--radius);
+    background:var(--signal);color:#1a1406;font-family:var(--display);font-weight:600;
+    font-size:14.5px;letter-spacing:.01em;display:flex;align-items:center;gap:8px;
+  }
+  .send:hover{background:#f6bf53}
+  .send:disabled{background:var(--signal-dim);color:#2a2110;cursor:not-allowed}
+  .hint{font-family:var(--mono);font-size:10.5px;color:var(--ink-dim);
+    position:absolute;right:12px;bottom:-16px}
+
+  /* ---------- modal ---------- */
+  .scrim{position:fixed;inset:0;background:rgba(10,10,16,.72);backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;z-index:40;padding:20px}
+  .scrim.open{display:flex}
+  .modal{width:100%;max-width:560px;max-height:82vh;display:flex;flex-direction:column;
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .modal h2{font-family:var(--display);font-weight:600;font-size:16px;margin:0;
+    padding:18px 20px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;gap:10px}
+  .modal .mbody{padding:18px 20px;overflow-y:auto}
+  .modal .mfoot{padding:14px 20px;border-top:1px solid var(--line-soft);display:flex;
+    justify-content:flex-end;gap:10px}
+  label.fl{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--ink-dim);margin-bottom:8px}
+  input.txt{width:100%;background:var(--panel-2);border:1px solid var(--line);
+    border-radius:var(--radius);color:var(--ink);font-family:var(--mono);font-size:13px;padding:11px 13px}
+  .muted{color:var(--ink-dim);font-size:13px;margin:12px 0 0}
+  .muted a{color:var(--signal)}
+  .btn{padding:10px 18px;border-radius:var(--radius);font-family:var(--display);
+    font-weight:600;font-size:14px;border:1px solid var(--line);background:var(--panel-2);color:var(--ink)}
+  .btn:hover{border-color:var(--ink-dim)}
+  .btn.primary{background:var(--signal);border-color:var(--signal);color:#1a1406}
+  .btn.primary:hover{background:#f6bf53}
+
+  /* model picker */
+  .picker-tools{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+  .picker-tools input{flex:1;background:var(--panel-2);border:1px solid var(--line);
+    border-radius:var(--radius);color:var(--ink);font-family:var(--body);font-size:14px;padding:9px 12px}
+  .toggle{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12px;
+    color:var(--ink-mid);cursor:pointer;flex:0 0 auto;user-select:none}
+  .toggle input{accent-color:var(--signal);width:15px;height:15px}
+  .mlist{display:flex;flex-direction:column;gap:1px}
+  .mrow{display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:8px;cursor:pointer}
+  .mrow:hover{background:var(--panel-2)}
+  .mrow[aria-disabled="true"]{opacity:.4;cursor:not-allowed}
+  .mrow[aria-disabled="true"]:hover{background:none}
+  .mrow .check{width:16px;height:16px;border:1px solid var(--line);border-radius:4px;flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center}
+  .mrow.sel .check{background:var(--signal);border-color:var(--signal)}
+  .mrow.sel .check::after{content:'';width:5px;height:9px;border:solid #1a1406;border-width:0 2px 2px 0;
+    transform:rotate(45deg) translate(-1px,-1px)}
+  .mrow .info{flex:1;min-width:0}
+  .mrow .mname{font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mrow .mid{font-family:var(--mono);font-size:11px;color:var(--ink-dim);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .badge{font-family:var(--mono);font-size:10px;letter-spacing:.06em;padding:2px 7px;border-radius:999px;
+    flex:0 0 auto;text-transform:uppercase}
+  .badge.free{background:rgba(111,224,160,.14);color:var(--c4);border:1px solid rgba(111,224,160,.28)}
+  .loading-row,.empty-row{padding:24px;text-align:center;color:var(--ink-dim);font-family:var(--mono);font-size:12px}
+
+  @media (max-width:640px){
+    .rack-label{display:none}
+    .master{padding:10px 12px}
+    .send{padding:0 16px}
+    .hint{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){
+    body.busy .flow i{animation:none;opacity:.5}
+    .msg .caret{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <svg class="glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M3 6h4M3 12h4M3 18h4" stroke="#5cc8e8" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M7 6c5 0 5 6 10 6M7 12h10M7 18c5 0 5-6 10-6" stroke="#6f6f8a" stroke-width="1.4"/>
+    <circle cx="19" cy="12" r="2.4" fill="#f0b23c"/>
+  </svg>
+  <div class="wordmark"><b>Manifold</b><span>one prompt · every model</span></div>
+  <div class="spacer"></div>
+  <div class="keychip">
+    <span class="dot off" id="keydot"></span>
+    <span id="keylabel">no key</span>
+    <button id="keybtn">add</button>
+  </div>
+  <div class="flow"><i></i></div>
+</header>
+
+<div class="rack" id="rack">
+  <span class="rack-label">Channels</span>
+  <button class="add-channel" id="addChannel">+ add model</button>
+</div>
+
+<div class="stage" id="stage">
+  <div class="placeholder" id="placeholder">
+    <svg class="glyph-lg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M3 6h4M3 12h4M3 18h4" stroke="#5cc8e8" stroke-width="1.4" stroke-linecap="round"/>
+      <path d="M7 6c5 0 5 6 10 6M7 12h10M7 18c5 0 5-6 10-6" stroke="#6f6f8a" stroke-width="1.2"/>
+      <circle cx="19" cy="12" r="2.4" fill="#f0b23c"/>
+    </svg>
+    <div class="big" id="ph-title">No channels live</div>
+    <p id="ph-body">Add your OpenRouter key, then open a channel for any model. Pick two or more to run them side by side on the same prompt.</p>
+  </div>
+</div>
+
+<div class="master">
+  <div class="field">
+    <textarea id="prompt" rows="1" placeholder="Type a prompt — it goes to every live channel at once…"></textarea>
+    <span class="hint">Enter to send · Shift+Enter for newline</span>
+  </div>
+  <button class="send" id="send">Send</button>
+</div>
+
+<!-- key modal -->
+<div class="scrim" id="keyScrim">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="keyTitle">
+    <h2 id="keyTitle">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 7a4 4 0 1 0-3.9 5H15v3h2v-3h2v-2h-4z" stroke="#f0b23c" stroke-width="1.5"/></svg>
+      Connect OpenRouter
+    </h2>
+    <div class="mbody">
+      <label class="fl" for="keyInput">API key</label>
+      <input class="txt" id="keyInput" type="password" placeholder="sk-or-v1-…" autocomplete="off" spellcheck="false">
+      <p class="muted">One key opens hundreds of models through a single endpoint — many of them free. Create a key at <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai/keys</a>. It's stored only in this browser and sent straight to OpenRouter, never anywhere else.</p>
+    </div>
+    <div class="mfoot">
+      <button class="btn" id="keyCancel">Cancel</button>
+      <button class="btn primary" id="keySave">Save key</button>
+    </div>
+  </div>
+</div>
+
+<!-- model picker modal -->
+<div class="scrim" id="pickScrim">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pickTitle">
+    <h2 id="pickTitle">Open a channel</h2>
+    <div class="mbody">
+      <div class="picker-tools">
+        <input id="search" type="text" placeholder="Search models…" autocomplete="off">
+        <label class="toggle"><input type="checkbox" id="freeOnly" checked> free only</label>
+      </div>
+      <div class="mlist" id="mlist"><div class="loading-row">loading models…</div></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn" id="pickDone">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ---------- tiny persistence that degrades gracefully ---------- */
+const store = (()=>{
+  let mem = {};
+  const ok = (()=>{ try{ const k='__m'; localStorage.setItem(k,'1'); localStorage.removeItem(k); return true; }catch(e){ return false; } })();
+  return {
+    get:(k)=>{ try{ return ok ? localStorage.getItem(k) : (mem[k] ?? null); }catch(e){ return mem[k] ?? null; } },
+    set:(k,v)=>{ try{ ok ? localStorage.setItem(k,v) : (mem[k]=v); }catch(e){ mem[k]=v; } },
+    del:(k)=>{ try{ ok ? localStorage.removeItem(k) : (delete mem[k]); }catch(e){ delete mem[k]; } }
+  };
+})();
+
+const CHAN_COLORS = ['var(--c1)','var(--c2)','var(--c3)','var(--c4)'];
+const MAX_CHANNELS = 4;
+const API_BASE = 'https://openrouter.ai/api/v1';
+
+const state = {
+  key: store.get('mf_key') || '',
+  models: [],            // full model list from API
+  channels: [],          // [{id, name, color, messages:[{role,content}], streaming:bool}]
+  busy: false,
+};
+
+/* ---------- element refs ---------- */
+const $ = (s)=>document.querySelector(s);
+const stage = $('#stage'), rack = $('#rack'), placeholder = $('#placeholder');
+const promptEl = $('#prompt'), sendBtn = $('#send');
+const keydot = $('#keydot'), keylabel = $('#keylabel');
+
+/* ---------- key UI ---------- */
+function refreshKeyChip(){
+  const has = !!state.key;
+  keydot.className = 'dot ' + (has?'on':'off');
+  keylabel.textContent = has ? 'connected' : 'no key';
+  $('#keybtn').textContent = has ? 'change' : 'add';
+}
+$('#keybtn').onclick = ()=>{ $('#keyInput').value = state.key; openScrim('keyScrim'); setTimeout(()=>$('#keyInput').focus(),50); };
+$('#keyCancel').onclick = ()=>closeScrim('keyScrim');
+$('#keySave').onclick = ()=>{
+  const v = $('#keyInput').value.trim();
+  state.key = v; v ? store.set('mf_key',v) : store.del('mf_key');
+  refreshKeyChip(); closeScrim('keyScrim');
+  if(v && state.models.length===0) loadModels();
+};
+function openScrim(id){ $('#'+id).classList.add('open'); }
+function closeScrim(id){ $('#'+id).classList.remove('open'); }
+document.querySelectorAll('.scrim').forEach(s=>s.addEventListener('mousedown',e=>{ if(e.target===s) s.classList.remove('open'); }));
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.scrim.open').forEach(s=>s.classList.remove('open')); });
+
+/* ---------- load model catalogue ---------- */
+async function loadModels(){
+  const listEl = $('#mlist');
+  listEl.innerHTML = '<div class="loading-row">loading models…</div>';
+  try{
+    const res = await fetch(API_BASE+'/models', { headers:{ 'Authorization':'Bearer '+state.key } });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data = await res.json();
+    state.models = (data.data||[]).map(m=>{
+      const p = m.pricing||{};
+      const free = (parseFloat(p.prompt||'0')===0 && parseFloat(p.completion||'0')===0) || /:free$/.test(m.id);
+      return { id:m.id, name:m.name||m.id, free };
+    }).sort((a,b)=> (a.name||'').localeCompare(b.name||''));
+    renderModelList();
+  }catch(err){
+    listEl.innerHTML = '<div class="empty-row">Could not load models. Check your key and connection.</div>';
+  }
+}
+
+/* ---------- model picker ---------- */
+function renderModelList(){
+  const q = $('#search').value.trim().toLowerCase();
+  const freeOnly = $('#freeOnly').checked;
+  const live = new Set(state.channels.map(c=>c.id));
+  const rows = state.models.filter(m=>{
+    if(freeOnly && !m.free) return false;
+    if(q && !(m.name.toLowerCase().includes(q) || m.id.toLowerCase().includes(q))) return false;
+    return true;
+  });
+  const listEl = $('#mlist');
+  if(rows.length===0){ listEl.innerHTML = '<div class="empty-row">No models match.</div>'; return; }
+  const atCap = state.channels.length >= MAX_CHANNELS;
+  listEl.innerHTML = '';
+  rows.slice(0,200).forEach(m=>{
+    const sel = live.has(m.id);
+    const disabled = !sel && atCap;
+    const row = document.createElement('div');
+    row.className = 'mrow'+(sel?' sel':'');
+    if(disabled) row.setAttribute('aria-disabled','true');
+    row.innerHTML = `<div class="check"></div>
+      <div class="info"><div class="mname">${esc(m.name)}</div><div class="mid">${esc(m.id)}</div></div>
+      ${m.free?'<span class="badge free">free</span>':''}`;
+    row.onclick = ()=>{ if(disabled) return; sel ? removeChannel(m.id) : addChannel(m); renderModelList(); };
+    listEl.appendChild(row);
+  });
+}
+$('#search').addEventListener('input', renderModelList);
+$('#freeOnly').addEventListener('change', renderModelList);
+$('#pickDone').onclick = ()=>closeScrim('pickScrim');
+$('#addChannel').onclick = openPicker;
+function openPicker(){
+  if(!state.key){ $('#keybtn').click(); return; }
+  openScrim('pickScrim');
+  if(state.models.length===0) loadModels(); else renderModelList();
+  setTimeout(()=>$('#search').focus(),50);
+}
+
+/* ---------- channels ---------- */
+function addChannel(m){
+  if(state.channels.length>=MAX_CHANNELS) return;
+  const color = CHAN_COLORS[state.channels.length % CHAN_COLORS.length];
+  state.channels.push({ id:m.id, name:shortName(m.name), color, messages:[], streaming:false });
+  renderRack(); renderStage();
+}
+function removeChannel(id){
+  state.channels = state.channels.filter(c=>c.id!==id);
+  state.channels.forEach((c,i)=>c.color = CHAN_COLORS[i % CHAN_COLORS.length]);
+  renderRack(); renderStage();
+}
+function renderRack(){
+  rack.querySelectorAll('.channel').forEach(n=>n.remove());
+  const addBtn = $('#addChannel');
+  state.channels.forEach(c=>{
+    const el = document.createElement('div');
+    el.className='channel';
+    el.innerHTML = `<span class="cdot" style="background:${c.color}"></span>
+      <span class="cname" title="${esc(c.id)}">${esc(c.name)}</span>
+      <button class="x" aria-label="Remove ${esc(c.name)}">✕</button>`;
+    el.querySelector('.x').onclick = ()=>removeChannel(c.id);
+    rack.insertBefore(el, addBtn);
+  });
+  addBtn.disabled = state.channels.length>=MAX_CHANNELS;
+  addBtn.textContent = state.channels.length>=MAX_CHANNELS ? 'max 4 channels' : '+ add model';
+}
+
+/* ---------- stage / threads ---------- */
+function renderStage(){
+  stage.querySelectorAll('.col').forEach(n=>n.remove());
+  if(state.channels.length===0){ placeholder.style.display='flex'; return; }
+  placeholder.style.display='none';
+  state.channels.forEach(c=>{
+    const col = document.createElement('div');
+    col.className='col'; col.dataset.id=c.id;
+    col.innerHTML = `<div class="col-head"><span class="cdot" style="background:${c.color}"></span>
+      <span class="cn" title="${esc(c.id)}">${esc(c.id)}</span></div>
+      <div class="thread"></div>`;
+    stage.appendChild(col);
+    renderThread(c);
+  });
+}
+function threadEl(id){ const col=[...stage.querySelectorAll('.col')].find(c=>c.dataset.id===id); return col?col.querySelector('.thread'):null; }
+function renderThread(c){
+  const t = threadEl(c.id); if(!t) return;
+  t.innerHTML='';
+  c.messages.forEach(m=>{
+    const wrap=document.createElement('div');
+    wrap.className='msg '+(m.role==='user'?'user':(m.error?'err':'bot'));
+    const who = m.role==='user' ? 'you' : c.name;
+    wrap.innerHTML = `<div class="who">${esc(who)}</div><div class="body"></div>`;
+    wrap.querySelector('.body').textContent = m.content;
+    if(m.role==='assistant' && !m.error && m.content && !c.streaming){
+      const cp=document.createElement('button'); cp.className='copy'; cp.textContent='copy';
+      cp.onclick=()=>{ navigator.clipboard?.writeText(m.content); cp.textContent='copied'; setTimeout(()=>cp.textContent='copy',1200); };
+      wrap.appendChild(cp);
+    }
+    t.appendChild(wrap);
+  });
+  t.scrollTop = t.scrollHeight;
+}
+function appendCaret(c){
+  const t=threadEl(c.id); if(!t) return;
+  const last=t.querySelector('.msg:last-child .body');
+  if(last && !last.querySelector('.caret')){ const car=document.createElement('span'); car.className='caret'; last.appendChild(car); }
+  t.scrollTop=t.scrollHeight;
+}
+
+/* ---------- send to every channel ---------- */
+async function sendAll(){
+  const text = promptEl.value.trim();
+  if(!text || state.busy) return;
+  if(!state.key){ $('#keybtn').click(); return; }
+  if(state.channels.length===0){ openPicker(); return; }
+
+  promptEl.value=''; autosize();
+  setBusy(true);
+
+  // push user turn + empty assistant turn to each channel
+  state.channels.forEach(c=>{
+    c.messages.push({role:'user',content:text});
+    c.messages.push({role:'assistant',content:''});
+    c.streaming=true; renderThread(c); appendCaret(c);
+  });
+
+  await Promise.all(state.channels.map(c=>streamChannel(c)));
+
+  state.channels.forEach(c=>{ c.streaming=false; renderThread(c); });
+  setBusy(false);
+  promptEl.focus();
+}
+
+async function streamChannel(c){
+  const history = c.messages.filter(m=>m.content!=='' || m.role==='user').map(m=>({role:m.role,content:m.content}));
+  // drop the trailing empty assistant placeholder from what we send
+  const payloadMsgs = history.filter((m,i)=> !(m.role==='assistant' && m.content==='' && i===history.length-1));
+  const target = c.messages[c.messages.length-1]; // the empty assistant msg we fill
+
+  try{
+    const res = await fetch(API_BASE+'/chat/completions',{
+      method:'POST',
+      headers:{
+        'Authorization':'Bearer '+state.key,
+        'Content-Type':'application/json',
+        'X-Title':'Manifold'
+      },
+      body: JSON.stringify({ model:c.id, messages:payloadMsgs, stream:true })
+    });
+
+    if(!res.ok){
+      let detail='';
+      try{ const j=await res.json(); detail=j.error?.message||''; }catch(_){}
+      target.error=true;
+      target.content = errorText(res.status, detail);
+      renderThread(c); return;
+    }
+
+    const reader=res.body.getReader();
+    const dec=new TextDecoder();
+    let buf='';
+    while(true){
+      const {done,value}=await reader.read();
+      if(done) break;
+      buf += dec.decode(value,{stream:true});
+      let nl;
+      while((nl=buf.indexOf('\n'))>=0){
+        let line=buf.slice(0,nl); buf=buf.slice(nl+1);
+        line=line.trim();
+        if(!line || line.startsWith(':')) continue;
+        if(!line.startsWith('data:')) continue;
+        const payload=line.slice(5).trim();
+        if(payload==='[DONE]'){ buf=''; break; }
+        try{
+          const obj=JSON.parse(payload);
+          const delta=obj.choices?.[0]?.delta?.content;
+          if(delta){ target.content += delta; paintDelta(c); }
+        }catch(_){ /* partial json across chunk boundary — ignore */ }
+      }
+    }
+    if(!target.content){ target.error=true; target.content='(empty response from model)'; }
+    renderThread(c);
+  }catch(err){
+    target.error=true;
+    target.content='Network error reaching OpenRouter. '+(err.message||'');
+    renderThread(c);
+  }
+}
+
+// lightweight paint during streaming (avoids full rerender each token)
+function paintDelta(c){
+  const t=threadEl(c.id); if(!t) return;
+  const body=t.querySelector('.msg:last-child .body');
+  if(body){ body.textContent=c.messages[c.messages.length-1].content;
+    const car=document.createElement('span'); car.className='caret'; body.appendChild(car);
+    t.scrollTop=t.scrollHeight; }
+}
+
+function errorText(status,detail){
+  if(status===401) return 'That key was rejected. Check it at openrouter.ai/keys.';
+  if(status===402) return 'This model needs credits your account doesn\'t have. Try a model with the free badge.';
+  if(status===429) return 'Rate limited — free models cap how often you can call them. Wait a moment and retry.';
+  if(status===404) return 'That model id wasn\'t found. It may have been retired.';
+  return 'Request failed (HTTP '+status+'). '+(detail||'');
+}
+
+/* ---------- input plumbing ---------- */
+function setBusy(b){
+  state.busy=b;
+  document.body.classList.toggle('busy',b);
+  sendBtn.disabled=b; sendBtn.textContent=b?'Generating…':'Send';
+}
+sendBtn.onclick=sendAll;
+promptEl.addEventListener('keydown',e=>{
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendAll(); }
+});
+function autosize(){ promptEl.style.height='auto'; promptEl.style.height=Math.min(promptEl.scrollHeight,180)+'px'; }
+promptEl.addEventListener('input',autosize);
+
+/* ---------- helpers ---------- */
+function esc(s){ return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function shortName(n){ return n.length>26 ? n.slice(0,25)+'…' : n; }
+
+/* ---------- boot ---------- */
+refreshKeyChip();
+if(state.key) loadModels();
+</script>
+</body>
+</html>

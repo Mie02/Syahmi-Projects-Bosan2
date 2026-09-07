@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+  <defs>
+    <linearGradient id="bgGrad_Manifold AI" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#040711"/>
+      <stop offset="100%" stop-color="#0a1226"/>
+    </linearGradient>
+    <filter id="glow_Manifold AI" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="640" height="360" fill="url(#bgGrad_Manifold AI)"/>
+
+  <!-- Grid lines -->
+  <g stroke="rgba(0, 240, 255, 0.04)" stroke-width="1">
+    <line x1="0" y1="90" x2="640" y2="90"/>
+    <line x1="0" y1="180" x2="640" y2="180"/>
+    <line x1="0" y1="270" x2="640" y2="270"/>
+    <line x1="160" y1="0" x2="160" y2="360"/>
+    <line x1="320" y1="0" x2="320" y2="360"/>
+    <line x1="480" y1="0" x2="480" y2="360"/>
+  </g>
+
+  <!-- Graphic Elements -->
+  <g filter="url(#glow_Manifold AI)">
+    <path d="M180 130 H260 M180 175 H260 M180 220 H260" stroke="#5cc8e8" stroke-width="4" stroke-linecap="round"/>
+           <path d="M260 130 C340 130 340 220 420 220 M260 175 H420 M260 220 C340 220 340 130 420 130" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+           <circle cx="450" cy="175" r="20" fill="#f0b23c"/>
+  </g>
+
+  <!-- Top Bracket & Category -->
+  <rect x="28" y="26" width="70" height="24" rx="4" fill="rgba(0,240,255,0.12)" stroke="#f0b23c" stroke-width="1"/>
+  <text x="63" y="42" font-family="'Orbitron', monospace, sans-serif" font-size="10" font-weight="700" fill="#f0b23c" text-anchor="middle" letter-spacing="1">AI/ML</text>
+
+  <!-- HUD Corner Accents -->
+  <path d="M20 30 V20 H30 M610 20 H620 V30 M620 330 V340 H610 M30 340 H20 V330" stroke="rgba(0,240,255,0.4)" stroke-width="2" fill="none"/>
+
+  <!-- Title & Subtitle overlay -->
+  <text x="28" y="305" font-family="'Orbitron', sans-serif" font-size="24" font-weight="900" fill="#ffffff" letter-spacing="1">Manifold AI</text>
+  <text x="28" y="326" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="600" fill="rgba(204,214,246,0.65)" letter-spacing="1.5">ONE PROMPT, EVERY MODEL</text>
+</svg>

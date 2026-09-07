@@ -3,211 +3,690 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FTMK Timetable Sync & Telegram Bot — Mie's Project Hub</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text y='52' font-size='56'>⚙</text></svg>" />
+  <title>FTMK Campus Companion & Smart Timetable — Mie's Project Hub</title>
+  <meta name="description" content="AI-powered timetable parser, weekly cyber schedule grid, clash detection engine, .ICS calendar export, and direct ARNav QR spatial anchor navigation for FTMK UTeM." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text y='52' font-size='56'>📅</text></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    .hub-back {
-      display: inline-flex; align-items: center; gap: 8px; position: fixed; top: 18px; left: 20px; z-index: 9999;
-      padding: 8px 18px 8px 14px; background: rgba(4, 7, 15, 0.85); backdrop-filter: blur(12px);
-      border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 8px; font-family: 'Orbitron', monospace;
-      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #00f0ff;
-      text-decoration: none; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); transition: all 0.25s ease;
-    }
-    .hub-back:hover { border-color: rgba(0, 240, 255, 0.8); box-shadow: 0 0 20px rgba(0, 240, 255, 0.4); transform: translateX(-2px); }
-    .hub-back-arrow { font-size: 1rem; line-height: 1; }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #040814; --surface: #0a1122; --card-bg: rgba(12, 20, 38, 0.8);
-      --cyan: #00f0ff; --purple: #a855f7; --green: #22d3a5; --amber: #f59e0b;
-      --text: #ccd6f6; --text-dim: #8892b0; --radius: 12px;
+      --bg: #030712;
+      --surface: #0a1124;
+      --card-bg: rgba(11, 20, 42, 0.82);
+      --card-border: rgba(0, 240, 255, 0.22);
+      --cyan: #00f0ff;
+      --purple: #a855f7;
+      --green: #22d3a5;
+      --amber: #f59e0b;
+      --red: #f43f5e;
+      --blue: #38bdf8;
+      --text: #e2e8f0;
+      --text-dim: #94a3b8;
+      --radius: 12px;
+      --font-display: 'Orbitron', monospace;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-body: 'Inter', system-ui, sans-serif;
     }
     body {
-      background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif;
-      min-height: 100vh; overflow-x: hidden;
-      background-image: radial-gradient(circle at 10% 20%, rgba(0, 240, 255, 0.08) 0%, transparent 40%),
-                        radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 40%);
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(circle at 10% 15%, rgba(0, 240, 255, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 90% 85%, rgba(168, 85, 247, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(34, 211, 165, 0.03) 0%, transparent 60%);
     }
-    .container { max-width: 1100px; margin: 0 auto; padding: 80px 24px 60px; }
-    .hero { text-align: center; margin-bottom: 40px; }
+
+    /* Floating Hub Back Button */
+    .hub-back {
+      display: inline-flex; align-items: center; gap: 8px; position: fixed; top: 18px; left: 20px; z-index: 9999;
+      padding: 8px 18px 8px 14px; background: rgba(3, 7, 18, 0.88); backdrop-filter: blur(14px);
+      border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 8px; font-family: var(--font-display);
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cyan);
+      text-decoration: none; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55); transition: all 0.25s ease;
+    }
+    .hub-back:hover {
+      border-color: var(--cyan); box-shadow: 0 0 25px rgba(0, 240, 255, 0.5); transform: translateX(-3px);
+    }
+    .container { max-width: 1240px; margin: 0 auto; padding: 75px 24px 80px; }
+
+    /* Hero Section */
+    .hero { text-align: center; margin-bottom: 30px; }
+    .hero-badge-bar { display: flex; justify-content: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+    .badge {
+      font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700;
+      padding: 5px 14px; border-radius: 999px; border: 1px solid rgba(0, 240, 255, 0.3);
+      background: rgba(0, 240, 255, 0.08); color: var(--cyan); letter-spacing: 0.05em;
+    }
+    .badge-purple { border-color: rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.1); color: #c084fc; }
+    .badge-green { border-color: rgba(34, 211, 165, 0.4); background: rgba(34, 211, 165, 0.1); color: var(--green); }
     .title {
-      font-family: 'Orbitron', sans-serif; font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 900;
-      background: linear-gradient(135deg, #fff, var(--cyan) 75%, var(--purple) 100%);
+      font-family: var(--font-display); font-size: clamp(2.2rem, 5vw, 3.4rem); font-weight: 900;
+      background: linear-gradient(135deg, #ffffff 30%, var(--cyan) 75%, var(--purple) 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 12px;
     }
-    .sub { color: var(--text-dim); max-width: 720px; margin: 0 auto 24px; font-size: 1.05rem; }
+    .sub { color: var(--text-dim); max-width: 780px; margin: 0 auto 24px; font-size: 1.05rem; }
 
-    /* Action bar */
-    .sync-bar {
-      display: flex; justify-content: space-between; align-items: center; background: var(--card-bg);
-      border: 1px solid rgba(0, 240, 255, 0.25); border-radius: var(--radius); padding: 20px 24px;
-      margin-bottom: 30px; flex-wrap: wrap; gap: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    /* Live Telemetry & Next Class HUD Banner */
+    .telemetry-banner {
+      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius);
+      padding: 20px 24px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 16px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.4);
     }
-    .status-badge {
-      font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--green); display: flex; align-items: center; gap: 8px;
+    .hud-left { display: flex; align-items: center; gap: 16px; }
+    .pulse-dot {
+      width: 12px; height: 12px; border-radius: 50%; background: var(--green);
+      box-shadow: 0 0 12px var(--green); animation: pulse 2s infinite;
     }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); }
-    .btn-group { display: flex; gap: 12px; }
-    .btn-sync {
-      background: linear-gradient(135deg, #00f0ff, #0284c7); color: #04070f; border: none;
-      font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 0.85rem; padding: 10px 20px;
-      border-radius: 8px; cursor: pointer; transition: all 0.2s;
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .hud-title { font-family: var(--font-display); font-size: 0.88rem; color: #fff; }
+    .hud-sub { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-dim); margin-top: 2px; }
+
+    /* Buttons */
+    .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-display);
+      font-weight: 700; font-size: 0.8rem; letter-spacing: 0.05em; padding: 10px 18px; border-radius: 8px;
+      cursor: pointer; transition: all 0.2s; border: none; text-decoration: none;
     }
-    .btn-sync:hover { box-shadow: 0 0 20px rgba(0, 240, 255, 0.5); }
+    .btn-cyan {
+      background: linear-gradient(135deg, var(--cyan), #0284c7); color: #020617;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.35);
+    }
+    .btn-cyan:hover { box-shadow: 0 0 25px rgba(0, 240, 255, 0.6); transform: translateY(-1px); }
+    .btn-purple {
+      background: linear-gradient(135deg, #c084fc, #9333ea); color: #fff;
+      box-shadow: 0 0 15px rgba(168, 85, 247, 0.35);
+    }
+    .btn-purple:hover { box-shadow: 0 0 25px rgba(168, 85, 247, 0.6); transform: translateY(-1px); }
     .btn-outline {
-      background: rgba(11,22,40,0.8); border: 1px solid rgba(0, 240, 255, 0.4); color: var(--cyan);
-      font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 0.85rem; padding: 10px 18px;
-      border-radius: 8px; cursor: pointer; transition: all 0.2s;
+      background: rgba(10, 16, 36, 0.8); border: 1px solid rgba(0, 240, 255, 0.3); color: var(--text);
     }
-    .btn-outline:hover { background: var(--cyan); color: #04070f; }
+    .btn-outline:hover { border-color: var(--cyan); color: var(--cyan); }
 
-    /* Timetable Grid */
-    .table-box {
-      background: var(--surface); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius);
-      overflow: hidden; margin-bottom: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    /* Clash Alert Banner */
+    .clash-banner {
+      background: rgba(244, 63, 94, 0.12); border: 1px solid var(--red); border-radius: var(--radius);
+      padding: 16px 20px; margin-bottom: 24px; display: none; align-items: center; justify-content: space-between;
+      animation: flashBorder 2s infinite;
     }
-    table { width: 100%; border-collapse: collapse; text-align: left; }
-    th, td { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); }
-    th {
-      background: #080d1a; font-family: 'Orbitron', monospace; font-size: 0.78rem; color: var(--cyan);
-      letter-spacing: 0.08em; text-transform: uppercase;
+    @keyframes flashBorder {
+      0%, 100% { border-color: var(--red); box-shadow: 0 0 15px rgba(244, 63, 94, 0.3); }
+      50% { border-color: rgba(244, 63, 94, 0.4); box-shadow: none; }
     }
-    tr:hover td { background: rgba(0, 240, 255, 0.03); }
-    .slot-time { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--purple); font-weight: 600; }
-    .slot-subject { font-weight: 700; color: #fff; font-size: 0.95rem; margin-bottom: 2px; }
-    .slot-room { font-size: 0.8rem; color: var(--text-dim); }
-    .slot-tag {
-      display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; padding: 2px 8px;
-      border-radius: 4px; background: rgba(0, 240, 255, 0.1); color: var(--cyan);
+    .clash-banner.visible { display: flex; }
+
+    /* Action Panels */
+    .panel {
+      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius);
+      padding: 24px; margin-bottom: 30px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.4);
     }
+    .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 12px; }
+    .panel-title { font-family: var(--font-display); font-size: 1.15rem; color: #fff; display: flex; align-items: center; gap: 10px; }
+
+    /* Drag Drop OCR Area */
+    .ocr-box {
+      border: 2px dashed rgba(0, 240, 255, 0.3); border-radius: var(--radius); padding: 30px 20px;
+      text-align: center; background: rgba(5, 11, 26, 0.6); cursor: pointer; transition: all 0.25s; margin-bottom: 20px;
+    }
+    .ocr-box:hover { border-color: var(--cyan); background: rgba(0, 240, 255, 0.06); }
+
+    /* Timetable Weekly Matrix View */
+    .matrix-container { width: 100%; overflow-x: auto; margin-top: 10px; }
+    .timetable-grid {
+      display: grid; grid-template-columns: 90px repeat(5, minmax(180px, 1fr)); gap: 10px; min-width: 980px;
+    }
+    .grid-header {
+      background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: 8px;
+      padding: 12px; font-family: var(--font-display); font-size: 0.8rem; color: var(--cyan); text-align: center;
+    }
+    .grid-time-header {
+      background: rgba(10, 16, 32, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; font-family: var(--font-mono);
+      font-size: 0.75rem; color: var(--text-dim);
+    }
+    .grid-col { display: flex; flex-direction: column; gap: 10px; }
+
+    /* Class Cards */
+    .class-card {
+      background: rgba(8, 15, 34, 0.9); border: 1px solid rgba(0, 240, 255, 0.25); border-radius: 8px;
+      padding: 14px; position: relative; transition: all 0.2s; cursor: pointer;
+    }
+    .class-card:hover {
+      border-color: var(--cyan); transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0, 240, 255, 0.25);
+    }
+    .class-card.clash {
+      border-color: var(--red); background: rgba(244, 63, 94, 0.1); box-shadow: 0 0 15px rgba(244, 63, 94, 0.3);
+    }
+    .class-card::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; border-radius: 8px 0 0 8px;
+      background: var(--cyan);
+    }
+    .class-card.lab::before { background: var(--purple); }
+    .class-card.tutorial::before { background: var(--green); }
+    .class-card.clash::before { background: var(--red); }
+
+    .card-time { font-family: var(--font-mono); font-size: 0.72rem; color: var(--cyan); margin-bottom: 4px; }
+    .card-code { font-family: var(--font-mono); font-size: 0.82rem; font-weight: 700; color: #fff; }
+    .card-title { font-size: 0.85rem; font-weight: 600; color: #e2e8f0; margin: 2px 0 6px; line-height: 1.3; }
+    .card-venue {
+      font-size: 0.75rem; color: var(--text-dim); display: flex; align-items: center; justify-content: space-between; margin-top: 6px;
+    }
+    .arnav-link {
+      color: var(--cyan); font-family: var(--font-mono); font-size: 0.7rem; text-decoration: underline;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .arnav-link:hover { color: #fff; }
+
+    /* Modal for ARNav Anchor Detail */
+    .modal {
+      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
+      display: none; align-items: center; justify-content: center; z-index: 10000; padding: 20px;
+    }
+    .modal.active { display: flex; }
+    .modal-card {
+      background: #091126; border: 1px solid var(--cyan); border-radius: var(--radius);
+      padding: 28px; max-width: 520px; width: 100%; box-shadow: 0 0 40px rgba(0, 240, 255, 0.3);
+      position: relative;
+    }
+    .modal-close {
+      position: absolute; top: 16px; right: 16px; background: transparent; border: none; color: var(--text-dim);
+      font-size: 1.4rem; cursor: pointer;
+    }
+    .modal-close:hover { color: #fff; }
 
     /* Telegram Box */
-    .bot-card {
-      background: linear-gradient(135deg, rgba(0, 136, 204, 0.1) 0%, rgba(10, 17, 34, 0.8) 100%);
-      border: 1px solid rgba(0, 136, 204, 0.35); border-radius: var(--radius); padding: 26px;
-      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;
+    .telegram-card {
+      background: linear-gradient(135deg, rgba(0, 136, 204, 0.12), rgba(8, 14, 30, 0.9));
+      border: 1px solid rgba(0, 136, 204, 0.4); border-radius: var(--radius); padding: 24px;
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
     }
-    .bot-info h3 { font-family: 'Orbitron', sans-serif; font-size: 1.15rem; color: #fff; margin-bottom: 6px; }
-    .bot-info p { color: var(--text-dim); font-size: 0.9rem; max-width: 600px; }
+    .telegram-info h3 { font-family: var(--font-display); font-size: 1.1rem; color: #fff; margin-bottom: 4px; }
+    .telegram-info p { color: var(--text-dim); font-size: 0.85rem; max-width: 620px; }
 
-    footer { text-align: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 30px; font-family: 'Orbitron', monospace; font-size: 0.75rem; color: var(--text-dim); }
+    footer {
+      text-align: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 30px;
+      font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-dim); margin-top: 50px;
+    }
   </style>
 </head>
 <body>
 
-  <a class="hub-back" href="../../index.html" aria-label="Back to Project Hub">
+  <!-- Floating Navigation -->
+  <a href="../../index.html" class="hub-back" title="Return to Main Project Hub">
     <span class="hub-back-arrow">←</span> Hub
   </a>
 
   <div class="container">
+    <!-- Hero Banner -->
     <header class="hero">
-      <h1 class="title">FTMK TIMETABLE SYNC</h1>
+      <div class="hero-badge-bar">
+        <span class="badge">MULTIMODAL TIMETABLE OCR</span>
+        <span class="badge badge-purple">ARNAV SPATIAL ANCHOR SYNC</span>
+        <span class="badge badge-green">LIVE CLASH DETECTOR</span>
+      </div>
+      <h1 class="title">FTMK CAMPUS COMPANION</h1>
       <p class="sub">
-        Automated Python portal scraper and Google Calendar synchronizer for FTMK UTeM students. Monitors schedule changes in real time and pushes instant Telegram alerts on classroom relocations.
+        Smart timetable parser, collision detector, and Google Calendar synchronizer for FTMK UTeM students. Seamlessly connects classroom locations with our Unity ARNav indoor pathfinding anchors.
       </p>
     </header>
 
-    <div class="sync-bar">
-      <div class="status-badge">
-        <span class="status-dot"></span>
-        <span>PORTAL SYNC ACTIVE // 0 CONFLICTS</span>
+    <!-- Telemetry & Next Class HUD Banner -->
+    <div class="telemetry-banner">
+      <div class="hud-left">
+        <div class="pulse-dot"></div>
+        <div>
+          <div class="hud-title" id="hud-status-text">PORTAL SYNC: CONNECTED // 0 CLASHES DETECTED</div>
+          <div class="hud-sub" id="hud-clock-text">Local Time: Initializing...</div>
+        </div>
       </div>
       <div class="btn-group">
-        <button class="btn-sync" onclick="exportICS()">📥 Export .ICS Calendar</button>
-        <button class="btn-outline" onclick="triggerBotTest()">📱 Test Telegram Alert</button>
+        <button class="btn btn-cyan" onclick="exportFullICS()">📅 1-Click .ICS Export</button>
+        <button class="btn btn-purple" onclick="copyTelegramBroadcaster()">📱 Copy Telegram Card</button>
       </div>
     </div>
 
-    <!-- Timetable -->
-    <div class="table-box">
-      <table>
-        <thead>
-          <tr>
-            <th>Day & Time</th>
-            <th>Subject & Code</th>
-            <th>Venue / Lab</th>
-            <th>Type</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="slot-time">MON &bull; 08:00 - 10:00</td>
-            <td>
-              <div class="slot-subject">Spatial Computing & AR Development</div>
-              <div class="slot-room">BITS 3423 &bull; Dr. FTMK Coordinator</div>
-            </td>
-            <td>Makmal Multimedia 2 (FTMK)</td>
-            <td><span class="slot-tag">LAB PRACTICAL</span></td>
-          </tr>
-          <tr>
-            <td class="slot-time">TUE &bull; 10:00 - 12:00</td>
-            <td>
-              <div class="slot-subject">Mobile Application Systems</div>
-              <div class="slot-room">BITM 2113 &bull; Systems Team</div>
-            </td>
-            <td>Dewan Kuliah 3 (DK3)</td>
-            <td><span class="slot-tag">LECTURE</span></td>
-          </tr>
-          <tr>
-            <td class="slot-time">WED &bull; 14:00 - 17:00</td>
-            <td>
-              <div class="slot-subject">Final Year Project 2 (FYP 2) Consultation</div>
-              <div class="slot-room">BITP 3124 &bull; Evaluation Committee</div>
-            </td>
-            <td>Bilik Seminar Al-Jazari</td>
-            <td><span class="slot-tag" style="color:var(--purple); background:rgba(168,85,247,0.15)">SUPERVISION</span></td>
-          </tr>
-          <tr>
-            <td class="slot-time">THU &bull; 11:00 - 13:00</td>
-            <td>
-              <div class="slot-subject">AI & Agentic Architectures</div>
-              <div class="slot-room">BITI 3213 &bull; AI Research Division</div>
-            </td>
-            <td>Lab AI & Data Science (Level 2)</td>
-            <td><span class="slot-tag">LAB PRACTICAL</span></td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Clash Warning Banner -->
+    <div class="clash-banner" id="clash-banner">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-size: 1.4rem;">⚠️</span>
+        <div>
+          <div style="font-family: var(--font-display); font-size: 0.95rem; color: #fff; font-weight: 700;">
+            SCHEDULE CLASH DETECTED
+          </div>
+          <div style="font-size: 0.8rem; color: #fecdd3;" id="clash-details">
+            Multiple classes are scheduled simultaneously on the same day.
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-outline" style="border-color: var(--red); color: #fff;" onclick="loadPreset('se')">
+        Resolve Clash
+      </button>
     </div>
 
-    <!-- Telegram Push Card -->
-    <div class="bot-card">
-      <div class="bot-info">
-        <h3>⚡ Telegram Push Relocation Guard</h3>
-        <p>
-          Configured to ping your personal Telegram ID whenever faculty admins update class venues or reschedule slots less than 24 hours prior.
+    <!-- OCR & Parser Panel -->
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-title"><span>📥</span> Timetable OCR & Schedule Parser</div>
+        <div class="btn-group">
+          <button class="btn btn-outline" onclick="loadPreset('se')">Preset: Year 3 SE (BITD)</button>
+          <button class="btn btn-outline" onclick="loadPreset('ai')">Preset: Year 2 AI & Data (BITS)</button>
+          <button class="btn btn-outline" style="border-color: rgba(244, 63, 94, 0.4); color: #fda4af;" onclick="loadPreset('clash')">
+            Test Clash Collision
+          </button>
+        </div>
+      </div>
+
+      <!-- Drag Drop OCR Zone -->
+      <div class="ocr-box" onclick="document.getElementById('timetable-file').click()">
+        <input type="file" id="timetable-file" accept="image/*,.pdf,.txt" style="display:none" onchange="handleScheduleFile(event)">
+        <div style="font-size: 2.2rem; margin-bottom: 8px;">📸</div>
+        <h3 style="font-family: var(--font-display); font-size: 1.05rem; color: #fff; margin-bottom: 4px;">
+          Drop FTMK Timetable Screenshot or Portal PDF
+        </h3>
+        <p style="color: var(--text-dim); font-size: 0.82rem;">
+          Extracts subjects, days, hours, lecturers, and room codes automatically.
         </p>
       </div>
-      <div>
-        <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #0088cc; font-weight: 600;">
-          @FTMK_TimetableBot: LINKED
-        </span>
-      </div>
-    </div>
 
-    <footer style="margin-top: 50px;">
-      MIE'S PROJECT HUB &nbsp;·&nbsp; FTMK TIMETABLE SYNC &nbsp;·&nbsp; ALL RIGHTS RESERVED
+      <!-- Quick Paste Raw Schedule Box -->
+      <div style="display: flex; gap: 10px;">
+        <input type="text" id="quick-parse-input" placeholder="Paste schedule line, e.g.: MON 08:00-10:00 BITD 2123 Data Mining Lab 4" 
+          style="flex: 1; background: #060c1d; border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 8px; color: #fff; padding: 10px 14px; font-family: var(--font-mono); font-size: 0.85rem;">
+        <button class="btn btn-cyan" onclick="parseSingleLineInput()">Add Slot +</button>
+      </div>
+    </section>
+
+    <!-- Weekly Timetable Matrix View -->
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-title"><span>🗓️</span> Weekly Academic Matrix (FTMK Campus)</div>
+        <div style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-dim);">
+          Click any venue to reveal the ARNav QR anchor code & floor route
+        </div>
+      </div>
+
+      <div class="matrix-container">
+        <div class="timetable-grid">
+          <!-- Headers -->
+          <div class="grid-header" style="color: var(--text-dim);">TIME</div>
+          <div class="grid-header">MON (ISNIN)</div>
+          <div class="grid-header">TUE (SELASA)</div>
+          <div class="grid-header">WED (RABU)</div>
+          <div class="grid-header">THU (KHAMIS)</div>
+          <div class="grid-header">FRI (JUMAAT)</div>
+
+          <!-- Day Columns -->
+          <div class="grid-time-header">
+            <div style="writing-mode: vertical-rl; transform: rotate(180deg); letter-spacing: 2px;">08:00 – 18:00</div>
+          </div>
+          <div class="grid-col" id="col-MON"></div>
+          <div class="grid-col" id="col-TUE"></div>
+          <div class="grid-col" id="col-WED"></div>
+          <div class="grid-col" id="col-THU"></div>
+          <div class="grid-col" id="col-FRI"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Telegram Broadcaster Integration -->
+    <section class="telegram-card">
+      <div class="telegram-info">
+        <h3>⚡ Real-Time Venue Relocation Guard & Bot Push</h3>
+        <p>
+          Need to alert coursemates of last-minute room changes? Generate formatted Markdown cards synced with FTMK's official Telegram channel bot (@FTMK_TimetableBot).
+        </p>
+      </div>
+      <button class="btn btn-outline" style="border-color: #0088cc; color: #38bdf8;" onclick="testTelegramBotAlert()">
+        📡 Test Telegram Bot Push
+      </button>
+    </section>
+
+    <footer>
+      MIE'S PROJECT HUB &nbsp;·&nbsp; FTMK CAMPUS COMPANION & ARNAV INTEGRATION &nbsp;·&nbsp; ALL RIGHTS RESERVED 2026
     </footer>
   </div>
 
+  <!-- ARNav Anchor Detail Modal -->
+  <div class="modal" id="arnav-modal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeArnavModal()">×</button>
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+        <span style="font-size: 1.6rem; color: var(--cyan);">◈</span>
+        <h3 style="font-family: var(--font-display); font-size: 1.2rem; color: #fff;" id="modal-venue-title">
+          Venue Information
+        </h3>
+      </div>
+
+      <div style="background: rgba(3, 7, 18, 0.8); border: 1px solid rgba(0, 240, 255, 0.25); border-radius: 8px; padding: 16px; margin-bottom: 18px; font-family: var(--font-mono); font-size: 0.82rem;">
+        <div style="margin-bottom: 6px;"><span style="color: var(--text-dim);">Building Block:</span> <span id="modal-block" style="color:#fff; font-weight:700;">Block B</span></div>
+        <div style="margin-bottom: 6px;"><span style="color: var(--text-dim);">Floor Level:</span> <span id="modal-floor" style="color: var(--green); font-weight:700;">Level 2</span></div>
+        <div style="margin-bottom: 6px;"><span style="color: var(--text-dim);">Nearest QR Anchor:</span> <span id="modal-anchor" style="color: var(--cyan); font-weight:700;">QR-FTMK-L2-04</span></div>
+        <div><span style="color: var(--text-dim);">NavMesh Waypoint:</span> <span id="modal-waypoint" style="color: var(--purple);">Node_B2_Corridor_North</span></div>
+      </div>
+
+      <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 20px; line-height: 1.5;">
+        Scan this QR anchor code inside the FTMK building to initiate AR arrow guidance directly to your classroom door via Unity ARNav.
+      </p>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn btn-outline" onclick="closeArnavModal()">Close</button>
+        <a href="../arnav/index.html" class="btn btn-cyan" id="modal-launch-btn">🚀 Open in ARNav Simulator</a>
+      </div>
+    </div>
+  </div>
+
   <script>
-    function exportICS() {
-      const icsData = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Mie//FTMK Timetable//EN\nSUMMARY:FTMK Class Schedule\nEND:VCALENDAR";
-      const blob = new Blob([icsData], { type: 'text/calendar' });
+    /* =========================================================================
+       FTMK CAMPUS COMPANION — SCHEDULE ENGINE & ARNAV BRIDGE
+       ========================================================================= */
+
+    // FTMK Venue to ARNav QR Anchor Directory
+    const VENUE_ANCHORS = {
+      'Makmal Multimedia 2': { block: 'FTMK Block B', floor: 'Level 2', anchor: 'QR-FTMK-L2-MM2', waypoint: 'Node_MM2_Door' },
+      'Lab 4': { block: 'FTMK Block B', floor: 'Level 2', anchor: 'QR-FTMK-L2-04', waypoint: 'Node_Lab4_Entrance' },
+      'Dewan Kuliah 3 (DK3)': { block: 'FTMK Central Spine', floor: 'Ground Floor', anchor: 'QR-FTMK-G-DK3', waypoint: 'Node_DK3_Main' },
+      'Dewan Kuliah 2 (DK2)': { block: 'FTMK Central Spine', floor: 'Ground Floor', anchor: 'QR-FTMK-G-DK2', waypoint: 'Node_DK2_Main' },
+      'Bilik Seminar Al-Jazari': { block: 'FTMK Block A', floor: 'Level 3', anchor: 'QR-FTMK-L3-SEM1', waypoint: 'Node_Seminar_AlJazari' },
+      'Lab AI & Data Science': { block: 'FTMK Block C', floor: 'Level 2', anchor: 'QR-FTMK-L2-AI', waypoint: 'Node_AIData_Lab' },
+      'Makmal Rangkaian (Net Lab)': { block: 'FTMK Block B', floor: 'Level 1', anchor: 'QR-FTMK-L1-NET', waypoint: 'Node_NetLab_Corridor' }
+    };
+
+    // Pre-set Timetables
+    const PRESETS = {
+      se: [
+        { day: 'MON', start: '08:00', end: '10:00', code: 'BITS 3423', title: 'Spatial Computing & AR', venue: 'Makmal Multimedia 2', type: 'lab', lecturer: 'Dr. FTMK AR Lead' },
+        { day: 'MON', start: '14:00', end: '16:00', code: 'BITD 2123', title: 'Data Mining & Warehousing', venue: 'Lab 4', type: 'lecture', lecturer: 'Assoc. Prof. Data Science' },
+        { day: 'TUE', start: '10:00', end: '12:00', code: 'BITM 2113', title: 'Mobile Application Systems', venue: 'Dewan Kuliah 3 (DK3)', type: 'lecture', lecturer: 'Mobile Systems Team' },
+        { day: 'WED', start: '14:00', end: '17:00', code: 'BITP 3124', title: 'FYP 2 Consultation & Viva', venue: 'Bilik Seminar Al-Jazari', type: 'tutorial', lecturer: 'Evaluation Panel' },
+        { day: 'THU', start: '11:00', end: '13:00', code: 'BITI 3213', title: 'Agentic AI Systems', venue: 'Lab AI & Data Science', type: 'lab', lecturer: 'AI Research Division' },
+        { day: 'FRI', start: '09:00', end: '11:00', code: 'BITN 2213', title: 'Network Security Architecture', venue: 'Makmal Rangkaian (Net Lab)', type: 'lecture', lecturer: 'Infosec Group' }
+      ],
+      ai: [
+        { day: 'MON', start: '10:00', end: '12:00', code: 'BITS 2103', title: 'Machine Learning Algorithms', venue: 'Lab AI & Data Science', type: 'lecture', lecturer: 'Dr. AI Coordinator' },
+        { day: 'TUE', start: '08:30', end: '11:30', code: 'BITD 3113', title: 'Big Data Engineering & Spark', venue: 'Lab 4', type: 'lab', lecturer: 'Big Data Lab Team' },
+        { day: 'WED', start: '10:00', end: '12:00', code: 'BITS 3203', title: 'Computer Vision & Deep Learning', venue: 'Makmal Multimedia 2', type: 'lab', lecturer: 'Vision Research Group' },
+        { day: 'THU', start: '14:00', end: '16:00', code: 'BITM 2113', title: 'Embedded IoT Telemetry', venue: 'Dewan Kuliah 2 (DK2)', type: 'lecture', lecturer: 'Robotics Dept' },
+        { day: 'FRI', start: '08:30', end: '10:30', code: 'BITP 2202', title: 'Software Quality Assurance', venue: 'Bilik Seminar Al-Jazari', type: 'tutorial', lecturer: 'Quality Committee' }
+      ],
+      clash: [
+        { day: 'MON', start: '08:00', end: '10:00', code: 'BITS 3423', title: 'Spatial Computing & AR', venue: 'Makmal Multimedia 2', type: 'lab', lecturer: 'Dr. FTMK AR Lead' },
+        // Intentional clash at Monday 08:30 - 10:30
+        { day: 'MON', start: '08:30', end: '10:30', code: 'BITD 2123', title: 'CONFLICT: Data Mining Lab', venue: 'Lab 4', type: 'lecture', lecturer: 'Prof. Clashing Dept' },
+        { day: 'TUE', start: '10:00', end: '12:00', code: 'BITM 2113', title: 'Mobile Application Systems', venue: 'Dewan Kuliah 3 (DK3)', type: 'lecture', lecturer: 'Mobile Systems Team' },
+        { day: 'THU', start: '11:00', end: '13:00', code: 'BITI 3213', title: 'Agentic AI Systems', venue: 'Lab AI & Data Science', type: 'lab', lecturer: 'AI Research Division' }
+      ]
+    };
+
+    let activeSchedule = [...PRESETS.se];
+
+    // =========================================================================
+    // RENDERING & CLASH DETECTION
+    // =========================================================================
+
+    function detectClashes() {
+      const clashes = [];
+      const days = ['MON', 'TUE', 'WED', 'THU', 'FRI'];
+
+      days.forEach(day => {
+        const slots = activeSchedule.filter(s => s.day === day);
+        for (let i = 0; i < slots.length; i++) {
+          for (let j = i + 1; j < slots.length; j++) {
+            const s1 = slots[i];
+            const s2 = slots[j];
+
+            // Convert to minutes
+            const start1 = timeToMinutes(s1.start);
+            const end1 = timeToMinutes(s1.end);
+            const start2 = timeToMinutes(s2.start);
+            const end2 = timeToMinutes(s2.end);
+
+            if (Math.max(start1, start2) < Math.min(end1, end2)) {
+              clashes.push({ s1, s2, day });
+            }
+          }
+        }
+      });
+      return clashes;
+    }
+
+    function timeToMinutes(timeStr) {
+      const [h, m] = timeStr.split(':').map(Number);
+      return h * 60 + m;
+    }
+
+    function renderTimetable() {
+      const days = ['MON', 'TUE', 'WED', 'THU', 'FRI'];
+      const clashes = detectClashes();
+
+      // Update Clash Banner
+      const banner = document.getElementById('clash-banner');
+      const hudStatus = document.getElementById('hud-status-text');
+
+      if (clashes.length > 0) {
+        banner.classList.add('visible');
+        document.getElementById('clash-details').textContent = 
+          `Collision on ${clashes[0].day}: ${clashes[0].s1.code} (${clashes[0].s1.start}) overlaps with ${clashes[0].s2.code} (${clashes[0].s2.start})`;
+        hudStatus.innerHTML = `<span style="color:var(--red)">CRITICAL: ${clashes.length} SCHEDULE CLASH DETECTED</span>`;
+      } else {
+        banner.classList.remove('visible');
+        hudStatus.textContent = `PORTAL SYNC ACTIVE // 0 CLASHES // ${activeSchedule.length} CLASSES ENROLLED`;
+      }
+
+      // Populate Columns
+      days.forEach(d => {
+        const col = document.getElementById(`col-${d}`);
+        col.innerHTML = '';
+
+        const daySlots = activeSchedule
+          .filter(s => s.day === d)
+          .sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
+
+        if (daySlots.length === 0) {
+          col.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-dim); font-size: 0.75rem; font-family: var(--font-mono); border: 1px dashed rgba(255,255,255,0.06); border-radius: 8px;">No Classes</div>';
+          return;
+        }
+
+        daySlots.forEach(slot => {
+          const isClashing = clashes.some(c => (c.s1 === slot || c.s2 === slot));
+          const card = document.createElement('div');
+          card.className = `class-card ${slot.type} ${isClashing ? 'clash' : ''}`;
+          
+          const anchorInfo = VENUE_ANCHORS[slot.venue] || { block: 'FTMK', floor: 'L1', anchor: 'QR-FTMK-01' };
+
+          card.innerHTML = `
+            <div class="card-time">${slot.start} – ${slot.end}</div>
+            <div class="card-code">${slot.code}</div>
+            <div class="card-title">${slot.title}</div>
+            <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 6px;">👨‍🏫 ${slot.lecturer}</div>
+            <div class="card-venue">
+              <span>📍 ${slot.venue}</span>
+              <a href="javascript:void(0)" class="arnav-link" onclick="openArnavModal('${slot.venue}')">
+                ◈ ${anchorInfo.anchor}
+              </a>
+            </div>
+          `;
+          col.appendChild(card);
+        });
+      });
+    }
+
+    function loadPreset(key) {
+      if (PRESETS[key]) {
+        activeSchedule = [...PRESETS[key]];
+        renderTimetable();
+      }
+    }
+
+    // =========================================================================
+    // ARNAV ANCHOR MODAL
+    // =========================================================================
+
+    function openArnavModal(venueName) {
+      const modal = document.getElementById('arnav-modal');
+      const info = VENUE_ANCHORS[venueName] || {
+        block: 'FTMK Main Complex',
+        floor: 'Level 2',
+        anchor: 'QR-FTMK-GEN-01',
+        waypoint: 'Node_General_Hub'
+      };
+
+      document.getElementById('modal-venue-title').textContent = venueName;
+      document.getElementById('modal-block').textContent = info.block;
+      document.getElementById('modal-floor').textContent = info.floor;
+      document.getElementById('modal-anchor').textContent = info.anchor;
+      document.getElementById('modal-waypoint').textContent = info.waypoint;
+
+      document.getElementById('modal-launch-btn').href = `../arnav/index.html?dest=${encodeURIComponent(venueName)}`;
+      modal.classList.add('active');
+    }
+
+    function closeArnavModal() {
+      document.getElementById('arnav-modal').classList.remove('active');
+    }
+
+    // =========================================================================
+    // PARSER & FILE INGESTION
+    // =========================================================================
+
+    function parseSingleLineInput() {
+      const input = document.getElementById('quick-parse-input');
+      const val = input.value.trim();
+      if (!val) return;
+
+      // Regex matching DAY START-END CODE TITLE VENUE
+      const regex = /(MON|TUE|WED|THU|FRI)\s+(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})\s+([A-Z]{4}\s*\d{4})\s+(.+?)\s+(Makmal.+|Lab.+|Dewan.+|Bilik.+)/i;
+      const m = val.match(regex);
+
+      if (m) {
+        activeSchedule.push({
+          day: m[1].toUpperCase(),
+          start: m[2],
+          end: m[3],
+          code: m[4].toUpperCase(),
+          title: m[5].trim(),
+          venue: m[6].trim(),
+          type: 'lecture',
+          lecturer: 'Faculty Staff'
+        });
+        input.value = '';
+        renderTimetable();
+        alert('✓ Added class to weekly schedule!');
+      } else {
+        // Fallback simple split
+        activeSchedule.push({
+          day: 'MON',
+          start: '12:00',
+          end: '14:00',
+          code: 'GEN 1001',
+          title: val,
+          venue: 'Lab 4',
+          type: 'lab',
+          lecturer: 'FTMK Lecturer'
+        });
+        input.value = '';
+        renderTimetable();
+      }
+    }
+
+    function handleScheduleFile(evt) {
+      const file = evt.target.files[0];
+      if (!file) return;
+
+      // Simulate vision AI OCR parsing on timetable image
+      const btn = event.target;
+      alert(`🤖 Gemini Multimodal Vision: Analyzing ${file.name}...\nExtracting course codes, time slots, and room numbers.`);
+      setTimeout(() => {
+        loadPreset('ai');
+        alert('✓ Timetable OCR complete: 5 course modules extracted and placed into weekly matrix.');
+      }, 500);
+    }
+
+    // =========================================================================
+    // EXPORTERS & NOTIFICATIONS
+    // =========================================================================
+
+    function exportFullICS() {
+      const dayOffsetMap = { 'MON': 1, 'TUE': 2, 'WED': 3, 'THU': 4, 'FRI': 5 };
+
+      let ics = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Mie//FTMK Campus Companion//EN',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        'X-WR-CALNAME:FTMK Semester Timetable',
+        'X-WR-TIMEZONE:Asia/Kuala_Lumpur'
+      ];
+
+      activeSchedule.forEach((slot, i) => {
+        const dOffset = dayOffsetMap[slot.day] || 1;
+        // Construct 2026 September semester date
+        const dayStr = String(7 + dOffset).padStart(2, '0');
+        const startClean = slot.start.replace(':', '') + '00';
+        const endClean = slot.end.replace(':', '') + '00';
+        const anchor = VENUE_ANCHORS[slot.venue]?.anchor || 'QR-FTMK';
+
+        ics.push(
+          'BEGIN:VEVENT',
+          `UID:ftmk-${i}-${Date.now()}@utem.edu.my`,
+          `DTSTAMP:20260907T120000Z`,
+          `DTSTART;TZID=Asia/Kuala_Lumpur:202609${dayStr}T${startClean}`,
+          `DTEND;TZID=Asia/Kuala_Lumpur:202609${dayStr}T${endClean}`,
+          'RRULE:FREQ=WEEKLY;COUNT=14',
+          `SUMMARY:${slot.code} — ${slot.title}`,
+          `LOCATION:${slot.venue} (${anchor})`,
+          `DESCRIPTION:Lecturer: ${slot.lecturer}\\nARNav QR Anchor: ${anchor}\\nAuto-synced via FTMK Campus Companion.`,
+          'STATUS:CONFIRMED',
+          'END:VEVENT'
+        );
+      });
+
+      ics.push('END:VCALENDAR');
+
+      const blob = new Blob([ics.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'ftmk_timetable_schedule.ics';
+      a.download = 'FTMK_Class_Schedule_2026.ics';
       a.click();
       URL.revokeObjectURL(url);
     }
 
-    function triggerBotTest() {
-      alert("🤖 [Telegram Push Alert Simulator]\n\n'Notice: BITS 3423 Spatial Computing on Mon 08:00 has been verified at Makmal Multimedia 2. No room clash detected.'");
+    function copyTelegramBroadcaster() {
+      let msg = `📅 *FTMK SEMESTER SCHEDULE UPDATE*\n\n`;
+      activeSchedule.forEach(s => {
+        const anchor = VENUE_ANCHORS[s.venue]?.anchor || 'QR-FTMK';
+        msg += `▪️ *${s.day} ${s.start}-${s.end}*: ${s.code} ${s.title}\n   📍 Venue: ${s.venue} \`[${anchor}]\`\n`;
+      });
+      msg += `\n🤖 _Generated via FTMK Campus Companion — NavMesh anchor synced._`;
+
+      navigator.clipboard.writeText(msg).then(() => {
+        alert('✓ Telegram Markdown message copied to clipboard! Ready to paste into coursemates group.');
+      });
     }
+
+    function testTelegramBotAlert() {
+      alert("🤖 [@FTMK_TimetableBot Simulator]\n\nBroadcast Dispatched:\n'Notice: BITS 3423 Spatial Computing on MON 08:00 has been verified at Makmal Multimedia 2. QR Anchor: QR-FTMK-L2-MM2. Zero schedule clashes.'");
+    }
+
+    // Live Clock & Next Class Telemetry
+    function updateClock() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString();
+      const dateStr = now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+      document.getElementById('hud-clock-text').textContent = `FTMK Telemetry Clock: ${dateStr}, ${timeStr} (MYT)`;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderTimetable();
+      updateClock();
+      setInterval(updateClock, 1000);
+    });
   </script>
 </body>
 </html>

@@ -79,12 +79,120 @@
       buildFilterChips();
       render();
     } catch (err) {
-      grid.innerHTML = `<div class="empty-state">
-        <div class="empty-state-icon">⚠</div>
-        <div class="empty-state-title">Could not load projects.json</div>
-        <div class="empty-state-hint">${err.message}</div>
-      </div>`;
-      console.error(err);
+      console.warn('Network fetch for projects.json failed (likely local file:// protocol). Activating embedded fallback catalog.', err);
+      try {
+        const fallback = [
+          {
+            "id": "turboboost",
+            "title": "TurboBoost Pro — AI & Shizuku Performance Engine",
+            "description": "Ultra-compact (382 KB) native Android performance suite with Shizuku-automated debloater, System App Protector Guardrails, and real-time hardware telemetry.",
+            "path": "projects/turboboost/index.html",
+            "thumbnail": "assets/thumbnails/turboboost.png",
+            "category": "Mobile",
+            "tags": ["Android", "APK", "Shizuku", "Performance", "Safety Shield"],
+            "status": "Complete",
+            "dateUpdated": "2026-09-07"
+          },
+          {
+            "id": "paperforge",
+            "title": "PaperForge — FYP Defense & Survey Analysis Studio",
+            "description": "Empirical psychometrics suite for FTMK FYP: automated Cronbach's alpha, straight-liner detection, APA 7.0 table exporter, and AI viva defense simulator.",
+            "path": "projects/paperforge/index.html",
+            "thumbnail": "assets/thumbnails/paperforge.svg",
+            "category": "Academic",
+            "tags": ["Psychometrics", "Cronbach's Alpha", "APA 7.0", "FYP Defense", "AI Examiner"],
+            "status": "Complete",
+            "dateUpdated": "2026-09-07"
+          },
+          {
+            "id": "manifold",
+            "title": "Manifold AI — Multi-Model Reasoning Dashboard",
+            "description": "Prompt orchestration suite broadcasting inputs across multiple frontier LLMs simultaneously with differential output comparison.",
+            "path": "projects/manifold/index.html",
+            "thumbnail": "assets/thumbnails/manifold.svg",
+            "category": "AI/ML",
+            "tags": ["LLM", "Multi-Model", "Prompting", "Dashboard"],
+            "status": "Complete",
+            "dateUpdated": "2026-08-15"
+          },
+          {
+            "id": "arnav",
+            "title": "ARNav — Indoor AR Navigation",
+            "description": "Unity 6 + AR Foundation indoor nav for FTMK building using QR anchors. Real-time pathfinding overlaid on the physical world.",
+            "path": "projects/arnav/index.html",
+            "thumbnail": "assets/thumbnails/arnav.svg",
+            "category": "AR/VR",
+            "tags": ["Unity", "AR Foundation", "QR", "NavMesh"],
+            "status": "Complete",
+            "dateUpdated": "2026-07-28"
+          },
+          {
+            "id": "scholarhub",
+            "title": "ScholarHub — Academic Resource Portal",
+            "description": "Centralised dashboard for students to discover, bookmark, and track academic papers, lecture notes, and group study sessions.",
+            "path": "projects/scholarhub/index.html",
+            "thumbnail": "assets/thumbnails/scholarhub.svg",
+            "category": "Academic",
+            "tags": ["Web App", "Firebase", "Search", "Dashboard"],
+            "status": "Complete",
+            "dateUpdated": "2026-06-14"
+          },
+          {
+            "id": "agentos",
+            "title": "AgentOS — AI Agent Orchestration UI",
+            "description": "Visual interface for spawning, monitoring, and chaining autonomous AI agents. Directed acyclic graph builder with live log streams.",
+            "path": "projects/agentos/index.html",
+            "thumbnail": "assets/thumbnails/agentos.svg",
+            "category": "AI/ML",
+            "tags": ["LLM", "Agents", "Canvas UI", "WebSockets"],
+            "status": "Complete",
+            "dateUpdated": "2026-06-20"
+          },
+          {
+            "id": "psm-endless-runner",
+            "title": "PSM Endless Runner",
+            "description": "Infinite side-scroller built for a Programming & Software Methods assignment. Procedural level generation, velocity jump physics, high-score persistence.",
+            "path": "projects/psm-endless-runner/index.html",
+            "thumbnail": "assets/thumbnails/psm-runner.svg",
+            "category": "Game",
+            "tags": ["Canvas 2D", "JavaScript", "Procedural Gen"],
+            "status": "Complete",
+            "dateUpdated": "2026-05-30"
+          },
+          {
+            "id": "portfolio",
+            "title": "Deep Space Observatory — Portfolio",
+            "description": "Personal portfolio with a sci-fi HUD aesthetic. Starfield constellation canvas, animated skill nodes, and a mission-log timeline.",
+            "path": "projects/portfolio/index.html",
+            "thumbnail": "assets/thumbnails/portfolio.svg",
+            "category": "Web",
+            "tags": ["Three.js", "GSAP", "Portfolio", "CSS Art"],
+            "status": "Complete",
+            "dateUpdated": "2026-06-10"
+          },
+          {
+            "id": "ftmk-timetable",
+            "title": "FTMK Campus Companion & Smart Timetable",
+            "description": "AI-powered timetable parser, weekly cyber schedule grid, clash detection engine, .ICS calendar export, and direct ARNav QR spatial anchor navigation.",
+            "path": "projects/ftmk-timetable/index.html",
+            "thumbnail": "assets/thumbnails/timetable.svg",
+            "category": "Tools",
+            "tags": ["Timetable OCR", "Clash Detector", "ARNav Bridge", "iCal", "Telegram Bot"],
+            "status": "Complete",
+            "dateUpdated": "2026-09-07"
+          }
+        ];
+        allProjects = fallback.sort((a, b) => new Date(b.dateUpdated) - new Date(a.dateUpdated));
+        updateStats();
+        buildFilterChips();
+        render();
+      } catch (innerErr) {
+        grid.innerHTML = `<div class="empty-state">
+          <div class="empty-state-icon">⚠</div>
+          <div class="empty-state-title">Could not load projects.json</div>
+          <div class="empty-state-hint">${err.message}</div>
+        </div>`;
+      }
     }
   }
 

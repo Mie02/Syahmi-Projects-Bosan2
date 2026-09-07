@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deep Space Observatory — Mie's Portfolio</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text y='52' font-size='56'>⬡</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    .hub-back {
+      display: inline-flex; align-items: center; gap: 8px; position: fixed; top: 18px; left: 20px; z-index: 9999;
+      padding: 8px 18px 8px 14px; background: rgba(4, 7, 15, 0.85); backdrop-filter: blur(12px);
+      border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 8px; font-family: 'Orbitron', monospace;
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #00f0ff;
+      text-decoration: none; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); transition: all 0.25s ease;
+    }
+    .hub-back:hover { border-color: rgba(0, 240, 255, 0.8); box-shadow: 0 0 20px rgba(0, 240, 255, 0.4); transform: translateX(-2px); }
+    .hub-back-arrow { font-size: 1rem; line-height: 1; }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #030612; --surface: #091024; --cyan: #00f0ff; --purple: #a855f7;
+      --green: #22d3a5; --text: #ccd6f6; --text-dim: #8892b0; --radius: 12px;
+    }
+    body {
+      background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100vh; overflow-x: hidden; position: relative;
+    }
+    #spaceCanvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .content-wrap { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 80px 24px 80px; }
+    
+    .hero { text-align: center; padding: 40px 0 50px; }
+    .title {
+      font-family: 'Orbitron', sans-serif; font-size: clamp(2rem, 4.5vw, 3.5rem); font-weight: 900;
+      background: linear-gradient(135deg, #fff, var(--cyan) 75%, var(--purple) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 12px;
+    }
+    .sub { color: var(--text-dim); max-width: 680px; margin: 0 auto 30px; font-size: 1.05rem; }
+
+    /* Interactive Constellation Skills */
+    .section-title { font-family: 'Orbitron', sans-serif; font-size: 1.4rem; color: #fff; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    .skills-cluster {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 60px;
+    }
+    .skill-node {
+      background: rgba(9, 16, 36, 0.7); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius);
+      padding: 20px; backdrop-filter: blur(10px); transition: all 0.3s;
+    }
+    .skill-node:hover {
+      border-color: var(--cyan); box-shadow: 0 0 20px rgba(0, 240, 255, 0.3); transform: translateY(-3px);
+    }
+    .skill-name { font-family: 'Orbitron', monospace; font-size: 1rem; color: #fff; font-weight: 700; margin-bottom: 6px; }
+    .skill-level { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--cyan); margin-bottom: 10px; }
+    .skill-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+    .skill-fill { height: 100%; background: linear-gradient(90deg, var(--cyan), var(--purple)); }
+
+    /* Mission Log Timeline */
+    .timeline { position: relative; border-left: 2px solid rgba(0, 240, 255, 0.3); margin-left: 20px; padding-left: 30px; margin-bottom: 60px; }
+    .timeline-item { position: relative; margin-bottom: 36px; }
+    .timeline-dot {
+      position: absolute; left: -37px; top: 4px; width: 12px; height: 12px; border-radius: 50%;
+      background: var(--cyan); box-shadow: 0 0 12px var(--cyan);
+    }
+    .timeline-date { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--purple); margin-bottom: 4px; }
+    .timeline-title { font-family: 'Orbitron', sans-serif; font-size: 1.1rem; color: #fff; font-weight: 700; margin-bottom: 6px; }
+    .timeline-desc { color: var(--text-dim); font-size: 0.92rem; line-height: 1.6; }
+
+    footer { text-align: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 30px; font-family: 'Orbitron', monospace; font-size: 0.75rem; color: var(--text-dim); }
+  </style>
+</head>
+<body>
+
+  <a class="hub-back" href="../../index.html" aria-label="Back to Project Hub">
+    <span class="hub-back-arrow">←</span> Hub
+  </a>
+
+  <canvas id="spaceCanvas"></canvas>
+
+  <div class="content-wrap">
+    <header class="hero">
+      <h1 class="title">DEEP SPACE OBSERVATORY</h1>
+      <p class="sub">
+        Mission control portfolio for Ahmad Syahmi (Mie). Spatial computing researcher, native Android systems optimizer, and full-stack software engineer.
+      </p>
+    </header>
+
+    <h2 class="section-title">✦ Core Constellations & Competencies</h2>
+    <div class="skills-cluster">
+      <div class="skill-node">
+        <div class="skill-name">Unity & AR Foundation</div>
+        <div class="skill-level">SPATIAL LEVEL 92%</div>
+        <div class="skill-bar"><div class="skill-fill" style="width: 92%;"></div></div>
+      </div>
+      <div class="skill-node">
+        <div class="skill-name">Android Native (Java/Kotlin)</div>
+        <div class="skill-level">SYSTEMS LEVEL 95%</div>
+        <div class="skill-bar"><div class="skill-fill" style="width: 95%;"></div></div>
+      </div>
+      <div class="skill-node">
+        <div class="skill-name">Shizuku & Android IPC</div>
+        <div class="skill-level">ROOTLESS IPC 90%</div>
+        <div class="skill-bar"><div class="skill-fill" style="width: 90%;"></div></div>
+      </div>
+      <div class="skill-node">
+        <div class="skill-name">Three.js & WebGL</div>
+        <div class="skill-level">GRAPHICS LEVEL 85%</div>
+        <div class="skill-bar"><div class="skill-fill" style="width: 85%;"></div></div>
+      </div>
+      <div class="skill-node">
+        <div class="skill-name">Python & Data Science</div>
+        <div class="skill-level">ANALYSIS LEVEL 88%</div>
+        <div class="skill-bar"><div class="skill-fill" style="width: 88%;"></div></div>
+      </div>
+      <div class="skill-node">
+        <div class="skill-name">Autonomous Agent Pipelines</div>
+        <div class="skill-level">AI ORCHESTRATION 87%</div>
+        <div class="skill-bar"><div class="skill-fill" style="width: 87%;"></div></div>
+      </div>
+    </div>
+
+    <h2 class="section-title">◈ Mission Log // Milestones</h2>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-date">SEPTEMBER 2026</div>
+        <div class="timeline-title">TurboBoost Pro v2.0 Release</div>
+        <div class="timeline-desc">Engineered ultra-compact 382 KB native Android debloating and hardware telemetry utility with System App Protector Shield and rootless Shizuku integration.</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-date">JULY 2026</div>
+        <div class="timeline-title">ARNav Indoor Navigation System (FTMK FYP)</div>
+        <div class="timeline-desc">Designed, developed, and evaluated QR anchor spatial AR localization on Unity 6 for the FTMK university complex with 94.2% completion rate in user empirical studies.</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-date">MAY 2026</div>
+        <div class="timeline-title">ScholarHub Academic Platform Launch</div>
+        <div class="timeline-desc">Architected responsive computer science research portal with dynamic bookmarking and collaborative session synchronization.</div>
+      </div>
+    </div>
+
+    <footer>
+      MIE'S PROJECT HUB &nbsp;·&nbsp; DEEP SPACE OBSERVATORY &nbsp;·&nbsp; AHMAD SYAHMI
+    </footer>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('spaceCanvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function init() {
+      stars = [];
+      const count = Math.floor((canvas.width * canvas.height) / 4500);
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 1.5 + 0.3,
+          vx: (Math.random() - 0.5) * 0.2,
+          vy: (Math.random() - 0.5) * 0.2,
+          color: Math.random() > 0.3 ? '#00f0ff' : '#a855f7'
+        });
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < stars.length; i++) {
+        const s = stars[i];
+        s.x += s.vx;
+        s.y += s.vy;
+        if (s.x < 0) s.x = canvas.width;
+        if (s.x > canvas.width) s.x = 0;
+        if (s.y < 0) s.y = canvas.height;
+        if (s.y > canvas.height) s.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = s.color;
+        ctx.fill();
+
+        // Connect nearby stars
+        for (let j = i + 1; j < stars.length; j++) {
+          const s2 = stars[j];
+          const dist = Math.hypot(s.x - s2.x, s.y - s2.y);
+          if (dist < 90) {
+            ctx.strokeStyle = `rgba(0, 240, 255, ${0.15 * (1 - dist / 90)})`;
+            ctx.beginPath();
+            ctx.moveTo(s.x, s.y);
+            ctx.lineTo(s2.x, s2.y);
+            ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', () => { resize(); init(); });
+    resize();
+    init();
+    draw();
+  </script>
+</body>
+</html>

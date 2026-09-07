@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+  <defs>
+    <linearGradient id="bgGrad_Observatory" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#040711"/>
+      <stop offset="100%" stop-color="#0a1226"/>
+    </linearGradient>
+    <filter id="glow_Observatory" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="640" height="360" fill="url(#bgGrad_Observatory)"/>
+
+  <!-- Grid lines -->
+  <g stroke="rgba(0, 240, 255, 0.04)" stroke-width="1">
+    <line x1="0" y1="90" x2="640" y2="90"/>
+    <line x1="0" y1="180" x2="640" y2="180"/>
+    <line x1="0" y1="270" x2="640" y2="270"/>
+    <line x1="160" y1="0" x2="160" y2="360"/>
+    <line x1="320" y1="0" x2="320" y2="360"/>
+    <line x1="480" y1="0" x2="480" y2="360"/>
+  </g>
+
+  <!-- Graphic Elements -->
+  <g filter="url(#glow_Observatory)">
+    <circle cx="320" cy="175" r="70" stroke="rgba(0,240,255,0.2)" stroke-width="2" fill="none"/>
+           <ellipse cx="320" cy="175" rx="105" ry="36" stroke="rgba(168,85,247,0.4)" stroke-width="2" fill="none" transform="rotate(-20 320 175)"/>
+           <circle cx="320" cy="175" r="24" fill="#00f0ff"/>
+           <circle cx="210" cy="140" r="5" fill="#fff"/>
+           <circle cx="430" cy="210" r="6" fill="#a855f7"/>
+           <circle cx="380" cy="95" r="4" fill="#22d3a5"/>
+  </g>
+
+  <!-- Top Bracket & Category -->
+  <rect x="28" y="26" width="70" height="24" rx="4" fill="rgba(0,240,255,0.12)" stroke="#00f0ff" stroke-width="1"/>
+  <text x="63" y="42" font-family="'Orbitron', monospace, sans-serif" font-size="10" font-weight="700" fill="#00f0ff" text-anchor="middle" letter-spacing="1">WEB</text>
+
+  <!-- HUD Corner Accents -->
+  <path d="M20 30 V20 H30 M610 20 H620 V30 M620 330 V340 H610 M30 340 H20 V330" stroke="rgba(0,240,255,0.4)" stroke-width="2" fill="none"/>
+
+  <!-- Title & Subtitle overlay -->
+  <text x="28" y="305" font-family="'Orbitron', sans-serif" font-size="24" font-weight="900" fill="#ffffff" letter-spacing="1">Observatory</text>
+  <text x="28" y="326" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="600" fill="rgba(204,214,246,0.65)" letter-spacing="1.5">3D STARFIELD PORTFOLIO</text>
+</svg>

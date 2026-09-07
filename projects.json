@@ -11,6 +11,17 @@
     "dateUpdated": "2026-09-07"
   },
   {
+    "id": "paperforge",
+    "title": "PaperForge — FYP Defense & Survey Analysis Studio",
+    "description": "Empirical psychometrics suite for FTMK FYP: automated Cronbach's alpha, straight-liner detection, APA 7.0 table exporter, and AI viva defense simulator.",
+    "path": "projects/paperforge/index.html",
+    "thumbnail": "assets/thumbnails/paperforge.svg",
+    "category": "Academic",
+    "tags": ["Psychometrics", "Cronbach's Alpha", "APA 7.0", "FYP Defense", "AI Examiner"],
+    "status": "Complete",
+    "dateUpdated": "2026-09-07"
+  },
+  {
     "id": "manifold",
     "title": "Manifold AI — Multi-Model Reasoning Dashboard",
     "description": "Prompt orchestration suite broadcasting inputs across multiple frontier LLMs simultaneously with differential output comparison.",
@@ -78,13 +89,13 @@
   },
   {
     "id": "ftmk-timetable",
-    "title": "FTMK Timetable Sync",
-    "description": "Scrapes the faculty timetable and exports it to Google Calendar / iCal. Detects room clashes and dispatches instant Telegram alerts.",
+    "title": "FTMK Campus Companion & Smart Timetable",
+    "description": "AI-powered timetable parser, weekly cyber schedule grid, clash detection engine, .ICS calendar export, and direct ARNav QR spatial anchor navigation.",
     "path": "projects/ftmk-timetable/index.html",
     "thumbnail": "assets/thumbnails/timetable.svg",
     "category": "Tools",
-    "tags": ["Python", "Scraper", "Google Calendar", "Telegram Bot"],
+    "tags": ["Timetable OCR", "Clash Detector", "ARNav Bridge", "iCal", "Telegram Bot"],
     "status": "Complete",
-    "dateUpdated": "2026-04-12"
+    "dateUpdated": "2026-09-07"
   }
 ]

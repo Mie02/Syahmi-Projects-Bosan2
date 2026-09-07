@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mie's Project Hub</title>
+  <meta name="description" content="A personal dashboard of Mie's projects — AR/VR, AI, web apps, games, and tools." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text y='52' font-size='56'>◆</text></svg>" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- HUD corner brackets -->
+  <div class="hud-corner tl" aria-hidden="true"></div>
+  <div class="hud-corner tr" aria-hidden="true"></div>
+  <div class="hud-corner bl" aria-hidden="true"></div>
+  <div class="hud-corner br" aria-hidden="true"></div>
+
+  <!-- Starfield -->
+  <canvas id="stars-canvas" aria-hidden="true"></canvas>
+
+  <div class="page-wrap">
+
+    <!-- ── Header ───────────────────────────────────────────── -->
+    <header class="site-header">
+      <div class="logo">
+        <span class="logo-text">MIE'S PROJECT HUB</span>
+        <span class="logo-sub">// Mission Control</span>
+      </div>
+      <div class="header-status">
+        <div class="pulse-dot" aria-hidden="true"></div>
+        Systems online
+      </div>
+    </header>
+
+    <!-- ── Stats strip ──────────────────────────────────────── -->
+    <div class="stats-strip" role="status" aria-label="Project statistics">
+      <div class="stat">
+        <span class="stat-value" id="stat-total">—</span>
+        <span class="stat-label">Projects</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="stat-cats">—</span>
+        <span class="stat-label">Categories</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="stat-last" style="font-size:0.9rem; letter-spacing:0.02em">—</span>
+        <span class="stat-label">Last updated</span>
+      </div>
+    </div>
+
+    <!-- ── Controls ─────────────────────────────────────────── -->
+    <div class="controls">
+
+      <div class="search-wrap">
+        <span class="search-icon" aria-hidden="true">⌕</span>
+        <input
+          type="search"
+          id="search"
+          placeholder="Search projects, tags, descriptions…"
+          aria-label="Search projects"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </div>
+
+      <div id="filter-chips" class="filter-chips" role="group" aria-label="Filter by category">
+        <!-- chips injected by script.js -->
+      </div>
+
+    </div>
+
+    <!-- ── Project grid ─────────────────────────────────────── -->
+    <main>
+      <div id="projects-grid" class="projects-grid" aria-live="polite" aria-label="Project list">
+        <!-- cards injected by script.js -->
+      </div>
+    </main>
+
+    <!-- ── Footer ───────────────────────────────────────────── -->
+    <footer class="site-footer">
+      <span>MIE'S PROJECT HUB &nbsp;·&nbsp; To add a project, edit <code>projects.json</code> only.</span>
+    </footer>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
