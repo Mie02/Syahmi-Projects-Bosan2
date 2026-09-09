@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+  <defs>
+    <linearGradient id="bgSlam" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#030612"/><stop offset="100%" stop-color="#0a122e"/>
+    </linearGradient>
+    <filter id="glow_slam"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="640" height="360" fill="url(#bgSlam)"/>
+  <!-- Point Cloud Dots & Trajectory Loop -->
+  <g fill="#00f0ff" opacity="0.6">
+    <circle cx="160" cy="140" r="3"/><circle cx="190" cy="110" r="2"/><circle cx="230" cy="120" r="4"/><circle cx="280" cy="90" r="3"/>
+    <circle cx="340" cy="100" r="4"/><circle cx="410" cy="130" r="3"/><circle cx="470" cy="110" r="2"/><circle cx="500" cy="160" r="3"/>
+    <circle cx="180" cy="220" r="3"/><circle cx="240" cy="240" r="2"/><circle cx="320" cy="250" r="4"/><circle cx="420" cy="230" r="3"/>
+  </g>
+  <!-- Elliptical Loop Trajectory -->
+  <ellipse cx="320" cy="170" rx="150" ry="60" fill="none" stroke="#f59e0b" stroke-width="3" filter="url(#glow_slam)"/>
+  <circle cx="200" cy="180" r="7" fill="#f43f5e"/>
+  <circle cx="440" cy="160" r="7" fill="#22d3a5"/>
+
+  <rect x="180" y="295" width="280" height="38" rx="8" fill="rgba(8,12,20,0.9)" stroke="rgba(0,240,255,0.4)" stroke-width="1.5"/>
+  <text x="320" y="319" fill="#f59e0b" font-family="'Orbitron', sans-serif" font-size="14" font-weight="700" letter-spacing="2" text-anchor="middle">SLAM MAPPER</text>
+</svg>

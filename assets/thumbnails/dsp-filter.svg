@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+  <defs>
+    <linearGradient id="bgDsp" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#040714"/><stop offset="100%" stop-color="#0a1532"/>
+    </linearGradient>
+    <filter id="glow_dsp"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="640" height="360" fill="url(#bgDsp)"/>
+  <!-- Bode Filter Curves & Equalizer Bars -->
+  <path d="M 120 120 L 280 120 Q 340 120 370 160 Q 400 200 520 250" fill="none" stroke="#00f0ff" stroke-width="4" filter="url(#glow_dsp)"/>
+  <path d="M 120 240 L 240 240 Q 280 240 320 180 Q 360 120 520 120" fill="none" stroke="#a855f7" stroke-width="3" stroke-dasharray="6,4"/>
+
+  <!-- Frequency Cutoff Marker -->
+  <line x1="340" y1="80" x2="340" y2="260" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4,4"/>
+  <circle cx="340" cy="140" r="7" fill="#f59e0b"/>
+
+  <rect x="180" y="295" width="280" height="38" rx="8" fill="rgba(8,12,20,0.9)" stroke="rgba(0,240,255,0.4)" stroke-width="1.5"/>
+  <text x="320" y="319" fill="#00f0ff" font-family="'Orbitron', sans-serif" font-size="14" font-weight="700" letter-spacing="2" text-anchor="middle">DSP AUDIO FILTER</text>
+</svg>

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shizuku Studio — Android ADB & Binder IPC Command Orchestrator | Mie's Project Hub</title>
+  <meta name="description" content="Native Android OS systems engineering workbench: rootless Shizuku Binder IPC simulation, package debloater with System App Protector, AppOps permission tuner, and live Logcat stream." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text y='52' font-size='56'>⚡</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #030712;
+      --surface: #0a1126;
+      --card-bg: rgba(10, 18, 42, 0.82);
+      --border: rgba(0, 240, 255, 0.25);
+      --cyan: #00f0ff;
+      --purple: #a855f7;
+      --green: #22d3a5;
+      --amber: #f59e0b;
+      --red: #f43f5e;
+      --text: #e2e8f0;
+      --text-dim: #94a3b8;
+      --font-display: 'Orbitron', monospace;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-body: 'Inter', system-ui, sans-serif;
+    }
+    body {
+      background: var(--bg); color: var(--text); font-family: var(--font-body);
+      min-height: 100vh; overflow-x: hidden; line-height: 1.5;
+    }
+
+    /* Floating Hub Back Button */
+    .hub-back {
+      display: inline-flex; align-items: center; gap: 8px; position: fixed; top: 18px; left: 20px; z-index: 9999;
+      padding: 8px 18px 8px 14px; background: rgba(3, 7, 18, 0.88); backdrop-filter: blur(14px);
+      border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 8px; font-family: var(--font-display);
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cyan);
+      text-decoration: none; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55); transition: all 0.25s ease;
+    }
+    .hub-back:hover {
+      border-color: var(--cyan); box-shadow: 0 0 25px rgba(0, 240, 255, 0.5); transform: translateX(-3px);
+    }
+
+    .container { max-width: 1320px; margin: 0 auto; padding: 75px 24px 80px; }
+
+    /* Hero */
+    .hero { text-align: center; margin-bottom: 26px; }
+    .hero-badge-bar { display: flex; justify-content: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    .badge {
+      font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700;
+      padding: 4px 12px; border-radius: 999px; border: 1px solid rgba(0, 240, 255, 0.3);
+      background: rgba(0, 240, 255, 0.08); color: var(--cyan); letter-spacing: 0.05em;
+    }
+    .badge-purple { border-color: rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.1); color: #c084fc; }
+    .badge-green { border-color: rgba(34, 211, 165, 0.4); background: rgba(34, 211, 165, 0.1); color: var(--green); }
+    .title {
+      font-family: var(--font-display); font-size: clamp(2.2rem, 4.5vw, 3.4rem); font-weight: 900;
+      background: linear-gradient(135deg, #fff 30%, var(--cyan) 75%, var(--purple) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px;
+    }
+    .sub { color: var(--text-dim); max-width: 800px; margin: 0 auto 20px; font-size: 1rem; }
+
+    /* Shizuku IPC Daemon HUD Banner */
+    .ipc-banner {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+      padding: 16px 22px; margin-bottom: 24px; display: flex; justify-content: space-between;
+      align-items: center; flex-wrap: wrap; gap: 14px; backdrop-filter: blur(12px);
+    }
+    .ipc-left { display: flex; align-items: center; gap: 14px; }
+    .pulse-dot {
+      width: 12px; height: 12px; border-radius: 50%; background: var(--green);
+      box-shadow: 0 0 12px var(--green); animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .ipc-title { font-family: var(--font-display); font-size: 0.95rem; color: #fff; font-weight: 700; }
+    .ipc-meta { font-family: var(--font-mono); font-size: 0.78rem; color: var(--cyan); margin-top: 2px; }
+
+    /* Tabs Layout */
+    .tabs-nav {
+      display: flex; gap: 8px; border-bottom: 1px solid rgba(0, 240, 255, 0.2); margin-bottom: 24px;
+      overflow-x: auto; padding-bottom: 6px;
+    }
+    .tab-btn {
+      font-family: var(--font-display); font-size: 0.8rem; font-weight: 700; padding: 9px 18px;
+      border-radius: 6px 6px 0 0; background: rgba(10, 18, 42, 0.6); border: 1px solid transparent;
+      border-bottom: none; color: var(--text-dim); cursor: pointer; transition: all 0.2s;
+    }
+    .tab-btn:hover, .tab-btn.active {
+      background: var(--card-bg); border-color: var(--border); color: var(--cyan);
+    }
+
+    /* Tab Contents */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Debloater Table */
+    .panel {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+      padding: 20px; backdrop-filter: blur(14px); margin-bottom: 24px;
+    }
+    .panel-head {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
+    }
+    .panel-title { font-family: var(--font-display); font-size: 1.05rem; color: #fff; display: flex; align-items: center; gap: 8px; }
+
+    .debloat-table {
+      width: 100%; border-collapse: collapse; font-size: 0.82rem; font-family: var(--font-mono);
+    }
+    .debloat-table th {
+      text-align: left; padding: 10px 12px; background: rgba(0, 240, 255, 0.08); color: var(--cyan);
+      border-bottom: 1px solid var(--border);
+    }
+    .debloat-table td {
+      padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.06); color: #cbd5e1;
+    }
+    .risk-tag {
+      padding: 2px 7px; border-radius: 4px; font-size: 0.68rem; font-weight: 700;
+    }
+    .risk-safe { background: rgba(34, 211, 165, 0.15); color: #22d3a5; border: 1px solid #22d3a5; }
+    .risk-risky { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid #f59e0b; }
+    .risk-shield { background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid #f43f5e; }
+
+    /* Toggle Switch */
+    .switch {
+      position: relative; display: inline-block; width: 36px; height: 20px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; inset: 0; background-color: rgba(255,255,255,0.15);
+      border-radius: 20px; transition: .25s; border: 1px solid rgba(255,255,255,0.2);
+    }
+    .slider:before {
+      position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px;
+      background-color: white; border-radius: 50%; transition: .25s;
+    }
+    input:checked + .slider { background-color: var(--cyan); border-color: var(--cyan); }
+    input:checked + .slider:before { transform: translateX(16px); background-color: #030712; }
+    input:disabled + .slider { opacity: 0.3; cursor: not-allowed; }
+
+    /* Virtual Terminal & Logcat */
+    .terminal-box {
+      background: #020409; border: 1px solid var(--border); border-radius: 8px;
+      padding: 14px 16px; font-family: var(--font-mono); font-size: 0.8rem; color: #6ee7b7;
+      min-height: 240px; max-height: 380px; overflow-y: auto; line-height: 1.6;
+    }
+    .term-input-row {
+      display: flex; gap: 10px; margin-top: 12px;
+    }
+    .term-input {
+      flex: 1; background: #070d1e; border: 1px solid var(--border); border-radius: 6px;
+      padding: 10px 14px; color: #fff; font-family: var(--font-mono); font-size: 0.82rem; outline: none;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-display);
+      font-weight: 700; font-size: 0.8rem; padding: 10px 18px; border-radius: 6px;
+      cursor: pointer; transition: all 0.2s; border: none; text-decoration: none;
+    }
+    .btn-cyan {
+      background: linear-gradient(135deg, var(--cyan), #0284c7); color: #020617;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.35);
+    }
+    .btn-cyan:hover { box-shadow: 0 0 25px rgba(0, 240, 255, 0.6); transform: translateY(-1px); }
+    .btn-outline {
+      background: rgba(10, 18, 42, 0.7); border: 1px solid var(--border); color: var(--text);
+    }
+    .btn-outline:hover { border-color: var(--cyan); color: var(--cyan); }
+
+    /* Quick Scripts Pill Bar */
+    .preset-scripts { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+    .pscript-btn {
+      font-family: var(--font-mono); font-size: 0.74rem; padding: 5px 10px; border-radius: 4px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: var(--cyan);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .pscript-btn:hover { background: rgba(0, 240, 255, 0.15); border-color: var(--cyan); }
+
+    footer {
+      text-align: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 30px;
+      font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-dim); margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+  <a class="hub-back" href="../../index.html" aria-label="Back to Project Hub">
+    <span>←</span> Hub
+  </a>
+
+  <div class="container">
+    <header class="hero">
+      <div class="hero-badge-bar">
+        <span class="badge">ROOTLESS BINDER IPC (SHIZUKU)</span>
+        <span class="badge badge-purple">SYSTEM APP PROTECTOR SHIELD</span>
+        <span class="badge badge-green">APPOPS & HIDDEN APIS</span>
+      </div>
+      <h1 class="title">SHIZUKU STUDIO</h1>
+      <p class="sub">
+        Advanced Android systems engineering & privileged IPC orchestrator. Perform zero-root debloating, audit hidden AppOps permissions, inspect live Logcat streams, and export production shell automation scripts.
+      </p>
+    </header>
+
+    <!-- IPC Daemon Banner -->
+    <div class="ipc-banner">
+      <div class="ipc-left">
+        <div class="pulse-dot"></div>
+        <div>
+          <div class="ipc-title">Shizuku Daemon Active // Process UID 2000 (Shell)</div>
+          <div class="ipc-meta">Binder Token: 0x94B2C3F0 &nbsp;|&nbsp; SELinux: Permissive &nbsp;|&nbsp; Target API: 34 (Android 14)</div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-outline" onclick="dispatchShell('dumpsys battery')">Battery Dumpsys</button>
+        <button class="btn btn-cyan" onclick="exportAutomationScript()">Export .SH Automation ↗</button>
+      </div>
+    </div>
+
+    <!-- Tabs Nav -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('debloat')">📦 Package Debloater Studio</button>
+      <button class="tab-btn" onclick="switchTab('appops')">🛡️ AppOps & Privacy Matrix</button>
+      <button class="tab-btn" onclick="switchTab('terminal')">💻 Shizuku IPC Shell Terminal</button>
+      <button class="tab-btn" onclick="switchTab('logcat')">📜 Live Logcat Stream</button>
+    </div>
+
+    <!-- Tab 1: Debloater Studio -->
+    <div class="tab-content active" id="tab-debloat">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">
+            <span>📦</span> Installed Package Manager // System App Protector Shield
+          </div>
+          <div style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-dim);" id="debloatStats">
+            4 Disabled · 185 MB RAM Saved
+          </div>
+        </div>
+
+        <table class="debloat-table">
+          <thead>
+            <tr>
+              <th>Package Identifier</th>
+              <th>Application Name</th>
+              <th>Safety Classification</th>
+              <th>Disk Footprint</th>
+              <th>Package State</th>
+            </tr>
+          </thead>
+          <tbody id="debloatBody">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab 2: AppOps Privacy Matrix -->
+    <div class="tab-content" id="tab-appops">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">
+            <span>🛡️</span> Hidden AppOps Permissions & Standby Buckets
+          </div>
+          <div style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--cyan);">
+            Bypasses standard user settings restrictions
+          </div>
+        </div>
+
+        <table class="debloat-table">
+          <thead>
+            <tr>
+              <th>AppOps Permission Code</th>
+              <th>Target Package</th>
+              <th>Description / Security Vector</th>
+              <th>Enforcement State</th>
+            </tr>
+          </thead>
+          <tbody id="appopsBody">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab 3: Terminal -->
+    <div class="tab-content" id="tab-terminal">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">
+            <span>💻</span> Shizuku Privileged Binder Shell
+          </div>
+          <div style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--green);">
+            Direct /system/bin/sh Dispatch
+          </div>
+        </div>
+
+        <div class="preset-scripts">
+          <button class="pscript-btn" onclick="dispatchShell('pm list packages -3')">List 3rd Party APKs</button>
+          <button class="pscript-btn" onclick="dispatchShell('dumpsys meminfo --package-summary')">Dumpsys Memory</button>
+          <button class="pscript-btn" onclick="dispatchShell('setprop debug.hwui.renderer skiagl')">Force SkiaGL GPU</button>
+          <button class="pscript-btn" onclick="dispatchShell('cmd thermalservice override-status 0')">Reset Thermal Throttling</button>
+          <button class="pscript-btn" onclick="dispatchShell('cmd appops set com.facebook.katana RUN_IN_BACKGROUND ignore')">Revoke Background Execution</button>
+        </div>
+
+        <div class="terminal-box" id="termOutput">
+          [SYS_READY] Shizuku native client initialized.<br/>
+          [BINDER] Connected to ShizukuUserService (interface descriptor: moe.shizuku.server.IShizukuService).<br/>
+          [AUTH] UID 2000 validated with CAP_NET_ADMIN, CAP_SYS_PTRACE.<br/>
+          Type a command or select a preset script above...
+        </div>
+
+        <div class="term-input-row">
+          <input class="term-input" id="termInput" type="text" placeholder="e.g. pm disable-user --user 0 com.facebook.katana" />
+          <button class="btn btn-cyan" onclick="submitTerminal()">Dispatch Command</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 4: Logcat Stream -->
+    <div class="tab-content" id="tab-logcat">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">
+            <span>📜</span> Live Logcat Stream Telemetry
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn-sm" onclick="clearLogcat()">Clear Buffer</button>
+            <button class="btn-sm" id="btnLogcatToggle" onclick="toggleLogcat()">Pause Stream</button>
+          </div>
+        </div>
+
+        <div class="terminal-box" id="logcatStream" style="color: #cbd5e1; max-height: 420px;">
+          <!-- Log lines stream continuously -->
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      MIE'S PROJECT HUB &nbsp;·&nbsp; SHIZUKU STUDIO & NATIVE ANDROID SYSTEMS &nbsp;·&nbsp; ALL RIGHTS RESERVED 2026
+    </footer>
+  </div>
+
+  <script>
+    // =========================================================================
+    // PACKAGES & SAFETY CLASSIFICATIONS
+    // =========================================================================
+    const PACKAGES = [
+      {
+        pkg: 'com.facebook.katana',
+        name: 'Facebook App & Telemetry',
+        risk: 'SAFE',
+        size: '64.2 MB',
+        disabled: true,
+        desc: 'Third-party bloatware, background wakelocks and analytics beacon'
+      },
+      {
+        pkg: 'com.google.android.youtube',
+        name: 'YouTube Preloaded Stub',
+        risk: 'SAFE',
+        size: '52.1 MB',
+        disabled: false,
+        desc: 'Can be safely disabled if using alternative web frontend'
+      },
+      {
+        pkg: 'com.microsoft.skydrive',
+        name: 'Microsoft OneDrive Sync',
+        risk: 'SAFE',
+        size: '48.6 MB',
+        disabled: true,
+        desc: 'OEM preinstalled cloud sync service'
+      },
+      {
+        pkg: 'com.google.android.apps.tachyon',
+        name: 'Google Meet / Duo Stub',
+        risk: 'SAFE',
+        size: '20.4 MB',
+        disabled: true,
+        desc: 'Preloaded video call service'
+      },
+      {
+        pkg: 'com.google.android.gms.location.history',
+        name: 'Location History Reporting',
+        risk: 'RISKY',
+        size: '8.4 MB',
+        disabled: false,
+        desc: 'May affect Google timeline or automated location-based smart home triggers'
+      },
+      {
+        pkg: 'com.android.chrome',
+        name: 'Google Chrome',
+        risk: 'RISKY',
+        size: '142.0 MB',
+        disabled: false,
+        desc: 'Ensure another browser is default before disabling'
+      },
+      {
+        pkg: 'com.android.systemui',
+        name: 'Android System UI',
+        risk: 'SHIELD',
+        size: '38.0 MB',
+        disabled: false,
+        desc: 'CRITICAL OS COMPONENT. Protected by System App Protector Shield to prevent bootloop.'
+      },
+      {
+        pkg: 'com.android.providers.telephony',
+        name: 'Telephony & SMS Provider',
+        risk: 'SHIELD',
+        size: '12.4 MB',
+        disabled: false,
+        desc: 'CRITICAL: Required for cellular calls, emergency numbers, and SMS routing.'
+      }
+    ];
+
+    const APPOPS = [
+      { code: 'RUN_IN_BACKGROUND', pkg: 'com.facebook.katana', desc: 'Allows service wakeups when app is not active', state: 'IGNORED' },
+      { code: 'SYSTEM_ALERT_WINDOW', pkg: 'com.google.android.youtube', desc: 'Draw picture-in-picture overlay on top of active screen', state: 'ALLOWED' },
+      { code: 'ACCESS_BACKGROUND_LOCATION', pkg: 'com.microsoft.skydrive', desc: 'Queries fine GPS coordinates without foreground activity', state: 'IGNORED' },
+      { code: 'WRITE_SETTINGS', pkg: 'com.sec.android.app.sbrowser', desc: 'Modifies system display timeout and ringtone volumes', state: 'ALLOWED' },
+      { code: 'SCHEDULE_EXACT_ALARM', pkg: 'com.facebook.katana', desc: 'Wakes CPU from deep sleep via AlarmManager exact intents', state: 'IGNORED' }
+    ];
+
+    function renderDebloater() {
+      const tbody = document.getElementById('debloatBody');
+      tbody.innerHTML = PACKAGES.map((p, idx) => {
+        let tagClass = 'risk-safe';
+        if (p.risk === 'RISKY') tagClass = 'risk-risky';
+        if (p.risk === 'SHIELD') tagClass = 'risk-shield';
+
+        const isShield = p.risk === 'SHIELD';
+
+        return `
+          <tr>
+            <td><code>${p.pkg}</code></td>
+            <td><strong>${p.name}</strong><div style="font-size:0.7rem;color:var(--text-dim);">${p.desc}</div></td>
+            <td><span class="risk-tag ${tagClass}">${p.risk}</span></td>
+            <td>${p.size}</td>
+            <td>
+              <label class="switch">
+                <input type="checkbox" ${!p.disabled ? 'checked' : ''} ${isShield ? 'disabled' : ''} onchange="togglePackage(${idx}, this.checked)">
+                <span class="slider"></span>
+              </label>
+              <span style="font-size:0.74rem; margin-left:8px; color:${p.disabled ? 'var(--red)' : 'var(--green)'}; font-weight:700;">
+                ${p.disabled ? 'DISABLED' : 'ACTIVE'}
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    window.togglePackage = function(idx, isChecked) {
+      const p = PACKAGES[idx];
+      if (p.risk === 'SHIELD') return;
+
+      p.disabled = !isChecked;
+      appendTerminal(`$ pm ${p.disabled ? 'disable-user --user 0' : 'enable'} ${p.pkg}`);
+      appendTerminal(`Package ${p.pkg} is now ${p.disabled ? 'disabled (state: STATE_DISABLED_USER)' : 'enabled (state: STATE_ENABLED)'}.`);
+
+      renderDebloater();
+    };
+
+    function renderAppOps() {
+      const tbody = document.getElementById('appopsBody');
+      tbody.innerHTML = APPOPS.map((op, idx) => `
+        <tr>
+          <td><code style="color:var(--cyan);">${op.code}</code></td>
+          <td><code>${op.pkg}</code></td>
+          <td>${op.desc}</td>
+          <td>
+            <button class="pscript-btn" onclick="toggleAppOp(${idx})">
+              ${op.state === 'ALLOWED' ? '🟢 ALLOWED' : '🔴 IGNORED'}
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    window.toggleAppOp = function(idx) {
+      const op = APPOPS[idx];
+      op.state = op.state === 'ALLOWED' ? 'IGNORED' : 'ALLOWED';
+      appendTerminal(`$ cmd appops set ${op.pkg} ${op.code} ${op.state.toLowerCase()}`);
+      appendTerminal(`AppOp mode updated: ${op.code} -> ${op.state}`);
+      renderAppOps();
+    };
+
+    // =========================================================================
+    // TERMINAL DISPATCHER
+    // =========================================================================
+    const termOutput = document.getElementById('termOutput');
+    const termInput = document.getElementById('termInput');
+
+    function appendTerminal(line) {
+      const div = document.createElement('div');
+      div.textContent = line;
+      termOutput.appendChild(div);
+      termOutput.scrollTop = termOutput.scrollHeight;
+    }
+
+    window.dispatchShell = function(cmd) {
+      appendTerminal(`$ ${cmd}`);
+      if (cmd.includes('dumpsys battery')) {
+        appendTerminal(`Current Battery Service state:\n  AC powered: false\n  USB powered: true\n  Wireless powered: false\n  Max charging current: 1500000\n  status: 2 (Charging)\n  health: 2 (Good)\n  present: true\n  level: 84\n  scale: 100\n  voltage: 4182 mV\n  temperature: 298 (29.8°C)\n  technology: Li-ion`);
+      } else if (cmd.includes('dumpsys meminfo')) {
+        appendTerminal(`Total PSS by OOM adjustment:\n    284,520K: Native\n    412,890K: System\n    560,110K: Persistent\n    840,230K: Foreground\n  1,210,400K: Visible\n  3,100,500K: Cached\nTotal Free RAM: 3,420,100K (includes 3,100,500K cached)`);
+      } else if (cmd.includes('setprop')) {
+        appendTerminal(`[OK] Property debug.hwui.renderer updated to 'skiagl'. Next app launch will utilize Skia Vulkan pipeline.`);
+      } else {
+        appendTerminal(`[OK] Shizuku Binder returned code 0. Command executed successfully.`);
+      }
+    };
+
+    window.submitTerminal = function() {
+      const val = termInput.value.trim();
+      if (!val) return;
+      dispatchShell(val);
+      termInput.value = '';
+    };
+
+    termInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') submitTerminal();
+    });
+
+    // =========================================================================
+    // LOGCAT STREAM SIMULATOR
+    // =========================================================================
+    const logcatBox = document.getElementById('logcatStream');
+    let logcatActive = true;
+    const SAMPLE_LOGS = [
+      "I ActivityManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10200000 cmp=com.shizuku.studio/.MainActivity} from uid 2000",
+      "D SurfaceFlinger: [SurfaceView - com.shizuku.studio] CompositionEngine: client composition requested",
+      "I ShizukuServer: Received transaction 1 (TRANSACTION_bindApplication) from UID 10245",
+      "D PackageManager: User 0: disabled component com.facebook.katana/.analytics.AnalyticsService",
+      "W BatteryStats: Excessive wake lock acquired by com.google.android.gms (5m 12s)",
+      "I HardwarePropertiesManager: Thermal status nominal (skin_temp: 34.2C, cpu_temp: 39.8C)",
+      "D AppOpsService: noteOperation: 24 (SYSTEM_ALERT_WINDOW) for uid 10190 returned 0 (ALLOWED)"
+    ];
+
+    function addLogcatLine() {
+      if (!logcatActive) return;
+      const randLog = SAMPLE_LOGS[Math.floor(Math.random() * SAMPLE_LOGS.length)];
+      const now = new Date().toTimeString().split(' ')[0] + '.' + Math.floor(Math.random() * 899 + 100);
+      const div = document.createElement('div');
+      div.textContent = `${now} 2000 2410 ${randLog}`;
+      logcatBox.appendChild(div);
+      if (logcatBox.childNodes.length > 50) logcatBox.removeChild(logcatBox.firstChild);
+      logcatBox.scrollTop = logcatBox.scrollHeight;
+    }
+
+    setInterval(addLogcatLine, 800);
+
+    window.clearLogcat = function() {
+      logcatBox.innerHTML = '';
+    };
+
+    window.toggleLogcat = function() {
+      logcatActive = !logcatActive;
+      document.getElementById('btnLogcatToggle').textContent = logcatActive ? 'Pause Stream' : 'Resume Stream';
+    };
+
+    // =========================================================================
+    // EXPORT AUTOMATION SCRIPT (.SH)
+    // =========================================================================
+    window.exportAutomationScript = function() {
+      let sh = `#!/bin/sh\n# Shizuku Studio — Android Rootless Debloat & Optimization Script\n# Generated: ${new Date().toISOString()}\n\necho "[+] Applying Shizuku System Optimizations..."\n\n`;
+
+      PACKAGES.filter(p => p.disabled && p.risk !== 'SHIELD').forEach(p => {
+        sh += `echo "Disabling ${p.pkg}..."\npm disable-user --user 0 ${p.pkg}\n`;
+      });
+
+      sh += `\necho "[+] Configuring AppOps Privacy Restrictions..."\n`;
+      APPOPS.forEach(op => {
+        sh += `cmd appops set ${op.pkg} ${op.code} ${op.state.toLowerCase()}\n`;
+      });
+
+      sh += `\necho "[+] Setting Skia Hardware Renderer..."\nsetprop debug.hwui.renderer skiagl\n\necho "[✓] Shizuku optimization complete."\n`;
+
+      const blob = new Blob([sh], { type: 'text/x-shellscript;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `shizuku_optimize_${Date.now()}.sh`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    // =========================================================================
+    // TABS SWITCHER
+    // =========================================================================
+    window.switchTab = function(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+      event.target.classList.add('active');
+      document.getElementById(`tab-${tabId}`).classList.add('active');
+    };
+
+    // Init
+    window.addEventListener('DOMContentLoaded', () => {
+      renderDebloater();
+      renderAppOps();
+    });
+  </script>
+</body>
+</html>

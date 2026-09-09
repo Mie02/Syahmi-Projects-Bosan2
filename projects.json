@@ -33,6 +33,116 @@
     "dateUpdated": "2026-09-07"
   },
   {
+    "id": "spatial-twin",
+    "title": "SpatialTwin — Industrial Digital Twin & IoT Telemetry 3D HUD",
+    "description": "Industrial 4.0 3D spatial digital twin and real-time IoT sensor telemetry simulator. Monitor industrial assets, detect bearing vibration anomalies, and dispatch maintenance work orders.",
+    "path": "projects/spatial-twin/index.html",
+    "thumbnail": "assets/thumbnails/spatial-twin.svg",
+    "category": "AR/VR",
+    "tags": ["Digital Twin", "IoT Sensors", "3D Isometric", "Vibration FFT", "Industry 4.0"],
+    "status": "Complete",
+    "dateUpdated": "2026-09-10"
+  },
+  {
+    "id": "shizuku-studio",
+    "title": "Shizuku Studio — Android ADB & Binder IPC Command Orchestrator",
+    "description": "Native Android OS systems engineering workbench: rootless Shizuku Binder IPC simulation, package debloater with System App Protector, AppOps permission tuner, and live Logcat stream.",
+    "path": "projects/shizuku-studio/index.html",
+    "thumbnail": "assets/thumbnails/shizuku-studio.svg",
+    "category": "Mobile",
+    "tags": ["Android Native", "Shizuku", "Binder IPC", "AppOps", "Logcat Stream"],
+    "status": "Complete",
+    "dateUpdated": "2026-09-10"
+  },
+  {
+    "id": "neural-vision-lab",
+    "title": "NeuralVision Lab — Edge Computer Vision & Spatial Perception",
+    "description": "Edge computer vision & spatial tracking workbench. Real-time multi-object tracking, optical flow vector overlay, spatial 3D raycasting, and YOLO dataset annotation exporter.",
+    "path": "projects/neural-vision-lab/index.html",
+    "thumbnail": "assets/thumbnails/neural-vision.svg",
+    "category": "AI/ML",
+    "tags": ["Computer Vision", "Object Detection", "Optical Flow", "Spatial 3D", "YOLO"],
+    "status": "Complete",
+    "dateUpdated": "2026-09-10"
+  },
+  {
+    "id": "slam-mapper",
+    "title": "SLAM Mapper — LiDAR Point Cloud & Visual Odometry",
+    "description": "Robotics & AR spatial localization visualizer. 3D LiDAR point cloud rendering, Visual-Inertial Odometry keyframe trajectory, loop closure optimization, and PCD exporter.",
+    "path": "projects/slam-mapper/index.html",
+    "thumbnail": "assets/thumbnails/slam-mapper.svg",
+    "category": "AR/VR",
+    "tags": ["LiDAR", "SLAM", "Visual Odometry", "Point Cloud", "Loop Closure"],
+    "status": "Complete",
+    "dateUpdated": "2026-09-10"
+  },
+  {
+    "id": "battery-sentinel",
+    "title": "BatterySentinel — Mobile Battery Drain & CPU Core Telemetry",
+    "description": "Android native performance & power optimization profiler. Real-time big.LITTLE multi-core CPU scheduler, wakelock energy drain analyzer, thermal throttling curves, and CPU governor tuning.",
+    "path": "projects/battery-sentinel/index.html",
+    "thumbnail": "assets/thumbnails/battery-sentinel.svg",
+    "category": "Mobile",
+    "tags": ["Android Power", "big.LITTLE CPU", "Kernel Governor", "Wakelocks", "Thermal"],
+    "status": "Complete",
+    "dateUpdated": "2026-09-10"
+  },
+  {
+    "id": "apiguard",
+    "title": "APIGuard — Zero-Trust API Gateway & Security Inspector",
+    "description": "Production-grade API security & gateway inspector. Real-time JWT signature tampering verification, token bucket rate limiter simulator, OWASP Top 10 API vulnerability scanner, and CORS policy auditor.",
+    "path": "projects/apiguard/index.html",
+    "thumbnail": "assets/thumbnails/apiguard.svg",
+    "category": "Tools",
+    "tags": ["Zero-Trust", "API Gateway", "JWT Security", "Rate Limiter", "OWASP"],
+    "status": "Complete",
+    "dateUpdated": "2026-09-10"
+  },
+  {
+    "id": "firmware-ota",
+    "title": "FirmwareOTA — IoT Fleet Management & Safe Rollout Console",
+    "description": "Industrial IoT firmware fleet management & A/B partition OTA rollout console. Phased canary deployment simulator with automated rollback on brick detection and delta binary diff calculator.",
+    "path": "projects/firmware-ota/index.html",
+    "thumbnail": "assets/thumbnails/firmware-ota.svg",
+    "category": "Tools",
+    "tags": ["IoT Fleet", "Firmware OTA", "A/B Partition", "Canary Rollout", "Delta Diff"],
+    "status": "Complete",
+    "dateUpdated": "2026-09-10"
+  },
+  {
+    "id": "quantum-crypto-lab",
+    "title": "QuantumCrypto Lab — Post-Quantum Cryptography & ZK-Proof Sandbox",
+    "description": "Next-generation cryptography & zero-knowledge proofs workbench. Interactive lattice-based Kyber vector grid, zk-SNARK prover-verifier simulation, and Shannon entropy analyzer.",
+    "path": "projects/quantum-crypto-lab/index.html",
+    "thumbnail": "assets/thumbnails/quantum-crypto.svg",
+    "category": "Tools",
+    "tags": ["Post-Quantum", "Lattice Crypto", "Kyber", "zk-SNARK", "Cryptography"],
+    "status": "Complete",
+    "dateUpdated": "2026-09-10"
+  },
+  {
+    "id": "dsp-audio-filter",
+    "title": "DSP Audio Filter — Digital Signal Processing & Noise Suppression",
+    "description": "Real-time Web Audio API digital signal processing studio. Interactive biquad filter frequency response Bode plot, spectral noise gate suppression, and FFT waterfall spectrogram.",
+    "path": "projects/dsp-audio-filter/index.html",
+    "thumbnail": "assets/thumbnails/dsp-filter.svg",
+    "category": "Audio/AI",
+    "tags": ["DSP", "Biquad Filter", "Bode Plot", "Noise Suppression", "Spectrogram"],
+    "status": "Complete",
+    "dateUpdated": "2026-09-10"
+  },
+  {
+    "id": "distributed-kv",
+    "title": "DistributedKV — Raft Consensus & Distributed Cluster Simulator",
+    "description": "Distributed systems & consensus simulator. Interactive 5-node Raft consensus cluster with visual leader election, log replication quorum, network partition split-brain testing, and KV query terminal.",
+    "path": "projects/distributed-kv/index.html",
+    "thumbnail": "assets/thumbnails/distributed-kv.svg",
+    "category": "Tools",
+    "tags": ["Distributed Systems", "Raft Consensus", "State Machine", "Quorum", "Split-Brain"],
+    "status": "Complete",
+    "dateUpdated": "2026-09-10"
+  },
+  {
     "id": "paperforge",
     "title": "PaperForge — FYP Defense & Survey Analysis Studio",
     "description": "Empirical psychometrics suite for FTMK FYP: automated Cronbach's alpha, straight-liner detection, APA 7.0 table exporter, and AI viva defense simulator.",

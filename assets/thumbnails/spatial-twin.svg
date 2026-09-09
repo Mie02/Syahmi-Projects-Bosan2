@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#050914"/>
+      <stop offset="100%" stop-color="#0a1532"/>
+    </linearGradient>
+    <filter id="glow_c" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="640" height="360" fill="url(#bgGrad)"/>
+  <g stroke="rgba(0, 240, 255, 0.08)" stroke-width="1">
+    <line x1="0" y1="90" x2="640" y2="90"/><line x1="0" y1="180" x2="640" y2="180"/><line x1="0" y1="270" x2="640" y2="270"/>
+    <line x1="160" y1="0" x2="160" y2="360"/><line x1="320" y1="0" x2="320" y2="360"/><line x1="480" y1="0" x2="480" y2="360"/>
+  </g>
+  <!-- Isometric 3D Blocks -->
+  <polygon points="180,180 260,140 340,180 260,220" fill="rgba(0,240,255,0.8)" stroke="#fff" filter="url(#glow_c)"/>
+  <polygon points="180,180 260,220 260,280 180,240" fill="rgba(8,20,50,0.9)" stroke="rgba(0,240,255,0.4)"/>
+  <polygon points="260,220 340,180 340,240 260,280" fill="rgba(4,12,32,0.9)" stroke="rgba(0,240,255,0.4)"/>
+  
+  <polygon points="380,120 450,85 520,120 450,155" fill="rgba(168,85,247,0.8)" stroke="#fff"/>
+  <polygon points="380,120 450,155 450,210 380,175" fill="rgba(25,10,45,0.9)" stroke="rgba(168,85,247,0.4)"/>
+  <polygon points="450,155 520,120 520,175 450,210" fill="rgba(15,5,30,0.9)" stroke="rgba(168,85,247,0.4)"/>
+
+  <rect x="180" y="300" width="280" height="38" rx="8" fill="rgba(8,12,20,0.9)" stroke="rgba(0,240,255,0.4)" stroke-width="1.5"/>
+  <text x="320" y="324" fill="#00f0ff" font-family="'Orbitron', sans-serif" font-size="14" font-weight="700" letter-spacing="2" text-anchor="middle">SPATIAL TWIN 3D</text>
+</svg>

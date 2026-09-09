@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+  <defs>
+    <linearGradient id="bgNV" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#050814"/><stop offset="100%" stop-color="#0e1738"/>
+    </linearGradient>
+    <filter id="glow_nv"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="640" height="360" fill="url(#bgNV)"/>
+  <!-- Cyber Bounding Boxes & Reticle -->
+  <circle cx="320" cy="160" r="70" fill="none" stroke="rgba(0,240,255,0.3)" stroke-width="2" stroke-dasharray="8,6"/>
+  <circle cx="320" cy="160" r="30" fill="none" stroke="#00f0ff" stroke-width="3" filter="url(#glow_nv)"/>
+  <circle cx="320" cy="160" r="6" fill="#f43f5e"/>
+  
+  <rect x="230" y="80" width="180" height="150" fill="none" stroke="#22d3a5" stroke-width="2" stroke-dasharray="12,4"/>
+  <rect x="230" y="60" width="80" height="20" fill="#22d3a5"/>
+  <text x="270" y="74" fill="#030712" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" text-anchor="middle">PERSON 96%</text>
+
+  <rect x="180" y="295" width="280" height="38" rx="8" fill="rgba(8,12,20,0.9)" stroke="rgba(0,240,255,0.4)" stroke-width="1.5"/>
+  <text x="320" y="319" fill="#00f0ff" font-family="'Orbitron', sans-serif" font-size="14" font-weight="700" letter-spacing="2" text-anchor="middle">NEURAL VISION LAB</text>
+</svg>
