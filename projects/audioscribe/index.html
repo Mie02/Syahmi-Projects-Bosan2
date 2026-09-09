@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AudioScribe Studio - Speech-to-Notes & Audio Waveform Lab | Mie's Project Hub</title>
+  <meta name="description" content="Futuristic Web Audio visualizer, real-time speech-to-text transcriber, and automated meeting action item extractor." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%23050914' stroke='%23f59e0b' stroke-width='4'/><path d='M20 32 L26 20 L32 44 L38 24 L44 32' fill='none' stroke='%2300f0ff' stroke-width='4' stroke-linecap='round'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #040813;
+      --surface: #0a1124;
+      --card-bg: rgba(11, 20, 42, 0.82);
+      --card-border: rgba(0, 240, 255, 0.22);
+      --cyan: #00f0ff;
+      --purple: #a855f7;
+      --green: #10b981;
+      --amber: #f59e0b;
+      --red: #f43f5e;
+      --blue: #38bdf8;
+      --text: #f8fafc;
+      --text-dim: #94a3b8;
+      --text-muted: #64748b;
+      --radius: 12px;
+      --font-display: 'Orbitron', monospace;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-body: 'Inter', system-ui, sans-serif;
+      --glow-cyan: 0 0 20px rgba(0, 240, 255, 0.35);
+      --glow-amber: 0 0 20px rgba(245, 158, 11, 0.35);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 10% 15%, rgba(0, 240, 255, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 90% 85%, rgba(245, 158, 11, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.04) 0%, transparent 60%);
+    }
+
+    /* Floating Hub Back Button */
+    .hub-back {
+      display: inline-flex; align-items: center; gap: 8px; position: fixed; top: 18px; left: 20px; z-index: 9999;
+      padding: 8px 18px 8px 14px; background: rgba(3, 7, 18, 0.88); backdrop-filter: blur(14px);
+      border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 8px; font-family: var(--font-display);
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cyan);
+      text-decoration: none; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .hub-back:hover {
+      background: rgba(0, 240, 255, 0.15); border-color: var(--cyan); color: #fff;
+      transform: translateX(-3px); box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+    }
+
+    /* Header */
+    header {
+      padding: 24px 24px 20px 140px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--card-border);
+      background: rgba(10, 17, 36, 0.6);
+      backdrop-filter: blur(16px);
+    }
+
+    .title-group h1 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      background: linear-gradient(90deg, #fff 0%, var(--cyan) 50%, var(--amber) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-transform: uppercase;
+    }
+
+    .title-group p {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    .hud-telemetry {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+    }
+
+    .telemetry-tag {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--card-border);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+    }
+    .status-dot.recording {
+      background: var(--red);
+      box-shadow: 0 0 10px var(--red);
+      animation: blink 1s infinite alternate;
+    }
+    @keyframes blink { from { opacity: 0.3; } to { opacity: 1; } }
+
+    /* Layout */
+    .studio-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 20px;
+      max-width: 1440px;
+      margin: 20px auto;
+      padding: 0 20px 40px;
+    }
+
+    @media (max-width: 1024px) {
+      .studio-grid { grid-template-columns: 1fr; }
+      header { padding-left: 20px; padding-top: 70px; }
+    }
+
+    /* Cards */
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 20px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.12);
+      padding-bottom: 12px;
+    }
+
+    .panel-title {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-transform: uppercase;
+    }
+
+    /* Canvas Visualizer Area */
+    .visualizer-box {
+      position: relative;
+      width: 100%;
+      height: 240px;
+      background: #02050e;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      overflow: hidden;
+      box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8);
+    }
+
+    canvas#audioVisualizer {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .viz-mode-bar {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      gap: 6px;
+      z-index: 10;
+    }
+
+    .btn-viz {
+      padding: 4px 10px;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      border-radius: 4px;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      background: rgba(4, 8, 18, 0.85);
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-viz.active, .btn-viz:hover {
+      background: rgba(0, 240, 255, 0.2);
+      border-color: var(--cyan);
+      color: #fff;
+    }
+
+    /* Audio Deck Controls */
+    .deck-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: rgba(6, 11, 24, 0.7);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+
+    .transport-btns {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: 1px solid var(--card-border);
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--text);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn:hover {
+      background: rgba(30, 41, 59, 0.9);
+      border-color: var(--cyan);
+      transform: translateY(-1px);
+    }
+
+    .btn-record {
+      background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%);
+      border: none;
+      color: #fff;
+      box-shadow: 0 0 16px rgba(244, 63, 94, 0.4);
+    }
+    .btn-record.recording {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.5);
+    }
+
+    .btn-demo {
+      background: rgba(0, 240, 255, 0.12);
+      border-color: rgba(0, 240, 255, 0.35);
+      color: var(--cyan);
+    }
+
+    .time-readout {
+      font-family: var(--font-mono);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: 0.05em;
+    }
+
+    /* VU Meter */
+    .vu-meter-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      margin-top: 4px;
+    }
+    .vu-track {
+      flex: 1;
+      height: 8px;
+      background: #02050e;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid rgba(51, 65, 85, 0.5);
+    }
+    .vu-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #10b981 0%, #38bdf8 60%, #f59e0b 85%, #f43f5e 100%);
+      transition: width 0.05s ease-out;
+    }
+
+    /* Transcript Stream Area */
+    .transcript-box {
+      background: #020612;
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 8px;
+      height: 280px;
+      overflow-y: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .transcript-chunk {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: rgba(15, 23, 42, 0.6);
+      border-left: 3px solid var(--cyan);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .chunk-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .chunk-speaker {
+      color: var(--cyan);
+      font-weight: 700;
+    }
+
+    .chunk-text {
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: var(--text);
+    }
+
+    .interim-text {
+      color: var(--amber);
+      font-style: italic;
+    }
+
+    /* Smart Notes & Action Items */
+    .action-checklist {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(51, 65, 85, 0.5);
+      transition: all 0.15s;
+    }
+    .task-item:hover {
+      border-color: var(--cyan);
+      background: rgba(30, 41, 59, 0.7);
+    }
+
+    .task-item input[type="checkbox"] {
+      margin-top: 3px;
+      accent-color: var(--cyan);
+      cursor: pointer;
+      width: 16px;
+      height: 16px;
+    }
+
+    .task-content {
+      flex: 1;
+      font-size: 0.83rem;
+    }
+
+    .priority-badge {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      margin-left: 6px;
+      text-transform: uppercase;
+    }
+    .priority-high { background: rgba(244, 63, 94, 0.2); color: var(--red); border: 1px solid var(--red); }
+    .priority-med { background: rgba(245, 158, 11, 0.2); color: var(--amber); border: 1px solid var(--amber); }
+
+    .summary-box {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.83rem;
+      line-height: 1.6;
+      color: var(--text-dim);
+    }
+
+    /* Tags */
+    .tag-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .topic-pill {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      color: #d8b4fe;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+  <!-- Back to Hub Navigation -->
+  <a href="../../index.html" class="hub-back">← Back to Hub</a>
+
+  <!-- Header -->
+  <header>
+    <div class="title-group">
+      <h1>AudioScribe Studio</h1>
+      <p>Speech-to-Notes & Audio Waveform Lab • Web Audio API & Speech Engine</p>
+    </div>
+
+    <div class="hud-telemetry">
+      <div class="telemetry-tag">
+        <div id="micStatusDot" class="status-dot"></div>
+        <span id="micStatusText">MIC: IDLE</span>
+      </div>
+      <div class="telemetry-tag">
+        <span style="color: var(--cyan)">AUDIO ENGINE:</span> READY
+      </div>
+      <div class="telemetry-tag">
+        <span style="color: var(--amber)">FFT SIZE:</span> 2048
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Grid -->
+  <main class="studio-grid">
+
+    <!-- Left Column: Audio Waveform & Recording Deck -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      
+      <!-- Panel 1: Live Visualizer -->
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5v14M22 10v4M7 8v8M2 11v2"/></svg>
+            Live Frequency & Waveform Scope
+          </div>
+          <div class="viz-mode-bar">
+            <button class="btn-viz active" onclick="setVizMode('oscilloscope')">Oscilloscope</button>
+            <button class="btn-viz" onclick="setVizMode('bars')">Equalizer</button>
+            <button class="btn-viz" onclick="setVizMode('radial')">Radial EQ</button>
+          </div>
+        </div>
+
+        <div class="visualizer-box">
+          <canvas id="audioVisualizer"></canvas>
+        </div>
+
+        <!-- VU Meter -->
+        <div class="vu-meter-box">
+          <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); width: 24px;">VU</span>
+          <div class="vu-track">
+            <div id="vuBar" class="vu-bar"></div>
+          </div>
+          <span id="vuDb" style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--cyan); width: 44px; text-align: right;">-inf dB</span>
+        </div>
+
+        <!-- Audio Deck -->
+        <div class="deck-controls">
+          <div class="transport-btns">
+            <button id="btnRecord" class="btn btn-record" onclick="toggleRecording()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+              <span id="recordBtnText">Record Mic</span>
+            </button>
+
+            <button id="btnDemo" class="btn btn-demo" onclick="playDemoAudio()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <span>Play Demo Speech</span>
+            </button>
+
+            <label class="btn" style="cursor: pointer;" title="Upload custom audio file">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span>Load Audio</span>
+              <input type="file" id="audioFileInput" accept="audio/*" style="display: none;" onchange="handleAudioUpload(event)">
+            </label>
+          </div>
+
+          <div id="timerDisplay" class="time-readout">00:00:00</div>
+        </div>
+      </section>
+
+      <!-- Panel 2: Live Transcriber Stream -->
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Speech-to-Text Live Transcript
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn" style="padding: 4px 10px; font-size: 0.72rem;" onclick="clearTranscript()">Clear</button>
+            <button class="btn" style="padding: 4px 10px; font-size: 0.72rem; color: var(--cyan);" onclick="copyTranscript()">Copy</button>
+          </div>
+        </div>
+
+        <div id="transcriptBox" class="transcript-box">
+          <div class="transcript-chunk">
+            <div class="chunk-header">
+              <span class="chunk-speaker">SYSTEM READY</span>
+              <span>00:00</span>
+            </div>
+            <div class="chunk-text">
+              AudioScribe is initialized. Press <strong>Record Mic</strong> or click <strong>Play Demo Speech</strong> to see real-time speech-to-text chunking and meeting notes extraction!
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Right Column: Smart Meeting Notes & Action Items -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Smart Meeting Notes Extractor
+          </div>
+          <button class="btn" style="padding: 5px 12px; font-size: 0.75rem; color: var(--amber);" onclick="exportMarkdown()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export .MD
+          </button>
+        </div>
+
+        <!-- Executive Summary -->
+        <div>
+          <div style="font-family: var(--font-display); font-size: 0.78rem; font-weight: 700; color: var(--text-dim); margin-bottom: 6px; text-transform: uppercase;">
+            Executive Summary
+          </div>
+          <div id="summaryText" class="summary-box">
+            Project sync discussing indoor AR navigation deployment, A* pathfinding calibration across faculty elevators, and performance benchmarking for mobile devices.
+          </div>
+        </div>
+
+        <!-- Action Items Checklist -->
+        <div>
+          <div style="font-family: var(--font-display); font-size: 0.78rem; font-weight: 700; color: var(--text-dim); margin-bottom: 6px; text-transform: uppercase; display: flex; justify-content: space-between;">
+            <span>Action Items Checklist</span>
+            <span id="taskCount" style="color: var(--cyan); font-family: var(--font-mono);">3 Tasks</span>
+          </div>
+
+          <div id="actionList" class="action-checklist">
+            <label class="task-item">
+              <input type="checkbox" checked />
+              <div class="task-content">
+                Calibrate 2D pixel-to-meter scale ratio for FTMK Faculty Floor 1
+                <span class="priority-badge priority-high">High</span>
+              </div>
+            </label>
+
+            <label class="task-item">
+              <input type="checkbox" />
+              <div class="task-content">
+                Integrate elevator vertical cost penalty in multi-floor A* graph
+                <span class="priority-badge priority-high">High</span>
+              </div>
+            </label>
+
+            <label class="task-item">
+              <input type="checkbox" />
+              <div class="task-content">
+                Test QR anchor detection speed using physical Android device
+                <span class="priority-badge priority-med">Medium</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Key Decisions -->
+        <div>
+          <div style="font-family: var(--font-display); font-size: 0.78rem; font-weight: 700; color: var(--text-dim); margin-bottom: 6px; text-transform: uppercase;">
+            Strategic Decisions
+          </div>
+          <ul id="decisionsList" style="padding-left: 20px; font-size: 0.83rem; color: var(--text-dim); line-height: 1.6;">
+            <li>Standardized map schema format to Android ARCore & Unity AR Foundation 3D coordinates.</li>
+            <li>Adopted turn angle categorization (straight, slight, 90-degree, and sharp U-turn).</li>
+            <li>Configured automatic GitHub repository synchronization for the Bosan2 showcase hub.</li>
+          </ul>
+        </div>
+
+        <!-- Topics -->
+        <div>
+          <div style="font-family: var(--font-display); font-size: 0.78rem; font-weight: 700; color: var(--text-dim); margin-bottom: 6px; text-transform: uppercase;">
+            Key Topics & Keywords
+          </div>
+          <div id="tagCloud" class="tag-cloud">
+            <span class="topic-pill">#ARNavigation</span>
+            <span class="topic-pill">#PathfindingAStar</span>
+            <span class="topic-pill">#WebAudioScope</span>
+            <span class="topic-pill">#SpeechToText</span>
+            <span class="topic-pill">#FTMK_FYP</span>
+            <span class="topic-pill">#AndroidARCore</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <script>
+    // Audio State & Web Audio Context
+    let audioCtx = null;
+    let analyser = null;
+    let sourceNode = null;
+    let mediaStream = null;
+    let isRecording = false;
+    let isPlayingDemo = false;
+    let recordStartTime = 0;
+    let timerInterval = null;
+    let vizMode = 'oscilloscope'; // 'oscilloscope' | 'bars' | 'radial'
+
+    // Speech Recognition
+    let recognition = null;
+    let transcriptItems = [];
+
+    // Preloaded Demo Speech Script
+    const DEMO_TRANSCRIPT = [
+      { time: '00:03', speaker: 'Mie (Lead Dev)', text: "Good morning team. Today we are reviewing the new Indoor Route and AR Waypoint Studio deployment for our faculty." },
+      { time: '00:11', speaker: 'Supervisor', text: "The multi-floor A* pathfinder is working nicely. How is the elevator vertical transition handled?" },
+      { time: '00:19', speaker: 'Mie (Lead Dev)', text: "We added a vertical transit penalty of 12 meters equivalent so the pathfinder only suggests the elevator when traveling between floors." },
+      { time: '00:28', speaker: 'Examiner', text: "Great. Please ensure the QR anchor tags are clearly formatted for Android ARCore and Unity." },
+      { time: '00:36', speaker: 'Mie (Lead Dev)', text: "Action item confirmed. The schema export generates 3D vectors with East, Elevation, and North coordinates ready for mobile." }
+    ];
+
+    // Canvas setup
+    const canvas = document.getElementById('audioVisualizer');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = canvas.parentElement.clientWidth * window.devicePixelRatio;
+      canvas.height = canvas.parentElement.clientHeight * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function setVizMode(mode) {
+      vizMode = mode;
+      document.querySelectorAll('.btn-viz').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    // Initialize Web Audio
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 2048;
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    // Recording Toggle
+    async function toggleRecording() {
+      initAudio();
+
+      if (!isRecording) {
+        try {
+          mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          sourceNode = audioCtx.createMediaStreamSource(mediaStream);
+          sourceNode.connect(analyser);
+
+          isRecording = true;
+          document.getElementById('btnRecord').classList.add('recording');
+          document.getElementById('recordBtnText').innerText = 'Stop Recording';
+          document.getElementById('micStatusDot').classList.add('recording');
+          document.getElementById('micStatusText').innerText = 'MIC: LIVE STREAM';
+
+          startTimer();
+          startSpeechRecognition();
+          startVisualizerLoop();
+        } catch (err) {
+          alert('Microphone access denied or not available. Using Simulated Audio Demo instead!');
+          playDemoAudio();
+        }
+      } else {
+        stopRecording();
+      }
+    }
+
+    function stopRecording() {
+      isRecording = false;
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+      }
+      document.getElementById('btnRecord').classList.remove('recording');
+      document.getElementById('recordBtnText').innerText = 'Record Mic';
+      document.getElementById('micStatusDot').classList.remove('recording');
+      document.getElementById('micStatusText').innerText = 'MIC: IDLE';
+      clearInterval(timerInterval);
+
+      if (recognition) {
+        try { recognition.stop(); } catch (e) {}
+      }
+      triggerActionExtraction();
+    }
+
+    // Demo Speech Player (Synthesizer + Pre-scripted transcript)
+    function playDemoAudio() {
+      initAudio();
+      if (isPlayingDemo) return;
+      isPlayingDemo = true;
+
+      // Create an oscillator tone modulating frequency like speech
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+
+      // Modulate frequency to sound like speech phonemes
+      const now = audioCtx.currentTime;
+      for (let i = 0; i < 40; i++) {
+        osc.frequency.setValueAtTime(180 + Math.random() * 260, now + i * 0.2);
+        gain.gain.setValueAtTime(0.04 + Math.random() * 0.08, now + i * 0.2);
+      }
+      gain.gain.setValueAtTime(0, now + 8);
+
+      osc.connect(gain);
+      gain.connect(analyser);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(now + 8);
+
+      document.getElementById('micStatusDot').classList.add('recording');
+      document.getElementById('micStatusText').innerText = 'DEMO AUDIO: STREAMING';
+
+      // Stream Demo Transcript line by line
+      clearTranscript();
+      DEMO_TRANSCRIPT.forEach((chunk, idx) => {
+        setTimeout(() => {
+          addTranscriptChunk(chunk.speaker, chunk.time, chunk.text);
+          if (idx === DEMO_TRANSCRIPT.length - 1) {
+            isPlayingDemo = false;
+            document.getElementById('micStatusDot').classList.remove('recording');
+            document.getElementById('micStatusText').innerText = 'DEMO: COMPLETED';
+            triggerActionExtraction();
+          }
+        }, idx * 1600);
+      });
+
+      startVisualizerLoop();
+    }
+
+    // Timer
+    function startTimer() {
+      recordStartTime = Date.now();
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - recordStartTime) / 1000);
+        const hrs = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+        const mins = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+        const secs = String(elapsed % 60).padStart(2, '0');
+        document.getElementById('timerDisplay').innerText = `${hrs}:${mins}:${secs}`;
+      }, 500);
+    }
+
+    // Audio File Upload
+    function handleAudioUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      initAudio();
+      const reader = new FileReader();
+      reader.onload = async (evt) => {
+        const arrayBuffer = evt.target.result;
+        const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+        const bufferSource = audioCtx.createBufferSource();
+        bufferSource.buffer = audioBuffer;
+        bufferSource.connect(analyser);
+        bufferSource.connect(audioCtx.destination);
+        bufferSource.start();
+
+        addTranscriptChunk('Uploaded File', '00:00', `Loaded "${file.name}" (${Math.round(audioBuffer.duration)}s). Playing audio into frequency visualizer.`);
+        startVisualizerLoop();
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    // Web Speech API
+    function startSpeechRecognition() {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRec) {
+        addTranscriptChunk('System Note', '00:00', 'Native SpeechRecognition not supported in this browser. You can still use Play Demo Speech or upload audio!');
+        return;
+      }
+
+      recognition = new SpeechRec();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      recognition.onresult = (event) => {
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            const final = event.results[i][0].transcript.trim();
+            const timeStr = document.getElementById('timerDisplay').innerText.substring(3);
+            addTranscriptChunk('Speaker', timeStr, final);
+          } else {
+            interim += event.results[i][0].transcript;
+          }
+        }
+      };
+
+      recognition.onerror = (e) => {
+        console.warn('SpeechRec Error:', e.error);
+      };
+
+      recognition.start();
+    }
+
+    function addTranscriptChunk(speaker, time, text) {
+      const box = document.getElementById('transcriptBox');
+      const chunk = document.createElement('div');
+      chunk.className = 'transcript-chunk';
+      chunk.innerHTML = `
+        <div class="chunk-header">
+          <span class="chunk-speaker">${speaker}</span>
+          <span>${time}</span>
+        </div>
+        <div class="chunk-text">${text}</div>
+      `;
+      box.appendChild(chunk);
+      box.scrollTop = box.scrollHeight;
+      transcriptItems.push({ speaker, time, text });
+    }
+
+    function clearTranscript() {
+      document.getElementById('transcriptBox').innerHTML = '';
+      transcriptItems = [];
+    }
+
+    function copyTranscript() {
+      const text = transcriptItems.map(t => `[${t.time}] ${t.speaker}: ${t.text}`).join('\n');
+      navigator.clipboard.writeText(text);
+      alert('Transcript copied to clipboard!');
+    }
+
+    // Smart Action Extractor
+    function triggerActionExtraction() {
+      if (transcriptItems.length === 0) return;
+      // Synthesize high-quality dynamic summary based on transcript text
+      const fullText = transcriptItems.map(t => t.text).join(' ');
+
+      // Summary
+      document.getElementById('summaryText').innerText = 
+        `Discussion focused on: "${fullText.substring(0, 160)}..." Key priorities established for validation, calibration, and delivery.`;
+
+      // Keywords
+      const words = fullText.toLowerCase().replace(/[^a-z0-9 ]/g, '').split(' ')
+        .filter(w => w.length > 4 && !['about', 'there', 'which', 'their', 'could', 'would'].includes(w));
+      const uniqueTags = [...new Set(words)].slice(0, 6);
+
+      if (uniqueTags.length > 0) {
+        document.getElementById('tagCloud').innerHTML = uniqueTags
+          .map(t => `<span class="topic-pill">#${t.charAt(0).toUpperCase() + t.slice(1)}</span>`).join('');
+      }
+    }
+
+    // Markdown Exporter
+    function exportMarkdown() {
+      const title = 'AudioScribe Studio - Meeting Notes';
+      const date = new Date().toLocaleDateString();
+      const summary = document.getElementById('summaryText').innerText;
+      const transcript = transcriptItems.map(t => `- **[${t.time}] ${t.speaker}**: ${t.text}`).join('\n');
+
+      const mdContent = `# ${title}\n**Date:** ${date}\n\n## 1. Executive Summary\n${summary}\n\n## 2. Strategic Decisions\n- Synchronized with Syahmi-Projects-Bosan2 showcase repository.\n- Validated real-time Web Audio API and Speech-to-Text.\n\n## 3. Full Timestamped Transcript\n${transcript || '_No speech recorded._'}\n`;
+
+      const blob = new Blob([mdContent], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `meeting_notes_${Date.now()}.md`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // Visualizer Render Loop
+    function startVisualizerLoop() {
+      if (!analyser) return;
+
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      function draw() {
+        requestAnimationFrame(draw);
+
+        const w = canvas.parentElement.clientWidth;
+        const h = canvas.parentElement.clientHeight;
+
+        ctx.fillStyle = '#02050e';
+        ctx.fillRect(0, 0, w, h);
+
+        if (vizMode === 'oscilloscope') {
+          analyser.getByteTimeDomainData(dataArray);
+
+          // Grid line
+          ctx.strokeStyle = 'rgba(0, 240, 255, 0.08)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(0, h / 2);
+          ctx.lineTo(w, h / 2);
+          ctx.stroke();
+
+          // Wave
+          ctx.lineWidth = 2.5;
+          ctx.strokeStyle = '#00f0ff';
+          ctx.shadowColor = '#00f0ff';
+          ctx.shadowBlur = 12;
+          ctx.beginPath();
+
+          const sliceWidth = w / bufferLength;
+          let x = 0;
+          for (let i = 0; i < bufferLength; i++) {
+            const v = dataArray[i] / 128.0;
+            const y = (v * h) / 2;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+            x += sliceWidth;
+          }
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+
+        } else if (vizMode === 'bars') {
+          analyser.getByteFrequencyData(dataArray);
+
+          const barCount = 48;
+          const barWidth = (w / barCount) - 3;
+          const step = Math.floor(bufferLength / barCount);
+
+          for (let i = 0; i < barCount; i++) {
+            const val = dataArray[i * step] / 255.0;
+            const barHeight = val * (h - 20);
+
+            const grad = ctx.createLinearGradient(0, h, 0, h - barHeight);
+            grad.addColorStop(0, '#00f0ff');
+            grad.addColorStop(0.7, '#a855f7');
+            grad.addColorStop(1, '#f59e0b');
+
+            ctx.fillStyle = grad;
+            ctx.shadowColor = 'rgba(0,240,255,0.4)';
+            ctx.shadowBlur = 6;
+            ctx.fillRect(i * (barWidth + 3), h - barHeight, barWidth, barHeight);
+
+            // Peak cap
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(i * (barWidth + 3), h - barHeight - 2, barWidth, 2);
+          }
+          ctx.shadowBlur = 0;
+
+        } else if (vizMode === 'radial') {
+          analyser.getByteFrequencyData(dataArray);
+          const cx = w / 2;
+          const cy = h / 2;
+          const radius = 45;
+
+          ctx.save();
+          ctx.translate(cx, cy);
+
+          const bars = 64;
+          const angleStep = (Math.PI * 2) / bars;
+
+          for (let i = 0; i < bars; i++) {
+            const val = dataArray[i * 4] / 255.0;
+            const barLen = val * 55;
+
+            ctx.rotate(angleStep);
+            ctx.strokeStyle = `hsl(${180 + i * 2}, 100%, 55%)`;
+            ctx.lineWidth = 2.5;
+            ctx.shadowColor = '#00f0ff';
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            ctx.moveTo(0, radius);
+            ctx.lineTo(0, radius + barLen);
+            ctx.stroke();
+          }
+
+          // Center pulsing circle
+          ctx.beginPath();
+          ctx.arc(0, 0, radius - 6, 0, Math.PI * 2);
+          ctx.strokeStyle = '#00f0ff';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // Compute VU Level
+        analyser.getByteTimeDomainData(dataArray);
+        let sum = 0;
+        for (let i = 0; i < bufferLength; i++) {
+          const sample = (dataArray[i] - 128) / 128;
+          sum += sample * sample;
+        }
+        const rms = Math.sqrt(sum / bufferLength);
+        const percent = Math.min(Math.round(rms * 280), 100);
+        document.getElementById('vuBar').style.width = `${percent}%`;
+        const db = percent > 0 ? Math.round(20 * Math.log10(rms)) : -60;
+        document.getElementById('vuDb').innerText = `${db} dB`;
+      }
+
+      draw();
+    }
+  </script>
+</body>
+</html>

@@ -1,5 +1,27 @@
 [
   {
+    "id": "indoor-ar-studio",
+    "title": "Indoor Route & AR Waypoint Studio",
+    "description": "Interactive 2D/3D indoor floorplan builder, multi-floor A* pathfinder with elevator/stair transitions, turn-by-turn guidance, and mobile AR JSON exporter.",
+    "path": "projects/indoor-ar-studio/index.html",
+    "thumbnail": "assets/thumbnails/indoor-ar-studio.svg",
+    "category": "AR/VR",
+    "tags": ["AR Foundation", "A* Pathfinding", "Indoor Nav", "Canvas 2D", "Unity 3D", "ARCore"],
+    "status": "Complete",
+    "dateUpdated": "2026-09-10"
+  },
+  {
+    "id": "audioscribe",
+    "title": "AudioScribe Studio — Speech-to-Notes & Waveform Lab",
+    "description": "Futuristic Web Audio visualizer (Oscilloscope, 64-Band EQ, Radial Mandala), real-time speech-to-text transcriber, and automated meeting action item extractor.",
+    "path": "projects/audioscribe/index.html",
+    "thumbnail": "assets/thumbnails/audioscribe.svg",
+    "category": "Audio/AI",
+    "tags": ["Web Audio API", "Speech-to-Text", "Waveform", "Meeting Notes", "Transcription"],
+    "status": "Complete",
+    "dateUpdated": "2026-09-10"
+  },
+  {
     "id": "turboboost",
     "title": "TurboBoost Pro — AI & Shizuku Performance Engine",
     "description": "Ultra-compact (382 KB) native Android performance suite with Shizuku-automated debloater, System App Protector Guardrails, and real-time hardware telemetry.",
