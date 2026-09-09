@@ -229,5 +229,16 @@
     "tags": ["Timetable OCR", "Clash Detector", "ARNav Bridge", "iCal", "Telegram Bot"],
     "status": "Complete",
     "dateUpdated": "2026-09-07"
+  },
+  {
+    "id": "autolead-commerce",
+    "title": "AutoLead Commerce — TikTok Ads & Android WhatsApp CRM Bot",
+    "description": "B2B social e-commerce monetization engine. Automated TikTok viral ad script generator, comment 'PM' lead harvester, instant WhatsApp notification auto-reply bot simulator, and Google Sheets CRM.",
+    "path": "projects/autolead-commerce/index.html",
+    "thumbnail": "assets/thumbnails/autolead-commerce.svg",
+    "category": "Tools",
+    "tags": ["TikTok Ads", "WhatsApp CRM", "Android Automation", "Auto-Reply", "E-Commerce"],
+    "status": "Complete",
+    "dateUpdated": "2026-09-10"
   }
 ]

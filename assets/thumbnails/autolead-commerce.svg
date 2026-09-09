@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+  <defs>
+    <linearGradient id="bgAutoLead" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#070c18"/>
+      <stop offset="50%" stop-color="#0c1626"/>
+      <stop offset="100%" stop-color="#051a14"/>
+    </linearGradient>
+    <linearGradient id="gradPhone" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#141f36"/>
+      <stop offset="100%" stop-color="#0a1220"/>
+    </linearGradient>
+    <linearGradient id="gradTikTok" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff0050"/>
+      <stop offset="100%" stop-color="#00f2fe"/>
+    </linearGradient>
+    <linearGradient id="gradWhatsApp" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#25d366"/>
+      <stop offset="100%" stop-color="#128c7e"/>
+    </linearGradient>
+    <filter id="glow_cyan"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="glow_green"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="glow_pink"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="640" height="360" fill="url(#bgAutoLead)"/>
+
+  <!-- Subtle grid lines -->
+  <path d="M 0 90 L 640 90 M 0 180 L 640 180 M 0 270 L 640 270" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+  <path d="M 160 0 L 160 360 M 320 0 L 320 360 M 480 0 L 480 360" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+
+  <!-- Ambient Glow Orbs -->
+  <circle cx="210" cy="150" r="90" fill="#ff0050" opacity="0.12" filter="blur(30px)"/>
+  <circle cx="430" cy="150" r="100" fill="#25d366" opacity="0.12" filter="blur(30px)"/>
+
+  <!-- Left: TikTok Viral Ad Icon / Card -->
+  <g transform="translate(140, 140)">
+    <rect x="-45" y="-55" width="90" height="110" rx="14" fill="rgba(15,23,42,0.85)" stroke="url(#gradTikTok)" stroke-width="2" filter="url(#glow_pink)"/>
+    <!-- Play Icon -->
+    <polygon points="-8,-16 16,0 -8,16" fill="#00f2fe"/>
+    <!-- TikTok Music Note silhouette -->
+    <circle cx="-12" cy="22" r="6" fill="#ff0050"/>
+    <rect x="-8" y="4" width="4" height="20" fill="#ff0050"/>
+    <path d="M -4 8 Q 10 4 14 16" stroke="#00f2fe" stroke-width="3" fill="none"/>
+    <text x="0" y="44" fill="#ffffff" font-family="'Inter', sans-serif" font-size="9" font-weight="700" text-anchor="middle">TIKTOK ADS</text>
+  </g>
+
+  <!-- Center Arrow / Funnel Path -->
+  <path d="M 200 140 C 240 120, 270 120, 295 140" stroke="#00f0ff" stroke-width="3" stroke-dasharray="6,4" fill="none" filter="url(#glow_cyan)"/>
+  <polygon points="295,135 305,140 295,145" fill="#00f0ff"/>
+
+  <!-- Center: Smartphone Mockup -->
+  <g transform="translate(320, 145)">
+    <!-- Phone Body -->
+    <rect x="-65" y="-105" width="130" height="210" rx="18" fill="url(#gradPhone)" stroke="#00f0ff" stroke-width="2.5" filter="url(#glow_cyan)"/>
+    <!-- Speaker / Notch -->
+    <rect x="-22" y="-96" width="44" height="6" rx="3" fill="#070c18"/>
+    <!-- Screen Header -->
+    <rect x="-57" y="-84" width="114" height="24" rx="4" fill="#075e54"/>
+    <circle cx="-42" cy="-72" r="6" fill="#25d366"/>
+    <rect x="-30" y="-76" width="45" height="4" rx="2" fill="#ffffff" opacity="0.8"/>
+    <rect x="-30" y="-70" width="30" height="3" rx="1.5" fill="#a7f3d0" opacity="0.7"/>
+
+    <!-- WhatsApp Chat Bubbles inside phone -->
+    <!-- Incoming lead: "PM price bag!" -->
+    <rect x="-53" y="-50" width="85" height="20" rx="6" fill="#1f2c34"/>
+    <text x="-47" y="-36" fill="#e9edef" font-family="'Inter', sans-serif" font-size="7.5">PM price sis? 👜</text>
+
+    <!-- Auto-Bot Reply: "Ready stock! RM79" -->
+    <rect x="-32" y="-24" width="85" height="24" rx="6" fill="#005c4b"/>
+    <text x="-26" y="-12" fill="#d9fdd3" font-family="'Inter', sans-serif" font-size="7.5" font-weight="600">RM79 + Free Post!</text>
+    <text x="-26" y="-3" fill="#8696a0" font-family="'Inter', sans-serif" font-size="6">Bot Auto-Replied (0.4s)</text>
+
+    <!-- Incoming Receipt: "Paid DuitNow" -->
+    <rect x="-53" y="6" width="85" height="20" rx="6" fill="#1f2c34"/>
+    <text x="-47" y="20" fill="#e9edef" font-family="'Inter', sans-serif" font-size="7.5">Paid! Here receipt ✅</text>
+
+    <!-- Bot Verified & Order Logged -->
+    <rect x="-32" y="32" width="85" height="20" rx="6" fill="#005c4b"/>
+    <text x="-26" y="45" fill="#25d366" font-family="'Inter', sans-serif" font-size="7.5" font-weight="700">Order #882 Logged 📦</text>
+
+    <!-- Home indicator bar -->
+    <rect x="-24" y="94" width="48" height="3" rx="1.5" fill="rgba(255,255,255,0.4)"/>
+  </g>
+
+  <!-- Center-Right Funnel Arrow -->
+  <path d="M 395 140 C 420 120, 450 120, 475 140" stroke="#25d366" stroke-width="3" stroke-dasharray="6,4" fill="none" filter="url(#glow_green)"/>
+  <polygon points="475,135 485,140 475,145" fill="#25d366"/>
+
+  <!-- Right: Sales & Revenue Card -->
+  <g transform="translate(500, 140)">
+    <rect x="-45" y="-55" width="90" height="110" rx="14" fill="rgba(15,23,42,0.85)" stroke="url(#gradWhatsApp)" stroke-width="2" filter="url(#glow_green)"/>
+    <!-- Currency / Sales Symbol -->
+    <circle cx="0" cy="-14" r="18" fill="rgba(37,211,102,0.15)" stroke="#25d366" stroke-width="2"/>
+    <text x="0" y="-8" fill="#25d366" font-family="'Orbitron', sans-serif" font-size="14" font-weight="700" text-anchor="middle">$</text>
+    <!-- Metrics -->
+    <text x="0" y="16" fill="#ffffff" font-family="'Orbitron', sans-serif" font-size="12" font-weight="700" text-anchor="middle">RM 14.8k</text>
+    <text x="0" y="28" fill="#25d366" font-family="'Inter', sans-serif" font-size="8" font-weight="600" text-anchor="middle">+342 Orders</text>
+    <text x="0" y="44" fill="#94a3b8" font-family="'Inter', sans-serif" font-size="8" text-anchor="middle">AUTOMATED</text>
+  </g>
+
+  <!-- Bottom Title Pill -->
+  <rect x="140" y="295" width="360" height="38" rx="8" fill="rgba(8,14,26,0.92)" stroke="rgba(37,211,102,0.5)" stroke-width="1.5" filter="url(#glow_green)"/>
+  <text x="320" y="319" fill="#25d366" font-family="'Orbitron', sans-serif" font-size="13" font-weight="700" letter-spacing="2" text-anchor="middle">AUTOLEAD // TIKTOK ADS &amp; WA BOT</text>
+</svg>

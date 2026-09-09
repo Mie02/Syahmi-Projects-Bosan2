@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoLead Commerce — TikTok Ads & WhatsApp Automation CRM | Mie's Project Hub</title>
+  <meta name="description" content="End-to-end e-commerce automation suite: Viral TikTok video ad script generator, comment-to-lead harvester, Android WhatsApp 24/7 auto-reply CRM, and Google Sheets sync." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text y='52' font-size='56'>🚀</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #030712;
+      --surface: #0a1126;
+      --card-bg: rgba(10, 18, 42, 0.82);
+      --border: rgba(0, 240, 255, 0.25);
+      --cyan: #00f0ff;
+      --purple: #a855f7;
+      --green: #22d3a5;
+      --amber: #f59e0b;
+      --red: #f43f5e;
+      --tiktok: #ff0050;
+      --whatsapp: #25d366;
+      --text: #e2e8f0;
+      --text-dim: #94a3b8;
+      --font-display: 'Orbitron', monospace;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-body: 'Inter', system-ui, sans-serif;
+    }
+    body {
+      background: var(--bg); color: var(--text); font-family: var(--font-body);
+      min-height: 100vh; overflow-x: hidden; line-height: 1.5;
+    }
+
+    /* Floating Hub Back Button */
+    .hub-back {
+      display: inline-flex; align-items: center; gap: 8px; position: fixed; top: 18px; left: 20px; z-index: 9999;
+      padding: 8px 18px 8px 14px; background: rgba(3, 7, 18, 0.88); backdrop-filter: blur(14px);
+      border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 8px; font-family: var(--font-display);
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cyan);
+      text-decoration: none; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55); transition: all 0.25s ease;
+    }
+    .hub-back:hover {
+      border-color: var(--cyan); box-shadow: 0 0 25px rgba(0, 240, 255, 0.5); transform: translateX(-3px);
+    }
+
+    .container { max-width: 1360px; margin: 0 auto; padding: 75px 24px 80px; }
+
+    /* Hero */
+    .hero { text-align: center; margin-bottom: 24px; }
+    .hero-badge-bar { display: flex; justify-content: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    .badge {
+      font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700;
+      padding: 4px 12px; border-radius: 999px; border: 1px solid rgba(0, 240, 255, 0.3);
+      background: rgba(0, 240, 255, 0.08); color: var(--cyan); letter-spacing: 0.05em;
+    }
+    .badge-tiktok { border-color: rgba(255, 0, 80, 0.4); background: rgba(255, 0, 80, 0.1); color: #ff0050; }
+    .badge-whatsapp { border-color: rgba(37, 211, 102, 0.4); background: rgba(37, 211, 102, 0.1); color: #25d366; }
+    .title {
+      font-family: var(--font-display); font-size: clamp(2.2rem, 4.5vw, 3.4rem); font-weight: 900;
+      background: linear-gradient(135deg, #fff 30%, var(--cyan) 70%, var(--tiktok) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px;
+    }
+    .sub { color: var(--text-dim); max-width: 820px; margin: 0 auto 20px; font-size: 1rem; }
+
+    /* Revenue & Growth Stats Strip */
+    .stats-strip {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 24px;
+    }
+    .s-box {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px;
+      padding: 14px 18px; backdrop-filter: blur(12px);
+    }
+    .s-label { font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-dim); text-transform: uppercase; }
+    .s-val { font-family: var(--font-display); font-size: 1.45rem; font-weight: 800; color: #fff; margin-top: 4px; }
+    .s-sub { font-size: 0.72rem; color: var(--green); margin-top: 2px; }
+
+    /* Nav Tabs */
+    .tabs-nav {
+      display: flex; gap: 8px; border-bottom: 1px solid rgba(0, 240, 255, 0.2); margin-bottom: 24px;
+      overflow-x: auto; padding-bottom: 6px;
+    }
+    .tab-btn {
+      font-family: var(--font-display); font-size: 0.8rem; font-weight: 700; padding: 10px 18px;
+      border-radius: 6px 6px 0 0; background: rgba(10, 18, 42, 0.6); border: 1px solid transparent;
+      border-bottom: none; color: var(--text-dim); cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    }
+    .tab-btn:hover, .tab-btn.active {
+      background: var(--card-bg); border-color: var(--border); color: var(--cyan);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Layout Grids */
+    .studio-grid {
+      display: grid; grid-template-columns: 380px 1fr; gap: 20px; margin-bottom: 30px;
+    }
+    @media (max-width: 1024px) { .studio-grid { grid-template-columns: 1fr; } }
+
+    .panel {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+      padding: 20px; backdrop-filter: blur(14px); display: flex; flex-direction: column;
+    }
+    .panel-head {
+      font-family: var(--font-display); font-size: 1rem; color: #fff; font-weight: 700;
+      margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+    }
+
+    /* Smartphone Frame HUD */
+    .phone-mockup {
+      width: 340px; margin: 0 auto; background: #050812; border: 4px solid #1e293b;
+      border-radius: 36px; padding: 16px 12px; box-shadow: 0 10px 40px rgba(0, 240, 255, 0.15);
+      position: relative; display: flex; flex-direction: column; height: 560px;
+    }
+    .phone-notch {
+      width: 120px; height: 16px; background: #1e293b; border-radius: 0 0 12px 12px;
+      margin: 0 auto 10px;
+    }
+    .wa-header {
+      background: #075e54; padding: 10px 12px; border-radius: 8px 8px 0 0;
+      display: flex; align-items: center; gap: 10px; color: #fff;
+    }
+    .wa-avatar { width: 32px; height: 32px; border-radius: 50%; background: #128c7e; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
+    .wa-name { font-size: 0.85rem; font-weight: 700; line-height: 1.2; }
+    .wa-status { font-size: 0.68rem; color: #a7f3d0; }
+
+    .chat-messages {
+      flex: 1; overflow-y: auto; padding: 12px 8px; display: flex; flex-direction: column;
+      gap: 10px; background: #081120;
+    }
+    .chat-bubble {
+      max-width: 82%; padding: 8px 12px; border-radius: 10px; font-size: 0.78rem; line-height: 1.45;
+      word-break: break-word; position: relative;
+    }
+    .chat-bubble.inbound {
+      background: #1e293b; color: #e2e8f0; align-self: flex-start; border-bottom-left-radius: 2px;
+    }
+    .chat-bubble.outbound {
+      background: #056162; color: #f0fdf4; align-self: flex-end; border-bottom-right-radius: 2px;
+    }
+    .chat-time {
+      font-size: 0.62rem; color: rgba(255,255,255,0.6); text-align: right; margin-top: 4px;
+    }
+    .typing-indicator {
+      font-size: 0.72rem; color: var(--green); font-style: italic; display: none; margin-top: 4px;
+    }
+
+    .phone-input-bar {
+      display: flex; gap: 6px; padding: 8px 4px 4px; border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .phone-input {
+      flex: 1; background: #0f172a; border: 1px solid rgba(255,255,255,0.15); border-radius: 18px;
+      padding: 6px 12px; font-size: 0.75rem; color: #fff; outline: none;
+    }
+
+    /* Buttons */
+    .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-sm {
+      font-family: var(--font-mono); font-size: 0.75rem; padding: 7px 14px; border-radius: 6px;
+      background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.3); color: var(--cyan);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-sm:hover, .btn-sm.active {
+      background: var(--cyan); color: #030712; font-weight: 700; box-shadow: 0 0 12px rgba(0,240,255,0.4);
+    }
+    .btn-tiktok {
+      background: rgba(255, 0, 80, 0.15); border-color: var(--tiktok); color: #ff0050;
+    }
+    .btn-tiktok:hover {
+      background: var(--tiktok); color: #fff; box-shadow: 0 0 15px rgba(255, 0, 80, 0.5);
+    }
+    .btn-whatsapp {
+      background: rgba(37, 211, 102, 0.15); border-color: var(--whatsapp); color: #25d366;
+    }
+    .btn-whatsapp:hover {
+      background: var(--whatsapp); color: #030712; box-shadow: 0 0 15px rgba(37, 211, 102, 0.5);
+    }
+
+    /* Rules Table */
+    .rules-table {
+      width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 0.78rem;
+    }
+    .rules-table th {
+      text-align: left; padding: 8px 10px; background: rgba(0, 240, 255, 0.08); color: var(--cyan);
+      border-bottom: 1px solid var(--border);
+    }
+    .rules-table td {
+      padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.06); color: #cbd5e1;
+    }
+
+    /* Kanban Board */
+    .kanban-board {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 10px;
+    }
+    .kanban-col {
+      background: rgba(4, 9, 22, 0.85); border: 1px solid rgba(0, 240, 255, 0.15); border-radius: 8px;
+      padding: 12px; display: flex; flex-direction: column; gap: 10px; min-height: 280px;
+    }
+    .kanban-header {
+      font-family: var(--font-display); font-size: 0.78rem; font-weight: 700; color: #fff;
+      display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: 8px;
+    }
+    .kanban-card {
+      background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;
+      padding: 10px; font-size: 0.78rem; cursor: pointer; transition: all 0.2s;
+    }
+    .kanban-card:hover {
+      border-color: var(--cyan); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,240,255,0.2);
+    }
+    .kc-title { font-weight: 700; color: #fff; margin-bottom: 2px; }
+    .kc-detail { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim); }
+    .kc-badge {
+      display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 0.65rem;
+      font-weight: 700; margin-top: 6px;
+    }
+
+    /* TikTok Ad Script Output Box */
+    .script-box {
+      background: #020409; border: 1px solid var(--border); border-radius: 8px;
+      padding: 16px; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.65;
+      color: #e2e8f0; white-space: pre-wrap; margin-top: 14px;
+    }
+
+    footer {
+      text-align: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 30px;
+      font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-dim); margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+  <a class="hub-back" href="../../index.html" aria-label="Back to Project Hub">
+    <span>←</span> Hub
+  </a>
+
+  <div class="container">
+    <header class="hero">
+      <div class="hero-badge-bar">
+        <span class="badge badge-tiktok">TIKTOK AD VIRAL GENERATOR</span>
+        <span class="badge badge-whatsapp">WHATSAPP 24/7 AUTO-CLOSING BOT</span>
+        <span class="badge">GOOGLE SHEETS CRM SYNC</span>
+      </div>
+      <h1 class="title">AUTOLEAD COMMERCE</h1>
+      <p class="sub">
+        High-earning e-commerce automation ecosystem. Auto-generate viral TikTok video ad hooks, harvest comment leads into WhatsApp with tracked UTM links, and execute 24/7 zero-latency order closing with live Google Sheets synchronization.
+      </p>
+    </header>
+
+    <!-- Stats Strip -->
+    <div class="stats-strip">
+      <div class="s-box">
+        <div class="s-label">Total Revenue Generated</div>
+        <div class="s-val" style="color: var(--green);" id="statRev">RM 14,850</div>
+        <div class="s-sub">+28% vs Manual Replies</div>
+      </div>
+      <div class="s-box">
+        <div class="s-label">Inbound TikTok Leads</div>
+        <div class="s-val" id="statLeads">342 Leads</div>
+        <div class="s-sub">Avg CPL: RM 0.82</div>
+      </div>
+      <div class="s-box">
+        <div class="s-label">Bot Conversion Rate</div>
+        <div class="s-val" style="color: var(--cyan);" id="statConv">41.8 %</div>
+        <div class="s-sub">Automated Checkouts</div>
+      </div>
+      <div class="s-box">
+        <div class="s-label">Seller Hours Saved</div>
+        <div class="s-val" style="color: var(--amber);">84 Hours</div>
+        <div class="s-sub">Zero Late-Night Manual DMs</div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('whatsapp')">📱 WhatsApp / Telegram Phone Bot</button>
+      <button class="tab-btn" onclick="switchTab('tiktok')">🎬 TikTok Viral Ad Generator</button>
+      <button class="tab-btn" onclick="switchTab('harvester')">🎯 TikTok Comment Lead Bridge</button>
+      <button class="tab-btn" onclick="switchTab('crm')">📊 Seller CRM & Google Sheets Sync</button>
+      <button class="tab-btn" onclick="switchTab('code')">💻 Native Android Kotlin Architecture</button>
+    </div>
+
+    <!-- Tab 1: Virtual Phone Simulator & Automation Engine -->
+    <div class="tab-content active" id="tab-whatsapp">
+      <div class="studio-grid">
+        <!-- Phone Frame -->
+        <div>
+          <div class="phone-mockup">
+            <div class="phone-notch"></div>
+            <div class="wa-header">
+              <div class="wa-avatar">🛒</div>
+              <div>
+                <div class="wa-name">AutoLead Commerce Bot</div>
+                <div class="wa-status">Online · NotificationListener Active</div>
+              </div>
+            </div>
+
+            <div class="chat-messages" id="chatContainer">
+              <div class="chat-bubble outbound">
+                Salam & Hai! Selamat datang ke AutoLead Commerce Store. 🛍️ Ada apa-apa saya boleh bantu?
+                <div class="chat-time">10:00 AM</div>
+              </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">AutoLead bot is typing reply...</div>
+
+            <div class="phone-input-bar">
+              <input class="phone-input" id="simUserInput" type="text" placeholder="Type test message (e.g. 'katalog', 'harga', 'bank')..." />
+              <button class="btn-sm" style="padding: 4px 10px;" onclick="sendSimMessage()">Send</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Automation Rules & Triggers -->
+        <div class="panel">
+          <div class="panel-head">
+            <span>⚡ Automated Keyword Dispatch Rules</span>
+            <button class="btn-sm" onclick="addNewRuleModal()">+ Add New Rule</button>
+          </div>
+
+          <div style="margin-bottom: 14px; font-size: 0.78rem; color: var(--text-dim);">
+            Click quick scenario buttons to simulate incoming customer messages:
+          </div>
+
+          <div class="btn-group" style="margin-bottom: 18px;">
+            <button class="btn-sm" onclick="triggerPresetSim('Hi, ada katalog produk?')">"Bagi Katalog"</button>
+            <button class="btn-sm" onclick="triggerPresetSim('Berapa harga promosi TikTok sekarang?')">"Tanya Harga"</button>
+            <button class="btn-sm" onclick="triggerPresetSim('Saya nak order 2 set, bagi no akaun bank')">"Nak No Bank"</button>
+            <button class="btn-sm" onclick="triggerPresetSim('Dah transfer RM120, ini resit pembayaran')">"Hantar Resit Bayaran"</button>
+          </div>
+
+          <table class="rules-table">
+            <thead>
+              <tr>
+                <th>Trigger Keyword / Regex</th>
+                <th>Automated Action</th>
+                <th>Payload / Asset Attached</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="rulesBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: TikTok Viral Ad Generator -->
+    <div class="tab-content" id="tab-tiktok">
+      <div class="panel">
+        <div class="panel-head">
+          <span>🎬 TikTok Viral E-Commerce Ad Creative Generator</span>
+          <span class="badge badge-tiktok">HIGH-CONVERTING HOOKS</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 16px;">
+          <div>
+            <label style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--cyan); display: block; margin-bottom: 4px;">PRODUCT NAME / NICHE</label>
+            <input type="text" id="ttProduct" value="AutoLead Commerce Pro (WhatsApp Bot)" style="width: 100%; background: #060c1d; border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; color: #fff; font-size: 0.82rem;" />
+          </div>
+          <div>
+            <label style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--cyan); display: block; margin-bottom: 4px;">CUSTOMER PAIN POINT</label>
+            <input type="text" id="ttPain" value="Penat balas 300 WhatsApp sampai 2 pagi, customer lari beli kedai lain" style="width: 100%; background: #060c1d; border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; color: #fff; font-size: 0.82rem;" />
+          </div>
+          <div>
+            <label style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--cyan); display: block; margin-bottom: 4px;">PROMOTIONAL OFFER</label>
+            <input type="text" id="ttOffer" value="Diskaun 50% + Percuma Setup Template Close Sales" style="width: 100%; background: #060c1d; border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; color: #fff; font-size: 0.82rem;" />
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn-sm btn-tiktok" onclick="generateTikTokScript('pas')">Generate Framework 1: Problem-Agitate-Solve</button>
+          <button class="btn-sm btn-tiktok" onclick="generateTikTokScript('bab')">Generate Framework 2: Before vs After</button>
+          <button class="btn-sm btn-tiktok" onclick="generateTikTokScript('ugc')">Generate Framework 3: Viral UGC Flash Deal</button>
+        </div>
+
+        <div class="script-box" id="ttScriptOutput">
+[TIKTOK 30-SECOND VIRAL AD SCRIPT — PROBLEM-AGITATE-SOLVE]
+
+⏱️ [0:00 - 0:03] HOOK (Visual: Close-up of phone buzzing with 99+ unread WhatsApp badges):
+"Korang pernah tak hilang customer sebab lambat balas WhatsApp 5 minit je?"
+
+⏱️ [0:04 - 0:12] AGITATE (Visual: Frustrated seller typing furiously on laptop late at night):
+"Customer tanya pukul 11 malam, kita tengah tidur. Esok pagi bangun tengok dia dah beli kat kedai lain. Penat je keluar modal buat iklan TikTok tapi jualan bocor sebab tak sempat reply manual!"
+
+⏱️ [0:13 - 0:22] SOLUTION (Visual: Clean AutoLead Commerce smartphone bot auto-replying in 0.8s):
+"Ni rahsia seller 5-angka guna sekarang: AutoLead Commerce! Dia auto-reply WhatsApp korang 24 jam. Customer tanya katalog? Bot hantar terus siap no akaun DuitNow QR. Korang tidur pun sales masuk!"
+
+⏱️ [0:23 - 0:30] CALL-TO-ACTION (Visual: Screen showing 'Diskaun 50% link in bio'):
+"Khas untuk followers TikTok, klik link kat bio sekarang untuk grab Diskaun 50% + Percuma Setup template close sales. Slot terhad 50 orang pertama!"
+
+🏷️ HASHTAGS: #bisnesonline #tipsbisnes #automation #autolead #tiktokshop #ecommerce #sellerlife
+        </div>
+
+        <button class="btn-sm" style="margin-top: 10px;" onclick="copyScriptText()">Copy Script to Clipboard 📋</button>
+      </div>
+    </div>
+
+    <!-- Tab 3: TikTok Comment Lead Harvester -->
+    <div class="tab-content" id="tab-harvester">
+      <div class="panel">
+        <div class="panel-head">
+          <span>🎯 TikTok Comment "PM" Lead Harvester & UTM Funnel Bridge</span>
+          <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--green);">LEAD CAPTURE ACTIVE</span>
+        </div>
+
+        <p style="font-size: 0.82rem; color: var(--text-dim); margin-bottom: 14px;">
+          Automatically scans incoming TikTok video comments for buying intent keywords and converts interested prospects into trackable 1-click WhatsApp customer conversations.
+        </p>
+
+        <table class="rules-table">
+          <thead>
+            <tr>
+              <th>TikTok Username</th>
+              <th>Detected Comment</th>
+              <th>Extracted Intent</th>
+              <th>Auto-Generated WhatsApp Deep-Link</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="harvesterBody">
+            <!-- Rendered via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab 4: Seller CRM & Google Sheets Sync -->
+    <div class="tab-content" id="tab-crm">
+      <div class="panel">
+        <div class="panel-head">
+          <span>📊 Live Sales Pipeline Kanban Board</span>
+          <button class="btn-sm" onclick="exportCrmOrders()">Export to Google Sheets CSV ↗</button>
+        </div>
+
+        <div class="kanban-board" id="kanbanBoard">
+          <!-- Rendered via JS -->
+        </div>
+
+        <div class="panel-head" style="margin-top: 24px;">
+          <span>📑 Real-Time Orders Log (Google Sheets Webhook Sync)</span>
+        </div>
+
+        <table class="rules-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer Name</th>
+              <th>Phone Number</th>
+              <th>Item Ordered</th>
+              <th>Amount</th>
+              <th>Payment Status</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody">
+            <!-- Rendered via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab 5: Native Android Kotlin Source Architecture -->
+    <div class="tab-content" id="tab-code">
+      <div class="panel">
+        <div class="panel-head">
+          <span>💻 Production Native Android Kotlin Architecture</span>
+          <span class="badge badge-whatsapp">NOTIFICATIONLISTENER SERVICE</span>
+        </div>
+
+        <p style="font-size: 0.82rem; color: var(--text-dim); margin-bottom: 12px;">
+          This code runs natively on Android (API 26–34), intercepting incoming WhatsApp/Telegram notifications and firing automated replies via <code>RemoteInput</code> without root access:
+        </p>
+
+        <div class="script-box" style="color: #a5f3fc; font-size: 0.78rem;">
+// AutoLeadNotificationListener.kt
+package com.syahmi.autolead.service
+
+import android.service.notification.NotificationListenerService
+import android.service.notification.StatusBarNotification
+import android.app.RemoteInput
+import android.content.Intent
+import android.os.Bundle
+
+class AutoLeadNotificationListener : NotificationListenerService() {
+
+    override fun onNotificationPosted(sbn: StatusBarNotification) {
+        val packageName = sbn.packageName
+        if (packageName != "com.whatsapp" &amp;&amp; packageName != "com.whatsapp.w4b") return
+
+        val extras = sbn.notification.extras
+        val senderTitle = extras.getString("android.title") ?: return
+        val messageText = extras.getCharSequence("android.text")?.toString() ?: return
+
+        // Prevent echo loops
+        if (senderTitle == "You" || senderTitle == "Anda") return
+
+        // Execute Rule Matching Engine
+        val matchedReply = AutomationRuleEngine.matchRule(messageText) ?: return
+
+        // Dispatch Quick Reply via WearableExtender / RemoteInput
+        sbn.notification.actions?.forEach { action -&gt;
+            action.remoteInputs?.forEach { remoteInput -&gt;
+                val intent = Intent()
+                val bundle = Bundle()
+                bundle.putCharSequence(remoteInput.resultKey, matchedReply.text)
+                RemoteInput.addResultsToIntent(arrayOf(remoteInput), intent, bundle)
+                action.actionIntent.send(this, 0, intent)
+                
+                // Log lead into local Room Database &amp; queue Google Sheets Sync
+                LeadRepository.recordLead(senderTitle, messageText, matchedReply.text)
+            }
+        }
+    }
+}
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      MIE'S PROJECT HUB &nbsp;·&nbsp; AUTOLEAD COMMERCE & TIKTOK AD AUTOMATION &nbsp;·&nbsp; ALL RIGHTS RESERVED 2026
+    </footer>
+  </div>
+
+  <script>
+    // =========================================================================
+    // AUTOMATION RULES DATA
+    // =========================================================================
+    const RULES = [
+      {
+        keyword: 'katalog|produk|menu|item',
+        action: 'Send Catalog PDF + Price List',
+        payload: 'Katalog_AutoLead_2026.pdf (Link)',
+        reply: 'Hai! Ini katalog lengkap kami: https://autolead.my/catalog. Ada promosi Diskaun 50% untuk pembelian hari ini! 🎁',
+        active: true
+      },
+      {
+        keyword: 'harga|berapa|price|promo',
+        action: 'Send Promo Pricing Tier',
+        payload: 'Pricing_Tier_Card.jpg',
+        reply: 'Harga promosi hari ini:\n1 Set: RM 59 (Asal RM 99)\n2 Set: RM 99 (Paling Laris 🔥)\nBerminat nak order yang mana?',
+        active: true
+      },
+      {
+        keyword: 'bank|akaun|transfer|bayar|qr',
+        action: 'Send DuitNow QR + Bank Info',
+        payload: 'DuitNow_Maybank_QR.png',
+        reply: 'Sila buat bayaran ke akaun rasmi kami:\nBank: Maybank\nNo Akaun: 5621-8849-0104 (AutoLead Ent)\n\nDah transfer, hantar resit di sini ya!',
+        active: true
+      },
+      {
+        keyword: 'resit|transfer|dah bayar|paid',
+        action: 'Verify Payment & Create Order',
+        payload: 'Order_Confirmed_Badge',
+        reply: 'Alhamdulillah bayaran diterima! ✅ Sila berikan Nama Penuh & Alamat penghantaran untuk kami pos hari ini.',
+        active: true
+      },
+      {
+        keyword: 'tracking|pos|courier|status',
+        action: 'Send J&T / NinjaVan Tracking Link',
+        payload: 'Tracking_Lookup_API',
+        reply: 'Barang anda sedang diproses courier! Tracking No: JNT884920194MY. Boleh semak di sini: https://tracking.my/jnt',
+        active: true
+      }
+    ];
+
+    function renderRules() {
+      const tbody = document.getElementById('rulesBody');
+      tbody.innerHTML = RULES.map((r, i) => `
+        <tr>
+          <td><code style="color:var(--cyan);">${r.keyword}</code></td>
+          <td><strong>${r.action}</strong></td>
+          <td><span style="font-size:0.7rem; color:var(--text-dim);">${r.payload}</span></td>
+          <td>
+            <span class="badge ${r.active ? 'badge-green' : 'badge-purple'}">
+              ${r.active ? 'ACTIVE' : 'DISABLED'}
+            </span>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // =========================================================================
+    // PHONE SIMULATOR CHAT ENGINE
+    // =========================================================================
+    const chatContainer = document.getElementById('chatContainer');
+    const simUserInput = document.getElementById('simUserInput');
+    const typingIndicator = document.getElementById('typingIndicator');
+
+    function appendChatBubble(text, isInbound = true) {
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const div = document.createElement('div');
+      div.className = `chat-bubble ${isInbound ? 'inbound' : 'outbound'}`;
+      div.innerHTML = `
+        ${escapeHtml(text)}
+        <div class="chat-time">${timeStr}</div>
+      `;
+      chatContainer.appendChild(div);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function processAutoReply(userText) {
+      const lower = userText.toLowerCase();
+      let matchedRule = null;
+
+      for (let r of RULES) {
+        if (!r.active) continue;
+        const keywords = r.keyword.split('|');
+        if (keywords.some(k => lower.includes(k))) {
+          matchedRule = r;
+          break;
+        }
+      }
+
+      const replyText = matchedRule 
+        ? matchedRule.reply 
+        : "Terima kasih atas mesej anda! Team kami sedang memproses pertanyaan anda. Sila nyatakan produk yang anda minati ya! 🌸";
+
+      typingIndicator.style.display = 'block';
+
+      setTimeout(() => {
+        typingIndicator.style.display = 'none';
+        appendChatBubble(replyText, false);
+
+        // If it was a purchase / payment, automatically log an order to CRM
+        if (lower.includes('resit') || lower.includes('transfer') || lower.includes('bayar')) {
+          addNewOrder('Amirul Hakim', '013-8472910', 'AutoLead Pro (2 Set)', 'RM 99.00');
+        }
+      }, 700);
+    }
+
+    window.sendSimMessage = function() {
+      const text = simUserInput.value.trim();
+      if (!text) return;
+      simUserInput.value = '';
+      appendChatBubble(text, true);
+      processAutoReply(text);
+    };
+
+    window.triggerPresetSim = function(text) {
+      appendChatBubble(text, true);
+      processAutoReply(text);
+    };
+
+    simUserInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') sendSimMessage();
+    });
+
+    // =========================================================================
+    // TIKTOK COMMENT LEAD HARVESTER
+    // =========================================================================
+    const HARVESTED_COMMENTS = [
+      { user: '@siti_farhana', comment: 'PM sis ada stok lagi tak?', intent: 'Purchase Intent', phone: '60172849102' },
+      { user: '@haikal_tech', comment: 'Berapa harga promosi ni?', intent: 'Pricing Query', phone: '60193847291' },
+      { user: '@norazimah99', comment: 'Nak order 2 set, pos ke Sabah berapa?', intent: 'Shipping & Order', phone: '60112849501' },
+      { user: '@fadhil_gadget', comment: 'Boleh bayar guna SpayLater atau QR?', intent: 'Payment Options', phone: '60184729104' }
+    ];
+
+    function renderHarvester() {
+      const tbody = document.getElementById('harvesterBody');
+      tbody.innerHTML = HARVESTED_COMMENTS.map((c, i) => {
+        const link = `https://wa.me/${c.phone}?text=Hai%20${encodeURIComponent(c.user)},%20terima%20kasih%20tanya%20kat%20TikTok!%20Ni%20detail%20AutoLead%20Commerce%20promosi%20Diskaun%2050%25...`;
+        return `
+          <tr>
+            <td><strong>${c.user}</strong></td>
+            <td><em>"${c.comment}"</em></td>
+            <td><span class="badge badge-tiktok">${c.intent}</span></td>
+            <td><code style="font-size:0.7rem; color:var(--cyan);">${link.substring(0, 45)}...</code></td>
+            <td>
+              <button class="btn-sm btn-whatsapp" onclick="launchWhatsAppLead('${c.user}', '${c.comment}')">
+                Open WhatsApp Funnel ↗
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    window.launchWhatsAppLead = function(user, comment) {
+      alert(`💬 [TIKTOK -> WHATSAPP FUNNEL LAUNCHED]\n\nRouting prospect ${user} into WhatsApp Auto-Closing Bot.\nTrigger message: "${comment}"`);
+      switchTab('whatsapp');
+      triggerPresetSim(`Hai AutoLead, saya dari TikTok (${user}). Mesej saya: "${comment}"`);
+    };
+
+    // =========================================================================
+    // TIKTOK VIRAL AD SCRIPT GENERATOR
+    // =========================================================================
+    window.generateTikTokScript = function(framework) {
+      const prod = document.getElementById('ttProduct').value;
+      const pain = document.getElementById('ttPain').value;
+      const offer = document.getElementById('ttOffer').value;
+      const out = document.getElementById('ttScriptOutput');
+
+      if (framework === 'pas') {
+        out.textContent = `[TIKTOK 30-SECOND AD — PROBLEM-AGITATE-SOLVE]\n\n` +
+        `⏱️ [0:00 - 0:03] HOOK: "Korang pernah tak hilang customer sebab lambat balas WhatsApp 5 minit je?"\n` +
+        `⏱️ [0:04 - 0:12] AGITATE: "${pain}. Customer tanya pukul 11 malam, esok pagi bangun tengok dia dah beli kedai lain!"\n` +
+        `⏱️ [0:13 - 0:22] SOLUTION: "Gunakan ${prod}! Dia auto-reply WhatsApp korang 24 jam sepantas kilat. Korang tidur pun sales masuk automasi!"\n` +
+        `⏱️ [0:23 - 0:30] CTA: "Klik link kat bio sekarang untuk grab ${offer}!"\n\n` +
+        `🏷️ HASHTAGS: #bisnesonline #tipsbisnes #automation #tiktokshop #sellerlife`;
+      } else if (framework === 'bab') {
+        out.textContent = `[TIKTOK 30-SECOND AD — BEFORE VS AFTER]\n\n` +
+        `⏱️ [0:00 - 0:03] HOOK: "DULU vs SEKARANG: Cara saya urus 500 order WhatsApp sehari!"\n` +
+        `⏱️ [0:04 - 0:12] BEFORE: "Dulu jari bengkak reply manual satu-satu. ${pain}."\n` +
+        `⏱️ [0:13 - 0:22] AFTER: "Lepas setup ${prod}, phone saya kerja sendiri 24/7. Auto-hantar katalog, auto-kutip resit DuitNow!"\n` +
+        `⏱️ [0:23 - 0:30] CTA: "Nak automate bisnes korang macam ni? Dapatkan ${offer} dengan klik link bio!"\n\n` +
+        `🏷️ HASHTAGS: #beforeandafter #salesfunnel #whatsappbot #bisnesdigital`;
+      } else {
+        out.textContent = `[TIKTOK 30-SECOND AD — VIRAL UGC FLASH DEAL]\n\n` +
+        `⏱️ [0:00 - 0:03] HOOK: "STOP SCROLL! Kalau korang buat bisnes kat TikTok, video ni untuk korang!"\n` +
+        `⏱️ [0:04 - 0:12] PROOF: "Tengok ni, 42 order masuk automasi dalam masa 1 jam je guna sistem ni."\n` +
+        `⏱️ [0:13 - 0:22] VALUE: "${prod} tolong korang close customer tanpa perlu pandang skrin phone langsung."\n` +
+        `⏱️ [0:23 - 0:30] URGENCY: "Tawaran sah 24 jam je: ${offer}. Komen 'NAK' atau klik link kat bio sekarang!"\n\n` +
+        `🏷️ HASHTAGS: #flashdeal #promositiktok #automasi #duitnow`;
+      }
+    };
+
+    window.copyScriptText = function() {
+      navigator.clipboard.writeText(document.getElementById('ttScriptOutput').textContent);
+      alert('✓ TikTok ad script copied to clipboard! Ready to paste into CapCut or teleprompter.');
+    };
+
+    // =========================================================================
+    // SELLER CRM KANBAN & GOOGLE SHEETS SYNC
+    // =========================================================================
+    const KANBAN_STAGES = [
+      { id: 'inbound', name: '1. Inbound Leads', color: 'var(--cyan)' },
+      { id: 'catalog', name: '2. Catalog Sent', color: 'var(--purple)' },
+      { id: 'payment', name: '3. Awaiting Transfer', color: 'var(--amber)' },
+      { id: 'confirmed', name: '4. Order Confirmed', color: 'var(--green)' }
+    ];
+
+    let LEADS = [
+      { id: 'L-101', name: 'Nadia Syafiqah', phone: '017-2948192', item: 'AutoLead Pro (1 Set)', amount: 'RM 59.00', stage: 'catalog' },
+      { id: 'L-102', name: 'Zulhelmi Rosli', phone: '019-3849102', item: 'AutoLead Pro (2 Set)', amount: 'RM 99.00', stage: 'payment' },
+      { id: 'L-103', name: 'Nurul Ain', phone: '011-2849104', item: 'AutoLead Enterprise', amount: 'RM 149.00', stage: 'confirmed' }
+    ];
+
+    function renderKanban() {
+      const board = document.getElementById('kanbanBoard');
+      board.innerHTML = KANBAN_STAGES.map(s => {
+        const stageLeads = LEADS.filter(l => l.stage === s.id);
+        return `
+          <div class="kanban-col">
+            <div class="kanban-header">
+              <span>${s.name}</span>
+              <span style="color:${s.color}; font-family:var(--font-mono);">${stageLeads.length}</span>
+            </div>
+            ${stageLeads.map(l => `
+              <div class="kanban-card" onclick="advanceLeadStage('${l.id}')">
+                <div class="kc-title">${l.name}</div>
+                <div class="kc-detail">${l.phone}</div>
+                <div class="kc-detail" style="color:var(--cyan); margin-top:2px;">${l.item}</div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span class="kc-badge" style="background:rgba(34,211,165,0.15); color:var(--green);">${l.amount}</span>
+                  <span style="font-size:0.65rem; color:var(--text-dim);">Tap to advance ➔</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }).join('');
+
+      renderOrdersTable();
+    }
+
+    function renderOrdersTable() {
+      const tbody = document.getElementById('ordersTableBody');
+      tbody.innerHTML = LEADS.map(l => `
+        <tr>
+          <td><strong>${l.id}</strong></td>
+          <td>${l.name}</td>
+          <td><code>${l.phone}</code></td>
+          <td>${l.item}</td>
+          <td><strong style="color:var(--green);">${l.amount}</strong></td>
+          <td><span class="badge ${l.stage === 'confirmed' ? 'badge-green' : 'badge-purple'}">${l.stage.toUpperCase()}</span></td>
+          <td>${new Date().toISOString().substring(0, 10)}</td>
+        </tr>
+      `).join('');
+    }
+
+    window.advanceLeadStage = function(id) {
+      const lead = LEADS.find(l => l.id === id);
+      if (!lead) return;
+
+      if (lead.stage === 'inbound') lead.stage = 'catalog';
+      else if (lead.stage === 'catalog') lead.stage = 'payment';
+      else if (lead.stage === 'payment') lead.stage = 'confirmed';
+
+      renderKanban();
+    };
+
+    function addNewOrder(name, phone, item, amount) {
+      const newId = `L-${Math.floor(Math.random() * 899 + 100)}`;
+      LEADS.unshift({ id: newId, name, phone, item, amount, stage: 'confirmed' });
+      renderKanban();
+
+      // Update Revenue Stats
+      const currentRev = parseInt(document.getElementById('statRev').textContent.replace(/[^0-9]/g, ''));
+      document.getElementById('statRev').textContent = `RM ${(currentRev + 99).toLocaleString()}`;
+      document.getElementById('statLeads').textContent = `${LEADS.length + 342} Leads`;
+    }
+
+    window.exportCrmOrders = function() {
+      let csv = "Order_ID,Customer_Name,Phone,Item,Amount,Status,Timestamp\n";
+      LEADS.forEach(l => {
+        csv += `"${l.id}","${l.name}","${l.phone}","${l.item}","${l.amount}","${l.stage}","${new Date().toISOString()}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `AutoLead_GoogleSheets_Orders_${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    // =========================================================================
+    // TABS SWITCHER
+    // =========================================================================
+    window.switchTab = function(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+      event.target.classList.add('active');
+      document.getElementById(`tab-${tabId}`).classList.add('active');
+    };
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br/>');
+    }
+
+    // Init
+    window.addEventListener('DOMContentLoaded', () => {
+      renderRules();
+      renderHarvester();
+      renderKanban();
+    });
+  </script>
+</body>
+</html>
