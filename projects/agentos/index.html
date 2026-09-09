@@ -3,244 +3,796 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AgentOS — AI Agent Orchestration UI</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text y='52' font-size='56'>◆</text></svg>" />
+  <title>AgentOS — AI Agent Orchestration UI | Mie's Project Hub</title>
+  <meta name="description" content="Visual Directed Acyclic Graph (DAG) canvas for configuring, executing, and streaming autonomous AI agent pipelines." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%23050914'/><circle cx='32' cy='32' r='14' fill='none' stroke='%2300f0ff' stroke-width='4'/><circle cx='18' cy='18' r='6' fill='%23a855f7'/><circle cx='46' cy='46' r='6' fill='%2310b981'/><line x1='22' y1='22' x2='42' y2='42' stroke='%2338bdf8' stroke-width='3'/></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    .hub-back {
-      display: inline-flex; align-items: center; gap: 8px; position: fixed; top: 18px; left: 20px; z-index: 9999;
-      padding: 8px 18px 8px 14px; background: rgba(4, 7, 15, 0.85); backdrop-filter: blur(12px);
-      border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 8px; font-family: 'Orbitron', monospace;
-      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #00f0ff;
-      text-decoration: none; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); transition: all 0.25s ease;
-    }
-    .hub-back:hover { border-color: rgba(0, 240, 255, 0.8); box-shadow: 0 0 20px rgba(0, 240, 255, 0.4); transform: translateX(-2px); }
-    .hub-back-arrow { font-size: 1rem; line-height: 1; }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #03050c; --surface: #0a0f1d; --card-bg: rgba(10, 16, 32, 0.8);
-      --cyan: #00f0ff; --purple: #a855f7; --green: #22d3a5; --amber: #f59e0b; --danger: #ef4444;
-      --text: #ccd6f6; --text-dim: #8892b0; --radius: 12px;
+      --bg: #050814;
+      --surface: #0a1126;
+      --card-bg: rgba(11, 20, 44, 0.85);
+      --card-border: rgba(0, 240, 255, 0.2);
+      --cyan: #00f0ff;
+      --purple: #a855f7;
+      --green: #10b981;
+      --amber: #f59e0b;
+      --red: #f43f5e;
+      --blue: #38bdf8;
+      --text: #f8fafc;
+      --text-dim: #94a3b8;
+      --text-muted: #64748b;
+      --font-display: 'Orbitron', monospace;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-body: 'Inter', system-ui, sans-serif;
     }
+
     body {
-      background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif;
-      min-height: 100vh; overflow-x: hidden;
-    }
-    .container { max-width: 1300px; margin: 0 auto; padding: 80px 24px 60px; }
-    .hero { text-align: center; margin-bottom: 30px; }
-    .title {
-      font-family: 'Orbitron', sans-serif; font-size: clamp(2rem, 4.5vw, 3.4rem); font-weight: 900;
-      background: linear-gradient(135deg, #fff, var(--purple) 70%, var(--cyan) 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 12px;
-    }
-    .sub { color: var(--text-dim); max-width: 720px; margin: 0 auto 24px; font-size: 1.05rem; }
-
-    .top-actions { display: flex; justify-content: center; gap: 14px; margin-bottom: 30px; }
-    .btn-action {
-      background: linear-gradient(135deg, var(--purple), #7c3aed); color: #fff; border: none;
-      font-family: 'Orbitron', sans-serif; font-size: 0.85rem; font-weight: 700; padding: 12px 24px;
-      border-radius: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
-    }
-    .btn-action:hover { box-shadow: 0 0 30px rgba(168, 85, 247, 0.7); transform: translateY(-2px); }
-
-    /* Canvas Grid & Pipeline */
-    .pipeline-board {
-      background: #060a16; border: 1px solid rgba(0, 240, 255, 0.25); border-radius: var(--radius);
-      padding: 30px; position: relative; overflow-x: auto; margin-bottom: 30px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.6); min-height: 280px; display: flex; align-items: center; justify-content: space-between; gap: 20px;
-    }
-    .node {
-      background: var(--surface); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 10px;
-      padding: 20px; width: 220px; flex-shrink: 0; position: relative; transition: all 0.3s;
-    }
-    .node.active {
-      border-color: var(--cyan); box-shadow: 0 0 25px rgba(0, 240, 255, 0.4);
-    }
-    .node-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .node-role { font-family: 'Orbitron', monospace; font-size: 0.75rem; color: var(--purple); font-weight: 700; }
-    .node-status { width: 8px; height: 8px; border-radius: 50%; background: #4b5563; }
-    .node-status.live { background: var(--green); box-shadow: 0 0 8px var(--green); }
-    .node-status.busy { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
-    .node-title { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 6px; }
-    .node-desc { font-size: 0.78rem; color: var(--text-dim); }
-
-    .node-connector {
-      color: var(--cyan); font-size: 1.4rem; font-family: monospace; font-weight: bold;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
-    /* Live Terminal Console */
-    .terminal {
-      background: #020409; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--radius);
-      overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+    .hub-back {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 14px; background: rgba(3, 7, 18, 0.88); backdrop-filter: blur(14px);
+      border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 6px; font-family: var(--font-display);
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cyan);
+      text-decoration: none; transition: all 0.2s;
     }
-    .terminal-head {
-      background: #080d19; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08); font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+    .hub-back:hover {
+      background: rgba(0, 240, 255, 0.2); color: #fff; transform: translateX(-2px);
     }
-    .terminal-logs {
-      height: 240px; overflow-y: auto; padding: 18px; font-family: 'JetBrains Mono', monospace;
-      font-size: 0.82rem; line-height: 1.7; color: #94a3b8;
+
+    /* Header */
+    header {
+      height: 58px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--card-border);
+      background: rgba(10, 17, 36, 0.75);
+      backdrop-filter: blur(16px);
+      z-index: 50;
     }
-    .log-line { margin-bottom: 4px; }
-    .log-time { color: #64748b; margin-right: 8px; }
-    .log-agent { color: var(--purple); font-weight: 600; margin-right: 8px; }
-    .log-action { color: var(--cyan); }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      background: linear-gradient(90deg, #fff 0%, var(--cyan) 60%, var(--purple) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: 1px solid var(--card-border);
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--text);
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      background: rgba(30, 41, 59, 0.9);
+      border-color: var(--cyan);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00f0ff 0%, #0284c7 100%);
+      border: none;
+      color: #040814;
+      font-weight: 800;
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.35);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 0 24px rgba(0, 240, 255, 0.6);
+      color: #000;
+    }
+
+    .btn-danger {
+      background: rgba(244, 63, 94, 0.15);
+      border-color: rgba(244, 63, 94, 0.4);
+      color: #fda4af;
+    }
+
+    /* Workspace */
+    .workspace {
+      display: flex;
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Canvas */
+    .canvas-container {
+      flex: 1;
+      position: relative;
+      background: #030611;
+      overflow: hidden;
+    }
+
+    canvas#dagCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }
+    canvas#dagCanvas:active {
+      cursor: grabbing;
+    }
+
+    /* Canvas Toolbar */
+    .canvas-toolbar {
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      display: flex;
+      gap: 8px;
+      background: rgba(11, 20, 44, 0.9);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 6px;
+      backdrop-filter: blur(12px);
+      z-index: 20;
+    }
+
+    /* Right Sidebar */
+    .sidebar {
+      width: 380px;
+      background: rgba(9, 15, 32, 0.92);
+      border-left: 1px solid var(--card-border);
+      display: flex;
+      flex-direction: column;
+      z-index: 30;
+      backdrop-filter: blur(20px);
+    }
+
+    .sidebar-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-dim);
+      font-family: var(--font-display);
+      font-size: 0.74rem;
+      font-weight: 700;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { color: #fff; }
+    .tab-btn.active {
+      color: var(--cyan);
+      border-bottom-color: var(--cyan);
+      background: rgba(0, 240, 255, 0.06);
+    }
+
+    .sidebar-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .panel-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .card-label {
+      font-family: var(--font-display);
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--cyan);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .form-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .form-input, .form-select, .form-textarea {
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+      background: rgba(5, 9, 20, 0.9);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      outline: none;
+    }
+    .form-textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+    }
+
+    /* Terminal Log */
+    .terminal-box {
+      background: #02050e;
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 6px;
+      height: 100%;
+      overflow-y: auto;
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .log-line {
+      display: flex;
+      gap: 8px;
+      line-height: 1.4;
+    }
+    .log-time { color: var(--text-muted); }
+    .log-agent { color: var(--cyan); font-weight: 700; }
+    .log-tag { padding: 1px 5px; border-radius: 3px; font-size: 0.65rem; font-weight: 700; }
+    .tag-info { background: rgba(56, 189, 248, 0.15); color: var(--blue); }
+    .tag-tool { background: rgba(168, 85, 247, 0.15); color: var(--purple); }
+    .tag-success { background: rgba(16, 185, 129, 0.15); color: var(--green); }
+    .tag-warn { background: rgba(245, 158, 11, 0.15); color: var(--amber); }
+
+    /* Telemetry grid */
+    .metric-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .metric-box {
+      background: rgba(5, 9, 20, 0.8);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 8px;
+      text-align: center;
+    }
+    .metric-val { font-family: var(--font-mono); font-size: 1rem; font-weight: 700; color: var(--cyan); }
+    .metric-lbl { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-top: 2px; }
   </style>
 </head>
 <body>
 
-  <a class="hub-back" href="../../index.html" aria-label="Back to Project Hub">
-    <span class="hub-back-arrow">←</span> Hub
-  </a>
-
-  <div class="container">
-    <header class="hero">
-      <h1 class="title">AGENTOS</h1>
-      <p class="sub">
-        Visual AI Agent Orchestrator. Construct directed acyclic graphs of autonomous LLM reasoning nodes, monitor execution flows, and inspect inter-agent telemetry in real time.
-      </p>
-
-      <div class="top-actions">
-        <button class="btn-action" id="btnRun" onclick="runPipeline()">▶ Execute Pipeline</button>
-        <button class="btn-action" style="background: rgba(11,22,40,0.8); border: 1px solid var(--cyan);" onclick="resetPipeline()">↺ Reset Flow</button>
-      </div>
-    </header>
-
-    <!-- Visual Nodes Pipeline -->
-    <div class="pipeline-board">
-      <div class="node" id="node1">
-        <div class="node-header">
-          <span class="node-role">DISCOVERY</span>
-          <span class="node-status" id="dot1"></span>
-        </div>
-        <div class="node-title">Research Agent</div>
-        <div class="node-desc">Searches web & academic sources, extracts citations.</div>
-      </div>
-
-      <div class="node-connector">━━▶</div>
-
-      <div class="node" id="node2">
-        <div class="node-header">
-          <span class="node-role">PLANNING</span>
-          <span class="node-status" id="dot2"></span>
-        </div>
-        <div class="node-title">Architect Agent</div>
-        <div class="node-desc">Generates system blueprint & dependency graph.</div>
-      </div>
-
-      <div class="node-connector">━━▶</div>
-
-      <div class="node" id="node3">
-        <div class="node-header">
-          <span class="node-role">SYNTHESIS</span>
-          <span class="node-status" id="dot3"></span>
-        </div>
-        <div class="node-title">Synthesis Agent</div>
-        <div class="node-desc">Cross-validates evidence and compiles code units.</div>
-      </div>
-
-      <div class="node-connector">━━▶</div>
-
-      <div class="node" id="node4">
-        <div class="node-header">
-          <span class="node-role">QA & SHIELD</span>
-          <span class="node-status" id="dot4"></span>
-        </div>
-        <div class="node-title">Reviewer Agent</div>
-        <div class="node-desc">Verifies security policies & tests functionality.</div>
-      </div>
+  <!-- Top Header -->
+  <header>
+    <div class="brand-group">
+      <a href="../../index.html" class="hub-back">← Hub</a>
+      <div class="brand-title">AGENTOS // ORCHESTRATION STUDIO</div>
     </div>
 
-    <!-- Live Execution Logs -->
-    <div class="terminal">
-      <div class="terminal-head">
-        <span>AGENTOS LIVE BUS // STREAM: WS-01</span>
-        <span style="color: var(--green);">● SYSTEM ONLINE</span>
-      </div>
-      <div class="terminal-logs" id="logBox">
-        <div class="log-line"><span class="log-time">[00:00.00]</span> [AgentOS Core] Daemon initialized. Ready to orchestrate agent DAG.</div>
-      </div>
+    <div class="header-actions">
+      <select id="templateSelector" class="form-select" onchange="loadSelectedTemplate(this.value)">
+        <option value="paper">Academic Paper Pipeline</option>
+        <option value="dev">Full-Stack Dev Cycle</option>
+        <option value="pentest">Security Audit Pipeline</option>
+      </select>
+
+      <button class="btn btn-primary" onclick="runPipeline()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span>Run Pipeline</span>
+      </button>
+
+      <button class="btn btn-danger" onclick="resetPipeline()">Reset</button>
+      <button class="btn" onclick="exportDAG()">Export DAG</button>
     </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <div class="workspace">
+
+    <!-- Canvas Area -->
+    <div class="canvas-container">
+      <div class="canvas-toolbar">
+        <button class="btn" style="padding: 5px 10px; font-size: 0.7rem;" onclick="addAgentNode()">+ Add Agent</button>
+        <button class="btn" style="padding: 5px 10px; font-size: 0.7rem;" onclick="resetZoom()">100% Zoom</button>
+      </div>
+      <canvas id="dagCanvas"></canvas>
+    </div>
+
+    <!-- Right Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-tabs">
+        <button class="tab-btn active" onclick="setSidebarTab('inspector')">Inspector</button>
+        <button class="tab-btn" onclick="setSidebarTab('logs')">Live Terminal</button>
+        <button class="tab-btn" onclick="setSidebarTab('telemetry')">Metrics</button>
+      </div>
+
+      <!-- Tab 1: Inspector -->
+      <div id="tabInspector" class="sidebar-body">
+        <div id="noSelectionMsg" style="text-align: center; color: var(--text-muted); padding: 30px 10px; font-size: 0.8rem;">
+          Click any agent node on the canvas to inspect prompt, model configuration, and tool permissions.
+        </div>
+
+        <div id="inspectorCard" class="panel-card" style="display: none;">
+          <div class="card-label">Agent Node Configuration</div>
+          
+          <div class="form-group">
+            <label class="form-label">Agent Identifier</label>
+            <input id="agentNameInput" type="text" class="form-input" onchange="updateSelectedNode('name', this.value)" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Assigned Persona / Role</label>
+            <input id="agentRoleInput" type="text" class="form-input" onchange="updateSelectedNode('role', this.value)" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Inference Model</label>
+            <select id="agentModelSelect" class="form-select" onchange="updateSelectedNode('model', this.value)">
+              <option value="Gemini 2.5 Pro">Gemini 2.5 Pro (Thinking)</option>
+              <option value="DeepSeek-R1">DeepSeek-R1 (Distill 70B)</option>
+              <option value="Qwen 2.5 Coder">Qwen 2.5 Coder (32B)</option>
+              <option value="Claude 3.7 Sonnet">Claude 3.7 Sonnet</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">System Instructions</label>
+            <textarea id="agentPromptInput" class="form-textarea" onchange="updateSelectedNode('prompt', this.value)"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tool Permissions</label>
+            <input id="agentToolsInput" type="text" class="form-input" placeholder="bash, file_write, web_search" onchange="updateSelectedNode('tools', this.value)" />
+          </div>
+
+          <button class="btn btn-danger" style="width: 100%; justify-content: center; margin-top: 10px;" onclick="deleteSelectedNode()">Delete Agent Node</button>
+        </div>
+      </div>
+
+      <!-- Tab 2: Terminal Logs -->
+      <div id="tabLogs" class="sidebar-body" style="display: none; padding: 12px; height: 100%;">
+        <div id="terminalStream" class="terminal-box">
+          <div class="log-line">
+            <span class="log-time">[00:00:00]</span>
+            <span class="log-agent">SYSTEM</span>
+            <span class="log-tag tag-info">READY</span>
+            <span>AgentOS orchestrator initialized. Click "Run Pipeline" to trigger execution.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Metrics -->
+      <div id="tabTelemetry" class="sidebar-body" style="display: none;">
+        <div class="panel-card">
+          <div class="card-label">Pipeline Execution Metrics</div>
+          <div class="metric-row">
+            <div class="metric-box">
+              <div id="metricTotalAgents" class="metric-val">4</div>
+              <div class="metric-lbl">Active Nodes</div>
+            </div>
+            <div class="metric-box">
+              <div id="metricTotalTime" class="metric-val">0.0s</div>
+              <div class="metric-lbl">Duration</div>
+            </div>
+            <div class="metric-box">
+              <div id="metricTokens" class="metric-val">0</div>
+              <div class="metric-lbl">Tokens</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <div class="card-label">Execution Status</div>
+          <div id="pipelineStatus" style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--green);">IDLE • READY TO EXECUTE</div>
+        </div>
+      </div>
+    </aside>
+
   </div>
 
   <script>
-    let running = false;
-    function log(agent, msg, action = '') {
-      const box = document.getElementById('logBox');
-      const time = new Date().toLocaleTimeString();
-      const div = document.createElement('div');
-      div.className = 'log-line';
-      div.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-agent">[${agent}]</span> ${msg} <span class="log-action">${action}</span>`;
-      box.appendChild(div);
-      box.scrollTop = box.scrollHeight;
-    }
-
-    async function runPipeline() {
-      if (running) return;
-      running = true;
-      document.getElementById('btnRun').disabled = true;
-
-      // Node 1
-      setNodeState(1, 'busy');
-      log('ResearchAgent', 'Initiating search query...', 'search_web("TurboBoost performance benchmarks")');
-      await sleep(1000);
-      log('ResearchAgent', 'Retrieved 8 relevant sources on ZRAM & kernel compactor.', 'DONE');
-      setNodeState(1, 'live');
-
-      // Node 2
-      setNodeState(2, 'busy');
-      log('ArchitectAgent', 'Synthesizing pipeline schema...', 'compile_graph()');
-      await sleep(1100);
-      log('ArchitectAgent', 'Architecture validated. Safe bounds established.', 'DONE');
-      setNodeState(2, 'live');
-
-      // Node 3
-      setNodeState(3, 'busy');
-      log('SynthesisAgent', 'Cross-referencing telemetry and package lists...', 'verify_manifest()');
-      await sleep(1200);
-      log('SynthesisAgent', 'Compiled production units without conflicts.', 'DONE');
-      setNodeState(3, 'live');
-
-      // Node 4
-      setNodeState(4, 'busy');
-      log('ReviewerAgent', 'Running safety audit on system app protector...', 'audit_guardrail()');
-      await sleep(1000);
-      log('ReviewerAgent', 'Shield check PASSED. Zero critical vulnerabilities found.', 'SUCCESS');
-      setNodeState(4, 'live');
-
-      log('AgentOS Core', 'Pipeline completed execution successfully.', 'STATUS 200 OK');
-      document.getElementById('btnRun').disabled = false;
-      running = false;
-    }
-
-    function setNodeState(index, state) {
-      const node = document.getElementById(`node${index}`);
-      const dot = document.getElementById(`dot${index}`);
-      node.classList.remove('active');
-      dot.className = 'node-status';
-
-      if (state === 'busy') {
-        node.classList.add('active');
-        dot.classList.add('busy');
-      } else if (state === 'live') {
-        dot.classList.add('live');
+    // Templates
+    const TEMPLATES = {
+      paper: {
+        nodes: [
+          { id: 'n1', name: 'Topic Architect', role: 'Formulates Research Question', model: 'Gemini 2.5 Pro', status: 'IDLE', x: 80, y: 180, prompt: 'Define core novel contributions and methodology scope.', tools: 'web_search' },
+          { id: 'n2', name: 'Lit Reviewer', role: 'Synthesizes Related Works', model: 'DeepSeek-R1', status: 'IDLE', x: 280, y: 100, prompt: 'Perform citation scan across IEEE & arXiv.', tools: 'arxiv_api' },
+          { id: 'n3', name: 'Draft Compiler', role: 'Generates LaTeX Chapters', model: 'Claude 3.7 Sonnet', status: 'IDLE', x: 280, y: 260, prompt: 'Format methodology into APA 7.0 structure.', tools: 'file_write' },
+          { id: 'n4', name: 'Peer Reviewer', role: 'Devil Advocate & Scoring', model: 'Qwen 2.5 Coder', status: 'IDLE', x: 480, y: 180, prompt: 'Audit statistical validity and flag overclaims.', tools: 'reviewer_rubric' }
+        ],
+        edges: [
+          { from: 'n1', to: 'n2' },
+          { from: 'n1', to: 'n3' },
+          { from: 'n2', to: 'n4' },
+          { from: 'n3', to: 'n4' }
+        ]
+      },
+      dev: {
+        nodes: [
+          { id: 'n1', name: 'System Architect', role: 'Designs Technical Plan', model: 'Gemini 2.5 Pro', status: 'IDLE', x: 80, y: 180, prompt: 'Draft full component diagram and API spec.', tools: 'doc_writer' },
+          { id: 'n2', name: 'Frontend Engineer', role: 'Builds UI Canvas', model: 'Claude 3.7 Sonnet', status: 'IDLE', x: 280, y: 100, prompt: 'Generate React Vite component system.', tools: 'vite, npm' },
+          { id: 'n3', name: 'Backend Engineer', role: 'API & Database Engine', model: 'Qwen 2.5 Coder', status: 'IDLE', x: 280, y: 260, prompt: 'Scaffold REST endpoints and SQLite schema.', tools: 'sqlite, express' },
+          { id: 'n4', name: 'QA Tester Agent', role: 'Automated Vitest & Lint', model: 'DeepSeek-R1', status: 'IDLE', x: 480, y: 180, prompt: 'Execute unit tests and self-heal failed assertions.', tools: 'vitest, browser' }
+        ],
+        edges: [
+          { from: 'n1', to: 'n2' },
+          { from: 'n1', to: 'n3' },
+          { from: 'n2', to: 'n4' },
+          { from: 'n3', to: 'n4' }
+        ]
+      },
+      pentest: {
+        nodes: [
+          { id: 'n1', name: 'Reconnaissance', role: 'Network Surface Mapper', model: 'DeepSeek-R1', status: 'IDLE', x: 80, y: 180, prompt: 'Scan open ports and headers.', tools: 'nmap, curl' },
+          { id: 'n2', name: 'Vuln Scanner', role: 'CVE Identification', model: 'Qwen 2.5 Coder', status: 'IDLE', x: 280, y: 180, prompt: 'Cross-reference CVE database against versions.', tools: 'cve_db' },
+          { id: 'n3', name: 'Remediation Agent', role: 'Generates Security Patches', model: 'Claude 3.7 Sonnet', status: 'IDLE', x: 480, y: 180, prompt: 'Draft hardening guide and WAF rules.', tools: 'patch_writer' }
+        ],
+        edges: [
+          { from: 'n1', to: 'n2' },
+          { from: 'n2', to: 'n3' }
+        ]
       }
+    };
+
+    // State
+    let currentDAG = JSON.parse(JSON.stringify(TEMPLATES.paper));
+    let selectedNodeId = null;
+    let isDragging = false;
+    let draggedNode = null;
+    let dragOffset = { x: 0, y: 0 };
+    let isExecuting = false;
+    let execStep = 0;
+    let execTimer = null;
+    let pulseOffset = 0;
+
+    // Canvas
+    const canvas = document.getElementById('dagCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = canvas.parentElement.clientWidth * window.devicePixelRatio;
+      canvas.height = canvas.parentElement.clientHeight * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      drawDAG();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    // Draw Loop
+    function drawDAG() {
+      pulseOffset = (pulseOffset + 0.5) % 30;
+      const w = canvas.parentElement.clientWidth;
+      const h = canvas.parentElement.clientHeight;
+
+      ctx.fillStyle = '#030611';
+      ctx.fillRect(0, 0, w, h);
+
+      // Grid
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.04)';
+      ctx.lineWidth = 1;
+      const grid = 30;
+      for (let x = 0; x < w; x += grid) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+      }
+      for (let y = 0; y < h; y += grid) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      }
+
+      // Edges / Connecting Wires
+      currentDAG.edges.forEach(edge => {
+        const fromNode = currentDAG.nodes.find(n => n.id === edge.from);
+        const toNode = currentDAG.nodes.find(n => n.id === edge.to);
+        if (!fromNode || !toNode) return;
+
+        const x1 = fromNode.x + 130;
+        const y1 = fromNode.y + 35;
+        const x2 = toNode.x;
+        const y2 = toNode.y + 35;
+
+        // Bezier wire
+        const cp1x = x1 + (x2 - x1) * 0.5;
+        const cp1y = y1;
+        const cp2x = x1 + (x2 - x1) * 0.5;
+        const cp2y = y2;
+
+        ctx.strokeStyle = 'rgba(51, 65, 85, 0.6)';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x2, y2);
+        ctx.stroke();
+
+        // Pulsing data packet if executing
+        if (isExecuting && (fromNode.status === 'SUCCESS' || fromNode.status === 'RUNNING')) {
+          ctx.strokeStyle = '#00f0ff';
+          ctx.lineWidth = 3;
+          ctx.setLineDash([8, 12]);
+          ctx.lineDashOffset = -pulseOffset;
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x2, y2);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+      });
+
+      // Nodes
+      currentDAG.nodes.forEach(node => {
+        const isSelected = selectedNodeId === node.id;
+        const nodeW = 130;
+        const nodeH = 70;
+
+        // Background
+        ctx.fillStyle = isSelected ? 'rgba(15, 23, 50, 0.95)' : 'rgba(10, 16, 36, 0.88)';
+        ctx.strokeStyle = isSelected ? '#00f0ff' : (node.status === 'RUNNING' ? '#f59e0b' : (node.status === 'SUCCESS' ? '#10b981' : 'rgba(0, 240, 255, 0.25)'));
+        ctx.lineWidth = isSelected || node.status === 'RUNNING' ? 2.5 : 1.5;
+
+        if (isSelected || node.status === 'RUNNING') {
+          ctx.shadowColor = isSelected ? '#00f0ff' : '#f59e0b';
+          ctx.shadowBlur = 14;
+        }
+
+        ctx.beginPath();
+        ctx.roundRect(node.x, node.y, nodeW, nodeH, 8);
+        ctx.fill();
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Status pill
+        const statusColors = { IDLE: '#94a3b8', RUNNING: '#f59e0b', SUCCESS: '#10b981', ERROR: '#f43f5e' };
+        ctx.fillStyle = statusColors[node.status] || '#94a3b8';
+        ctx.beginPath();
+        ctx.arc(node.x + 14, node.y + 16, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Title
+        ctx.font = '700 11px "Orbitron", sans-serif';
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillText(node.name, node.x + 24, node.y + 20);
+
+        // Role
+        ctx.font = '500 9px "Inter", sans-serif';
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillText(node.role.slice(0, 22), node.x + 14, node.y + 40);
+
+        // Model Tag
+        ctx.font = '600 8px "JetBrains Mono", monospace';
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillText(node.model, node.x + 14, node.y + 56);
+      });
+
+      requestAnimationFrame(drawDAG);
+    }
+
+    // Mouse Dragging
+    canvas.addEventListener('mousedown', e => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+
+      const hit = currentDAG.nodes.slice().reverse().find(n => mx >= n.x && mx <= n.x + 130 && my >= n.y && my <= n.y + 70);
+      if (hit) {
+        selectedNodeId = hit.id;
+        isDragging = true;
+        draggedNode = hit;
+        dragOffset = { x: mx - hit.x, y: my - hit.y };
+        showInspector(hit);
+      } else {
+        selectedNodeId = null;
+        hideInspector();
+      }
+    });
+
+    window.addEventListener('mousemove', e => {
+      if (isDragging && draggedNode) {
+        const rect = canvas.getBoundingClientRect();
+        draggedNode.x = Math.max(10, Math.min(canvas.width / window.devicePixelRatio - 140, e.clientX - rect.left - dragOffset.x));
+        draggedNode.y = Math.max(10, Math.min(canvas.height / window.devicePixelRatio - 80, e.clientY - rect.top - dragOffset.y));
+      }
+    });
+
+    window.addEventListener('mouseup', () => { isDragging = false; draggedNode = null; });
+
+    // Sidebar & Inspector
+    function setSidebarTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('tabInspector').style.display = tab === 'inspector' ? 'flex' : 'none';
+      document.getElementById('tabLogs').style.display = tab === 'logs' ? 'flex' : 'none';
+      document.getElementById('tabTelemetry').style.display = tab === 'telemetry' ? 'flex' : 'none';
+    }
+
+    function showInspector(node) {
+      document.getElementById('noSelectionMsg').style.display = 'none';
+      document.getElementById('inspectorCard').style.display = 'block';
+      document.getElementById('agentNameInput').value = node.name;
+      document.getElementById('agentRoleInput').value = node.role;
+      document.getElementById('agentModelSelect').value = node.model;
+      document.getElementById('agentPromptInput').value = node.prompt;
+      document.getElementById('agentToolsInput').value = node.tools;
+    }
+
+    function hideInspector() {
+      document.getElementById('noSelectionMsg').style.display = 'block';
+      document.getElementById('inspectorCard').style.display = 'none';
+    }
+
+    function updateSelectedNode(field, val) {
+      if (!selectedNodeId) return;
+      const n = currentDAG.nodes.find(n => n.id === selectedNodeId);
+      if (n) n[field] = val;
+    }
+
+    function deleteSelectedNode() {
+      if (!selectedNodeId) return;
+      currentDAG.nodes = currentDAG.nodes.filter(n => n.id !== selectedNodeId);
+      currentDAG.edges = currentDAG.edges.filter(e => e.from !== selectedNodeId && e.to !== selectedNodeId);
+      selectedNodeId = null;
+      hideInspector();
+      updateMetrics();
+    }
+
+    function addAgentNode() {
+      const id = 'n' + Date.now();
+      const newNode = {
+        id,
+        name: 'Agent ' + (currentDAG.nodes.length + 1),
+        role: 'Autonomous Worker',
+        model: 'Gemini 2.5 Pro',
+        status: 'IDLE',
+        x: 100 + (currentDAG.nodes.length * 30) % 300,
+        y: 100 + (currentDAG.nodes.length * 20) % 200,
+        prompt: 'Execute task assigned by parent coordinator.',
+        tools: 'bash, memory'
+      };
+      currentDAG.nodes.push(newNode);
+      selectedNodeId = id;
+      showInspector(newNode);
+      updateMetrics();
+    }
+
+    function resetZoom() {
+      drawDAG();
+    }
+
+    // Terminal Logging
+    function logEvent(agent, tag, text) {
+      const stream = document.getElementById('terminalStream');
+      const now = new Date().toTimeString().split(' ')[0];
+      const tagClass = tag === 'TOOL' ? 'tag-tool' : (tag === 'SUCCESS' ? 'tag-success' : 'tag-info');
+      const line = document.createElement('div');
+      line.className = 'log-line';
+      line.innerHTML = `<span class="log-time">[${now}]</span> <span class="log-agent">${agent}</span> <span class="log-tag ${tagClass}">${tag}</span> <span>${text}</span>`;
+      stream.appendChild(line);
+      stream.scrollTop = stream.scrollHeight;
+    }
+
+    // Execution Engine
+    function runPipeline() {
+      if (isExecuting) return;
+      isExecuting = true;
+      execStep = 0;
+      currentDAG.nodes.forEach(n => n.status = 'IDLE');
+      document.getElementById('pipelineStatus').innerText = 'EXECUTING PIPELINE...';
+      document.getElementById('pipelineStatus').style.color = 'var(--amber)';
+
+      const stepOrder = currentDAG.nodes;
+      let startTime = Date.now();
+
+      function step() {
+        if (execStep >= stepOrder.length) {
+          isExecuting = false;
+          document.getElementById('pipelineStatus').innerText = 'COMPLETED ALL TASKS (0 ERRORS)';
+          document.getElementById('pipelineStatus').style.color = 'var(--green)';
+          logEvent('ORCHESTRATOR', 'SUCCESS', 'All agent nodes successfully resolved output artifacts.');
+          return;
+        }
+
+        const curr = stepOrder[execStep];
+        curr.status = 'RUNNING';
+        logEvent(curr.name, 'INFO', `Activated model ${curr.model}. Initializing system context.`);
+
+        setTimeout(() => {
+          logEvent(curr.name, 'TOOL', `Invoked tool [${curr.tools.split(',')[0] || 'core'}]. Processing input streams.`);
+          setTimeout(() => {
+            curr.status = 'SUCCESS';
+            logEvent(curr.name, 'SUCCESS', `Output generated with 0 errors. Forwarding data packets to connected downstream agents.`);
+            execStep++;
+            const elapsed = ((Date.now() - startTime) / 1000).toFixed(1) + 's';
+            document.getElementById('metricTotalTime').innerText = elapsed;
+            document.getElementById('metricTokens').innerText = (execStep * 1420);
+            step();
+          }, 1200);
+        }, 1000);
+      }
+
+      step();
     }
 
     function resetPipeline() {
-      for (let i = 1; i <= 4; i++) {
-        document.getElementById(`node${i}`).classList.remove('active');
-        document.getElementById(`dot${i}`).className = 'node-status';
-      }
-      document.getElementById('logBox').innerHTML = '<div class="log-line"><span class="log-time">[00:00.00]</span> [AgentOS Core] Pipeline reset. Ready to launch.</div>';
-      document.getElementById('btnRun').disabled = false;
-      running = false;
+      isExecuting = false;
+      currentDAG.nodes.forEach(n => n.status = 'IDLE');
+      document.getElementById('pipelineStatus').innerText = 'IDLE • READY TO EXECUTE';
+      document.getElementById('pipelineStatus').style.color = 'var(--green)';
+      document.getElementById('metricTotalTime').innerText = '0.0s';
+      document.getElementById('metricTokens').innerText = '0';
+      logEvent('SYSTEM', 'INFO', 'Workflow reset to initial state.');
     }
 
-    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+    function loadSelectedTemplate(tplKey) {
+      if (TEMPLATES[tplKey]) {
+        currentDAG = JSON.parse(JSON.stringify(TEMPLATES[tplKey]));
+        selectedNodeId = null;
+        hideInspector();
+        updateMetrics();
+        logEvent('SYSTEM', 'INFO', `Loaded template: ${tplKey.toUpperCase()}`);
+      }
+    }
+
+    function updateMetrics() {
+      document.getElementById('metricTotalAgents').innerText = currentDAG.nodes.length;
+    }
+
+    function exportDAG() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentDAG, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "agentos_pipeline.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    // Init
+    resizeCanvas();
+    updateMetrics();
   </script>
 </body>
 </html>

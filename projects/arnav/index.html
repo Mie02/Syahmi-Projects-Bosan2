@@ -3,374 +3,584 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ARNav — Indoor AR Navigation | FTMK UTeM</title>
-  <meta name="description" content="Unity 6 + AR Foundation indoor navigation system for FTMK building using QR anchors and real-time NavMesh pathfinding." />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text y='52' font-size='56'>◈</text></svg>" />
+  <title>ARNav — Indoor AR Navigation | FTMK UTeM | Mie's Project Hub</title>
+  <meta name="description" content="ARCore & Unity 6 indoor navigation simulator with live camera HUD, floating 3D spatial waypoints, QR anchor localization, and voice cues." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%23030712' stroke='%2300f0ff' stroke-width='4'/><polygon points='32 10 44 48 32 40 20 48' fill='%2300f0ff'/></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    .hub-back {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      position: fixed;
-      top: 18px;
-      left: 20px;
-      z-index: 9999;
-      padding: 8px 18px 8px 14px;
-      background: rgba(4, 7, 15, 0.85);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(0, 240, 255, 0.3);
-      border-radius: 8px;
-      font-family: 'Orbitron', monospace;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: #00f0ff;
-      text-decoration: none;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-      transition: all 0.25s ease;
-    }
-    .hub-back:hover {
-      border-color: rgba(0, 240, 255, 0.8);
-      box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
-      transform: translateX(-2px);
-    }
-    .hub-back-arrow { font-size: 1rem; line-height: 1; }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #04070f;
-      --surface: #0b1120;
-      --card-bg: rgba(13, 22, 40, 0.75);
+      --bg: #030712;
+      --surface: #0a1126;
+      --card-bg: rgba(10, 18, 40, 0.82);
+      --card-border: rgba(0, 240, 255, 0.25);
       --cyan: #00f0ff;
-      --purple: #a855f7;
-      --green: #22d3a5;
+      --green: #10b981;
       --amber: #f59e0b;
-      --text: #ccd6f6;
-      --text-dim: #8892b0;
-      --radius: 12px;
+      --purple: #a855f7;
+      --red: #f43f5e;
+      --text: #f8fafc;
+      --text-dim: #94a3b8;
+      --font-display: 'Orbitron', monospace;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-body: 'Inter', system-ui, sans-serif;
     }
+
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'Inter', system-ui, sans-serif;
-      line-height: 1.6;
+      font-family: var(--font-body);
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
       overflow-x: hidden;
-      background-image: radial-gradient(circle at 80% 20%, rgba(0, 240, 255, 0.08) 0%, transparent 50%),
-                        radial-gradient(circle at 20% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 50%);
     }
-    .container { max-width: 1200px; margin: 0 auto; padding: 80px 24px 80px; }
-    .hero { text-align: center; padding: 30px 0 50px; }
-    .badge-bar { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-    .badge {
-      font-family: 'Orbitron', monospace; font-size: 0.7rem; font-weight: 700;
-      padding: 5px 12px; border-radius: 999px; border: 1px solid rgba(0, 240, 255, 0.3);
-      background: rgba(0, 240, 255, 0.06); color: var(--cyan);
-    }
-    .title {
-      font-family: 'Orbitron', sans-serif; font-size: clamp(2rem, 4.5vw, 3.4rem);
-      font-weight: 900; line-height: 1.15;
-      background: linear-gradient(135deg, #fff 40%, var(--cyan) 80%, var(--purple) 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px;
-    }
-    .subtitle { max-width: 760px; margin: 0 auto 30px; color: var(--text-dim); font-size: 1.1rem; }
 
-    /* Interactive Simulator */
-    .sim-card {
-      background: var(--card-bg); border: 1px solid rgba(0, 240, 255, 0.25);
-      border-radius: var(--radius); padding: 24px; margin-bottom: 50px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    .hub-back {
+      display: inline-flex; align-items: center; gap: 8px; position: fixed; top: 16px; left: 20px; z-index: 9999;
+      padding: 7px 16px; background: rgba(3, 7, 18, 0.88); backdrop-filter: blur(14px);
+      border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 8px; font-family: var(--font-display);
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cyan);
+      text-decoration: none; transition: all 0.2s;
     }
-    .sim-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 12px; }
-    .sim-title { font-family: 'Orbitron', sans-serif; font-size: 1.2rem; color: #fff; display: flex; align-items: center; gap: 10px; }
-    .controls-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
-    select, button {
-      background: #060b18; border: 1px solid rgba(0, 240, 255, 0.3);
-      color: var(--text); padding: 10px 16px; border-radius: 8px; font-family: 'Inter', sans-serif;
-      font-size: 0.9rem; outline: none;
-    }
-    select:focus { border-color: var(--cyan); }
-    .btn-sim {
-      background: linear-gradient(135deg, #00f0ff, #0284c7); color: #04070f;
-      font-family: 'Orbitron', sans-serif; font-weight: 700; cursor: pointer; border: none;
-      padding: 10px 22px; transition: all 0.2s;
-    }
-    .btn-sim:hover { box-shadow: 0 0 16px rgba(0, 240, 255, 0.5); }
-    
-    #map-canvas {
-      width: 100%; height: 380px; background: #030610; border-radius: 8px;
-      border: 1px dashed rgba(0, 240, 255, 0.2); display: block;
-    }
-    .map-legend { display: flex; gap: 20px; margin-top: 14px; font-size: 0.8rem; color: var(--text-dim); flex-wrap: wrap; }
-    .legend-item { display: flex; align-items: center; gap: 6px; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-    .dot.blue { background: #00f0ff; }
-    .dot.green { background: #22d3a5; }
-    .dot.yellow { background: #f59e0b; }
-    .dot.purple { background: #a855f7; }
+    .hub-back:hover { background: rgba(0, 240, 255, 0.2); color: #fff; transform: translateX(-2px); }
 
-    /* Metrics Grid */
-    .metrics-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px; margin-bottom: 50px;
+    header {
+      padding: 16px 20px 16px 140px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--card-border);
+      background: rgba(10, 17, 36, 0.7);
+      backdrop-filter: blur(16px);
     }
-    .metric-card {
-      background: var(--card-bg); border: 1px solid rgba(0, 240, 255, 0.15);
-      border-radius: var(--radius); padding: 20px; text-align: center;
-    }
-    .metric-val { font-family: 'Orbitron', monospace; font-size: 1.8rem; font-weight: 800; color: var(--cyan); }
-    .metric-lbl { font-size: 0.82rem; color: var(--text-dim); text-transform: uppercase; margin-top: 4px; }
 
-    /* Features */
-    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 60px; }
-    .card {
-      background: var(--card-bg); border: 1px solid rgba(0, 240, 255, 0.15);
-      border-radius: var(--radius); padding: 26px;
+    .title-group h1 {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      background: linear-gradient(90deg, #fff 0%, var(--cyan) 60%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
-    .card h3 { font-family: 'Orbitron', sans-serif; font-size: 1.15rem; color: #fff; margin-bottom: 10px; }
-    .card p { color: var(--text-dim); font-size: 0.92rem; }
+    .title-group p { font-size: 0.78rem; color: var(--text-dim); margin-top: 2px; }
 
-    footer { text-align: center; padding: 40px 0; border-top: 1px solid rgba(0, 240, 255, 0.1); font-size: 0.8rem; color: var(--text-dim); font-family: 'Orbitron', monospace; }
+    /* Layout */
+    .ar-container {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 20px;
+      max-width: 1440px;
+      margin: 20px auto;
+      padding: 0 20px 30px;
+      flex: 1;
+      width: 100%;
+    }
+    @media (max-width: 1024px) {
+      .ar-container { grid-template-columns: 1fr; }
+      header { padding-left: 20px; padding-top: 70px; }
+    }
+
+    /* AR Viewport Window */
+    .viewport-box {
+      position: relative;
+      width: 100%;
+      height: 480px;
+      background: #02050f;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+
+    video#cameraFeed {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    canvas#arOverlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    /* HUD Reticle */
+    .hud-header {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      right: 14px;
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--cyan);
+      background: rgba(3, 7, 18, 0.75);
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      backdrop-filter: blur(10px);
+    }
+
+    .hud-compass {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(3, 7, 18, 0.8);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      border-radius: 20px;
+      padding: 6px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: #fff;
+    }
+
+    /* Panel Card */
+    .panel-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 18px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--cyan);
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+      padding-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .form-select {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+      background: rgba(5, 9, 20, 0.9);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      outline: none;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: 1px solid var(--card-border);
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--text);
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      background: rgba(30, 41, 59, 0.9);
+      border-color: var(--cyan);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #00f0ff 0%, #0284c7 100%);
+      border: none;
+      color: #040814;
+      font-weight: 800;
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.35);
+    }
+
+    .qr-pill-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .qr-pill {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 6px;
+      padding: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .qr-pill:hover {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--cyan);
+    }
+
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      background: rgba(5, 9, 20, 0.7);
+      border-left: 3px solid var(--cyan);
+      font-size: 0.8rem;
+    }
   </style>
 </head>
 <body>
 
-  <a class="hub-back" href="../../index.html" aria-label="Back to Project Hub">
-    <span class="hub-back-arrow">←</span> Hub
-  </a>
+  <a href="../../index.html" class="hub-back">← Hub</a>
 
-  <div class="container">
-    <header class="hero">
-      <div class="badge-bar">
-        <span class="badge">UTeM FTMK FYP</span>
-        <span class="badge">Unity 6</span>
-        <span class="badge">AR Foundation</span>
-        <span class="badge">NavMesh 3D</span>
-        <span class="badge">QR Anchor Tracking</span>
+  <header>
+    <div class="title-group">
+      <h1>ARNav — Indoor AR Navigation</h1>
+      <p>Unity 6 & ARCore Spatial Guidance System • FTMK UTeM Building</p>
+    </div>
+
+    <div style="display: flex; gap: 10px;">
+      <button class="btn" onclick="toggleWebcam()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+        <span id="webcamBtnText">Use Real Webcam</span>
+      </button>
+
+      <button class="btn btn-primary" onclick="speakNavigation()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        <span>Voice Guide</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="ar-container">
+
+    <!-- Left: AR Viewport & Camera Feed -->
+    <div class="viewport-box">
+      <!-- Video Element -->
+      <video id="cameraFeed" autoplay playsinline muted></video>
+
+      <!-- 3D Perspective AR Overlay Canvas -->
+      <canvas id="arOverlay"></canvas>
+
+      <!-- HUD Header -->
+      <div class="hud-header">
+        <div>TRACKING: <span id="hudTracking" style="color: var(--green);">ANCHOR LOCKED</span></div>
+        <div>CURRENT: <span id="hudCurrentAnchor" style="color: #fff;">QR-FOYER-GROUND</span></div>
+        <div>TARGET: <span id="hudTarget" style="color: var(--amber);">LAB AI 2</span></div>
       </div>
-      <h1 class="title">ARNAV — INDOOR AR NAVIGATION</h1>
-      <p class="subtitle">
-        Spatial AR wayfinding system designed for the Faculty of Information and Communication Technology (FTMK), UTeM. Eliminates complex indoor disorientation through QR code spatial anchors and real-time augmented path projections.
-      </p>
-    </header>
 
-    <!-- Interactive Floor Map Simulation -->
-    <div class="sim-card">
-      <div class="sim-header">
-        <div class="sim-title">
-          <span>◈</span> FTMK Level 1 Spatial Simulation
-        </div>
-        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--cyan);">
-          STATUS: <span id="nav-status">READY FOR ROUTE</span>
-        </div>
+      <!-- Compass & Bearing HUD -->
+      <div class="hud-compass">
+        <span id="hudBearing">BEARING: 042° NE</span>
+        <span>•</span>
+        <span id="hudDistance" style="color: var(--cyan); font-weight: 700;">18.4m REMAINING</span>
       </div>
+    </div>
 
-      <div class="controls-row">
-        <div>
-          <label style="font-size: 0.75rem; color: var(--text-dim); display:block; margin-bottom:4px;">START LOCATION</label>
-          <select id="start-node">
-            <option value="lobby">FTMK Main Lobby (QR #01)</option>
-            <option value="dk3">Dewan Kuliah 3 (DK3)</option>
-            <option value="lab-ai">Lab AI & Data Science</option>
-            <option value="cafe">Faculty Cafeteria</option>
+    <!-- Right: Navigation Controls & QR Anchors -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      
+      <!-- Route Destination Picker -->
+      <div class="panel-card">
+        <div class="card-title">
+          <span>Set Navigation Destination</span>
+          <span style="font-size: 0.7rem; color: var(--green);">FTMK Campus</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Floor Level</label>
+          <select id="floorSelect" class="form-select" onchange="updateFloor(this.value)">
+            <option value="G">Ground Floor (Foyer & Facilities)</option>
+            <option value="1" selected>Floor 1 (Labs & Lecture Halls)</option>
+            <option value="2">Floor 2 (Dean Office & Faculty)</option>
           </select>
         </div>
 
-        <div>
-          <label style="font-size: 0.75rem; color: var(--text-dim); display:block; margin-bottom:4px;">DESTINATION</label>
-          <select id="end-node">
-            <option value="seminar">Bilik Seminar Al-Jazari</option>
-            <option value="lab-ai">Lab AI & Data Science</option>
-            <option value="office">Pejabat Dekan / Admin Office</option>
-            <option value="dk3">Dewan Kuliah 3 (DK3)</option>
+        <div class="form-group">
+          <label class="form-label">Destination Room / Lab</label>
+          <select id="destSelect" class="form-select" onchange="updateDestination(this.value)">
+            <option value="Lab AI 2" selected>Advanced AI & Robotics Lab (Floor 1)</option>
+            <option value="DK1">Dewan Kuliah 1 - Main Auditorium (Floor G)</option>
+            <option value="Dean Office">Pejabat Dekan FTMK (Floor 2)</option>
+            <option value="Cafeteria">FTMK Cyber Cafe (Floor G)</option>
+            <option value="Makmal 4">Software Engineering Lab 4 (Floor 1)</option>
           </select>
         </div>
-
-        <button class="btn-sim" id="btn-calc" style="margin-top: 18px;">
-          <span>▶ Calculate AR Path</span>
-        </button>
       </div>
 
-      <canvas id="map-canvas" width="900" height="380"></canvas>
+      <!-- QR Anchor Localization -->
+      <div class="panel-card">
+        <div class="card-title">
+          <span>QR Anchor Localization</span>
+          <span style="font-size: 0.68rem; color: var(--text-dim);">Tap to Calibrate</span>
+        </div>
 
-      <div class="map-legend">
-        <div class="legend-item"><span class="dot blue"></span> Current Anchor (QR)</div>
-        <div class="legend-item"><span class="dot green"></span> Target Destination</div>
-        <div class="legend-item"><span class="dot yellow"></span> Augmented Waypoints</div>
-        <div class="legend-item"><span class="dot purple"></span> NavMesh Corridor Grid</div>
+        <div class="qr-pill-grid">
+          <div class="qr-pill" onclick="calibrateAnchor('QR-FOYER-GROUND', 'Main Foyer')">
+            <div style="color: var(--cyan); font-weight: 700;">QR-FOYER-G</div>
+            <div style="color: var(--text-dim); margin-top: 2px;">Main Lobby Entrance</div>
+          </div>
+          <div class="qr-pill" onclick="calibrateAnchor('QR-LIFT-F1', 'Elevator F1')">
+            <div style="color: var(--purple); font-weight: 700;">QR-ELEV-F1</div>
+            <div style="color: var(--text-dim); margin-top: 2px;">Floor 1 Central Shaft</div>
+          </div>
+          <div class="qr-pill" onclick="calibrateAnchor('QR-LAB-AI', 'Lab AI 2 Door')">
+            <div style="color: var(--green); font-weight: 700;">QR-LAB-AI</div>
+            <div style="color: var(--text-dim); margin-top: 2px;">East Wing Lab Corridor</div>
+          </div>
+          <div class="qr-pill" onclick="calibrateAnchor('QR-DEAN-F2', 'Dean Office Lobby')">
+            <div style="color: var(--amber); font-weight: 700;">QR-DEAN-F2</div>
+            <div style="color: var(--text-dim); margin-top: 2px;">Floor 2 Administration</div>
+          </div>
+        </div>
       </div>
+
+      <!-- Turn-by-Turn Route Guidance -->
+      <div class="panel-card">
+        <div class="card-title">Turn-by-Turn AR Cues</div>
+        <div id="stepList" class="step-list">
+          <div class="step-item">
+            <span style="color: var(--cyan); font-weight: 700;">1.</span>
+            <span>Walk 12m forward along South Hallway.</span>
+          </div>
+          <div class="step-item">
+            <span style="color: var(--cyan); font-weight: 700;">2.</span>
+            <span>Turn right at Central Elevator (Floor 1).</span>
+          </div>
+          <div class="step-item">
+            <span style="color: var(--green); font-weight: 700;">3.</span>
+            <span>Destination: <strong>Lab AI 2</strong> on your left.</span>
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <!-- Research Metrics from User Study -->
-    <h2 style="font-family: 'Orbitron', sans-serif; font-size: 1.4rem; color: #fff; margin-bottom: 18px;">
-      📊 Empirical Evaluation & User Study
-    </h2>
-    <div class="metrics-grid">
-      <div class="metric-card">
-        <div class="metric-val">94.2%</div>
-        <div class="metric-lbl">Task Completion Rate</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-val">0.24m</div>
-        <div class="metric-lbl">QR Anchor Drift Margin</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-val">68.5%</div>
-        <div class="metric-lbl">Navigation Time Saved</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-val">4.8 / 5</div>
-        <div class="metric-lbl">SUS Usability Score</div>
-      </div>
-    </div>
-
-    <!-- Core Architecture -->
-    <div class="grid-2">
-      <div class="card">
-        <h3>📍 QR Spatial Anchoring</h3>
-        <p>
-          QR codes fixed at key junction pillars provide immediate 6DoF camera position and rotation re-localization, defeating ARKit/ARCore Visual-Inertial Odometry drift in long featureless corridors.
-        </p>
-      </div>
-      <div class="card">
-        <h3>🧭 3D Dynamic NavMesh</h3>
-        <p>
-          Pre-baked architectural geometry of FTMK building with real-time obstacle avoidance. Generates smooth Bézier ribbon arrows drawn directly on the user's camera feed.
-        </p>
-      </div>
-    </div>
-
-    <footer>
-      MIE'S PROJECT HUB &nbsp;·&nbsp; ARNAV FTKM UTEM &nbsp;·&nbsp; ALL RIGHTS RESERVED
-    </footer>
-  </div>
+  </main>
 
   <script>
-    const canvas = document.getElementById('map-canvas');
+    const canvas = document.getElementById('arOverlay');
     const ctx = canvas.getContext('2d');
+    const video = document.getElementById('cameraFeed');
+    let usingWebcam = false;
+    let animFrame;
+    let arrowOffset = 0;
+    let currentDistance = 18.4;
+    let currentBearing = 42;
 
-    const nodes = {
-      'lobby':   { x: 120, y: 300, name: 'Main Lobby' },
-      'dk3':     { x: 340, y: 300, name: 'DK 3' },
-      'cafe':    { x: 120, y: 100, name: 'Cafeteria' },
-      'lab-ai':  { x: 550, y: 180, name: 'Lab AI' },
-      'seminar': { x: 780, y: 120, name: 'Bilik Seminar' },
-      'office':  { x: 780, y: 300, name: 'Pejabat Dekan' }
-    };
+    function resizeCanvas() {
+      canvas.width = canvas.parentElement.clientWidth * window.devicePixelRatio;
+      canvas.height = canvas.parentElement.clientHeight * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-    const corridors = [
-      ['lobby', 'cafe'],
-      ['lobby', 'dk3'],
-      ['cafe', 'seminar'],
-      ['dk3', 'office'],
-      ['dk3', 'lab-ai'],
-      ['lab-ai', 'seminar'],
-      ['office', 'seminar']
-    ];
-
-    let currentPath = [];
-    let progress = 0;
-    let animId = null;
-
-    function drawMap() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Draw grid
-      ctx.strokeStyle = 'rgba(0, 240, 255, 0.05)';
-      ctx.lineWidth = 1;
-      for (let x = 0; x < canvas.width; x += 30) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
-      }
-      for (let y = 0; y < canvas.height; y += 30) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-      }
-
-      // Draw corridors
-      ctx.strokeStyle = 'rgba(168, 85, 247, 0.25)';
-      ctx.lineWidth = 6;
-      ctx.lineCap = 'round';
-      corridors.forEach(([a, b]) => {
-        const n1 = nodes[a], n2 = nodes[b];
-        ctx.beginPath();
-        ctx.moveTo(n1.x, n1.y);
-        ctx.lineTo(n2.x, n2.y);
-        ctx.stroke();
-      });
-
-      // Draw active AR path if present
-      if (currentPath.length > 1) {
-        ctx.strokeStyle = '#00f0ff';
-        ctx.lineWidth = 4;
-        ctx.setLineDash([8, 6]);
-        ctx.beginPath();
-        const start = nodes[currentPath[0]];
-        ctx.moveTo(start.x, start.y);
-        for (let i = 1; i < currentPath.length; i++) {
-          const pt = nodes[currentPath[i]];
-          ctx.lineTo(pt.x, pt.y);
+    // Webcam toggle
+    async function toggleWebcam() {
+      if (!usingWebcam) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+          video.srcObject = stream;
+          usingWebcam = true;
+          document.getElementById('webcamBtnText').innerText = 'Stop Webcam';
+          document.getElementById('hudTracking').innerText = 'CAMERA FEED ACTIVE';
+        } catch (e) {
+          alert('Webcam permission denied. Running in Campus Corridor Simulation mode!');
         }
+      } else {
+        if (video.srcObject) {
+          video.srcObject.getTracks().forEach(t => t.stop());
+          video.srcObject = null;
+        }
+        usingWebcam = false;
+        document.getElementById('webcamBtnText').innerText = 'Use Real Webcam';
+        document.getElementById('hudTracking').innerText = 'SIMULATOR ACTIVE';
+      }
+    }
+
+    // AR HUD Overlay Rendering Loop
+    function renderAROverlay() {
+      arrowOffset = (arrowOffset + 0.05) % 1.0;
+      const w = canvas.parentElement.clientWidth;
+      const h = canvas.parentElement.clientHeight;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // If webcam is not active, draw simulated corridor perspective lines
+      if (!usingWebcam) {
+        ctx.fillStyle = '#060b18';
+        ctx.fillRect(0, 0, w, h);
+
+        // Perspective corridor grid
+        ctx.strokeStyle = 'rgba(0, 240, 255, 0.12)';
+        ctx.lineWidth = 1.5;
+        const horizonY = h * 0.45;
+
+        ctx.beginPath();
+        // Floor vanishing lines
+        ctx.moveTo(w * 0.5, horizonY); ctx.lineTo(0, h);
+        ctx.moveTo(w * 0.5, horizonY); ctx.lineTo(w * 0.25, h);
+        ctx.moveTo(w * 0.5, horizonY); ctx.lineTo(w * 0.5, h);
+        ctx.moveTo(w * 0.5, horizonY); ctx.lineTo(w * 0.75, h);
+        ctx.moveTo(w * 0.5, horizonY); ctx.lineTo(w, h);
+        // Ceiling vanishing lines
+        ctx.moveTo(w * 0.5, horizonY); ctx.lineTo(0, 0);
+        ctx.moveTo(w * 0.5, horizonY); ctx.lineTo(w, 0);
         ctx.stroke();
-        ctx.setLineDash([]);
 
-        // Animated pulse
-        const n1 = nodes[currentPath[0]];
-        const n2 = nodes[currentPath[currentPath.length - 1]];
-        const cx = n1.x + (n2.x - n1.x) * progress;
-        const cy = n1.y + (n2.y - n1.y) * progress;
-        ctx.beginPath();
-        ctx.arc(cx, cy, 8, 0, Math.PI * 2);
-        ctx.fillStyle = '#f59e0b';
-        ctx.fill();
-        ctx.shadowColor = '#f59e0b';
-        ctx.shadowBlur = 12;
+        // Horizontal depth ribs
+        for (let i = 1; i <= 5; i++) {
+          const depthY = horizonY + (h - horizonY) * (i / 5);
+          ctx.beginPath();
+          ctx.moveTo(0, depthY);
+          ctx.lineTo(w, depthY);
+          ctx.stroke();
+        }
       }
 
-      // Draw nodes
-      for (const [key, n] of Object.entries(nodes)) {
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, 7, 0, Math.PI * 2);
-        ctx.fillStyle = '#00f0ff';
-        ctx.fill();
+      // Draw 3D Floating AR Navigation Chevrons
+      const numArrows = 4;
+      for (let i = 0; i < numArrows; i++) {
+        const t = (i / numArrows + arrowOffset) % 1.0;
+        const startY = h * 0.85;
+        const endY = h * 0.48;
+        const y = startY - (startY - endY) * t;
+        const scale = 1.0 - t * 0.65;
+        const alpha = Math.sin(t * Math.PI);
 
-        ctx.fillStyle = '#ccd6f6';
-        ctx.font = '11px Orbitron, monospace';
-        ctx.fillText(n.name, n.x - 30, n.y - 14);
+        ctx.save();
+        ctx.translate(w * 0.5, y);
+        ctx.scale(scale, scale);
+
+        // Glowing Chevron
+        ctx.strokeStyle = `rgba(0, 240, 255, ${alpha * 0.9})`;
+        ctx.lineWidth = 6;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.shadowColor = '#00f0ff';
+        ctx.shadowBlur = 16;
+
+        ctx.beginPath();
+        ctx.moveTo(-40, 15);
+        ctx.lineTo(0, -15);
+        ctx.lineTo(40, 15);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.restore();
       }
-      ctx.shadowBlur = 0;
+
+      // Floating Destination Beacon Pin in 3D Space
+      const beaconX = w * 0.5;
+      const beaconY = h * 0.44;
+
+      ctx.save();
+      ctx.translate(beaconX, beaconY);
+
+      // Pulse ring
+      ctx.strokeStyle = 'rgba(16, 185, 129, 0.6)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(0, -35, 18 + Math.sin(Date.now() / 200) * 4, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Pin body
+      ctx.fillStyle = '#10b981';
+      ctx.shadowColor = '#10b981';
+      ctx.shadowBlur = 16;
+      ctx.beginPath();
+      ctx.arc(0, -35, 12, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(-6, -26);
+      ctx.lineTo(0, 0);
+      ctx.lineTo(6, -26);
+      ctx.fill();
+
+      // Target Label
+      ctx.font = '700 11px "Orbitron", sans-serif';
+      ctx.fillStyle = '#f8fafc';
+      ctx.textAlign = 'center';
+      ctx.fillText(document.getElementById('hudTarget').innerText, 0, -56);
+
+      ctx.font = '600 9px "JetBrains Mono", monospace';
+      ctx.fillStyle = '#00f0ff';
+      ctx.fillText(`${currentDistance}m`, 0, -68);
+
+      ctx.restore();
+
+      requestAnimationFrame(renderAROverlay);
+    }
+    renderAROverlay();
+
+    // Controls
+    function updateDestination(val) {
+      document.getElementById('hudTarget').innerText = val;
+      currentDistance = (Math.random() * 15 + 10).toFixed(1);
+      document.getElementById('hudDistance').innerText = `${currentDistance}m REMAINING`;
     }
 
-    function calculateRoute() {
-      const s = document.getElementById('start-node').value;
-      const e = document.getElementById('end-node').value;
-      if (s === e) {
-        alert('Start and destination must be different.');
-        return;
-      }
-
-      // Sample mock route
-      if (s === 'lobby' && e === 'seminar') currentPath = ['lobby', 'cafe', 'seminar'];
-      else if (s === 'lobby' && e === 'lab-ai') currentPath = ['lobby', 'dk3', 'lab-ai'];
-      else currentPath = [s, e];
-
-      document.getElementById('nav-status').textContent = 'AR GUIDANCE ACTIVE';
-      progress = 0;
-
-      if (animId) cancelAnimationFrame(animId);
-      function animate() {
-        progress += 0.008;
-        if (progress > 1) progress = 0;
-        drawMap();
-        animId = requestAnimationFrame(animate);
-      }
-      animate();
+    function calibrateAnchor(code, label) {
+      document.getElementById('hudCurrentAnchor').innerText = code;
+      alert(`AR Anchor Scanned: ${code} (${label})\nCamera pose calibrated in 3D metric space!`);
     }
 
-    document.getElementById('btn-calc').addEventListener('click', calculateRoute);
-    drawMap();
+    function updateFloor(floor) {
+      alert(`Switched indoor map to Floor ${floor}. Recalculating vertical path.`);
+    }
+
+    function speakNavigation() {
+      const text = `ARNav route guidance active. Walk straight along hallway toward ${document.getElementById('hudTarget').innerText}. Distance remaining is ${currentDistance} meters.`;
+      if ('speechSynthesis' in window) {
+        const u = new SpeechSynthesisUtterance(text);
+        u.pitch = 1.0;
+        u.rate = 1.0;
+        window.speechSynthesis.speak(u);
+      } else {
+        alert(text);
+      }
+    }
   </script>
 </body>
 </html>
