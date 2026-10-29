@@ -238,6 +238,7 @@ export function createObjectViewers(THREE, options) {
       record.element.classList.add('object-ready');
       if (record.fallback) record.fallback.hidden = true;
       rebuild(); resize(); render(); schedule();
+      if (!record.failed) record.element.closest('.object-lab')?.querySelectorAll('[data-object-reset], [data-object-choice]').forEach(button => { button.disabled = false; });
       window.dispatchEvent(new CustomEvent('object:ready', { detail: { kind: record.kind, image: Boolean(record.image) } }));
     } catch (_) { showFallback(record, true); }
   }

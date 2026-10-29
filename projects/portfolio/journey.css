@@ -1,5 +1,5 @@
 /* A continuous, progressively enhanced space journey. */
-@view-transition { navigation: auto; }
+/* Shared departure/arrival effects work consistently across browsers. */
 :root {
   --bg: #05060a;
   --surface: #111216;

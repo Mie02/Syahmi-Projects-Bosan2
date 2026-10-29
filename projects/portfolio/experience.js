@@ -5,6 +5,7 @@
   let paused = reduced.matches;
   try { const saved = sessionStorage.getItem('syz-motion-paused'); if (saved !== null) paused = saved === 'true'; } catch (_) {}
   const motionAllowed = () => !paused;
+  document.querySelectorAll('[data-object-reset], [data-object-choice]').forEach(button => { button.disabled = true; });
   let revealObserver;
   function syncMotion(value) {
     const wasPaused = paused;
