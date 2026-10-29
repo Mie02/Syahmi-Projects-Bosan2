@@ -6,11 +6,15 @@
   const stage = canvas?.closest('.scene-stage');
   if (!canvas || !stage) return;
   const status = document.getElementById('scene-status');
+  const motionButtons = [...document.querySelectorAll('#motion-toggle, #global-motion')];
   const motionButton = document.getElementById('motion-toggle');
   const modeButtons = [...document.querySelectorAll('[data-scene-mode]')];
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const state = { mode: 'orbit', paused: reducedMotion.matches, ready: false, fallback: false, rotation: 0 };
-  let renderer, scene, camera, sculpture, ringSystem, stars, moon, atmosphere, planet;
+  let motionPreference = null;
+  try { motionPreference = sessionStorage.getItem('syz-motion-paused'); } catch (_) { /* Private storage may be disabled. */ }
+  const state = { mode: 'orbit', paused: motionPreference === null ? reducedMotion.matches : motionPreference === 'true', ready: false, fallback: false, rotation: 0, chapter: 'orbit', progress: 0, objectsReady: false };
+  let renderer, scene, camera, sculpture, ringSystem, stars, moon, atmosphere, planet, satellite, streaks, streakPositions, starSeeds;
+  let objectController;
   let frame = 0;
   let inView = true;
   let lost = false;
@@ -23,19 +27,30 @@
   let height = 1;
   let mobile = false;
   let targetRotation = 0;
-  let scrollProgress = 0;
+  let scrollDirty = true;
+  let chapters = [];
+  let currentPose = null;
+  let targetPose = null;
+  let departure = 0;
+  let departureTarget = 0;
   const pointer = { x: 0, y: 0 };
   const palettes = {
-    orbit: { light: '#bca27d', dark: '#302b24', ring: '#a58b60', haze: '#b9925a', exposure: 1.0 },
-    nebula: { light: '#9dacaa', dark: '#222e34', ring: '#899d95', haze: '#75aaa0', exposure: 1.0 },
-    eclipse: { light: '#b58c60', dark: '#211d1a', ring: '#816245', haze: '#d4863b', exposure: 0.85 }
+    orbit: { light: '#bca27d', dark: '#302b24', ring: '#a58b60', haze: '#719ece', exposure: 1.0 },
+    nebula: { light: '#9dacaa', dark: '#222e34', ring: '#899d95', haze: '#668dd0', exposure: 1.0 },
+    eclipse: { light: '#b58c60', dark: '#211d1a', ring: '#816245', haze: '#7399bb', exposure: 0.85 }
   };
 
   function syncControls() {
-    motionButton?.setAttribute('aria-pressed', String(state.paused));
-    const label = motionButton?.querySelector('[data-motion-label]');
-    if (label) label.textContent = state.paused ? 'Resume motion' : 'Pause motion';
-    else if (motionButton) motionButton.textContent = state.paused ? 'Resume motion' : 'Pause motion';
+    motionButtons.forEach(button => {
+      button.setAttribute('aria-pressed', String(state.paused));
+      const label = button.querySelector('[data-motion-label]');
+      const name = button.id === 'global-motion' ? 'animations' : 'motion';
+      if (label) label.textContent = `${state.paused ? 'Resume' : 'Pause'} ${name}`;
+      else button.textContent = `${state.paused ? 'Resume' : 'Pause'} ${name}`;
+    });
+    document.body.classList.toggle('motion-paused', state.paused);
+    document.body.classList.toggle('motion-enabled', !state.paused);
+    stage.dataset.scenePaused = String(state.paused);
     modeButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.sceneMode === state.mode)));
   }
 
@@ -66,14 +81,19 @@
     frame = requestAnimationFrame(animate);
   }
 
-  function setPaused(value) {
+  function setPaused(value, explicit = true) {
     state.paused = Boolean(value);
+    if (explicit) {
+      motionPreference = String(state.paused);
+      try { sessionStorage.setItem('syz-motion-paused', motionPreference); } catch (_) { /* Continue without persistence. */ }
+    }
     syncControls();
+    window.dispatchEvent(new CustomEvent('portfolio:motion', { detail: { paused: state.paused, reduced: reducedMotion.matches } }));
     if (state.paused) {
       cancelAnimationFrame(frame);
       frame = 0;
       renderStill();
-    } else schedule();
+    } else { scrollDirty = true; schedule(); }
   }
 
   function setMode(value) {
@@ -97,22 +117,26 @@
     pointer.x = 0;
     pointer.y = 0;
     if (sculpture) {
-      sculpture.rotation.y = 0;
-      sculpture.rotation.x = 0;
+      sculpture.rotation.y = currentPose?.ry || 0;
+      sculpture.rotation.x = currentPose?.rx || 0;
       state.rotation = 0;
       renderStill();
     }
   }
 
-  window.orbitalScene = { setMode, setPaused, reset, getState: () => ({ ...state }) };
+  window.orbitalScene = { setMode, setPaused, reset, setObject: value => objectController?.setObject(value), getState: () => ({ ...state }) };
   syncControls();
-  motionButton?.addEventListener('click', () => setPaused(!state.paused));
+  window.dispatchEvent(new CustomEvent('portfolio:motion', { detail: { paused: state.paused, reduced: reducedMotion.matches } }));
+  motionButtons.forEach(button => button.addEventListener('click', () => setPaused(!state.paused)));
   document.getElementById('reset-view')?.addEventListener('click', reset);
   modeButtons.forEach(button => button.addEventListener('click', () => setMode(button.dataset.sceneMode)));
-  reducedMotion.addEventListener('change', event => setPaused(event.matches));
+  reducedMotion.addEventListener('change', event => { if (motionPreference === null) setPaused(event.matches, false); });
 
   // The scene does not capture wheel events or vertical touch gestures.
-  const interaction = document.getElementById('scene-interaction') || stage;
+  const interactions = [...document.querySelectorAll('[data-space-interact]')];
+  // Older pages can retain a directly focusable, non-global stage.
+  if (!interactions.length && stage.tabIndex >= 0 && getComputedStyle(stage).position !== 'fixed') interactions.push(stage);
+  interactions.forEach(interaction => {
   interaction.addEventListener('pointerdown', event => {
     if (event.button !== 0 || event.target.closest('button, a, input')) return;
     dragging = true;
@@ -126,7 +150,7 @@
       targetRotation += (event.clientX - lastX) * 0.006;
       lastX = event.clientX;
       if (state.paused && sculpture) {
-        sculpture.rotation.y = targetRotation;
+        sculpture.rotation.y = (currentPose?.ry || 0) + targetRotation;
         state.rotation = targetRotation;
         renderStill();
       }
@@ -152,15 +176,18 @@
     else {
       targetRotation += event.key === 'ArrowLeft' ? -0.16 : 0.16;
       if (state.paused && sculpture) {
-        sculpture.rotation.y = targetRotation;
+        sculpture.rotation.y = (currentPose?.ry || 0) + targetRotation;
         state.rotation = targetRotation;
         renderStill();
       }
     }
   });
+  });
   window.addEventListener('scroll', () => {
-    if (!state.paused && inView) scrollProgress = Math.min(1, Math.max(0, -stage.getBoundingClientRect().top / height));
+    scrollDirty = true;
   }, { passive: true });
+  window.addEventListener('portfolio:navigate', () => { if (!state.paused) departureTarget = 1; });
+  window.addEventListener('portfolio:arrive', () => { departureTarget = 0; scrollDirty = true; });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       cancelAnimationFrame(frame);
@@ -192,6 +219,18 @@
     schedule();
   });
 
+  window.addEventListener('pagehide', event => {
+    cancelAnimationFrame(frame); frame = 0;
+    if (!event.persisted && renderer) {
+      scene?.traverse(child => {
+        child.geometry?.dispose();
+        if (child.material) (Array.isArray(child.material) ? child.material : [child.material]).forEach(material => material.dispose());
+      });
+      renderer.dispose();
+    }
+  });
+  window.addEventListener('pageshow', () => { scrollDirty = true; schedule(); });
+
   const noiseGLSL = `
     float hash(vec3 p) { p=fract(p*0.3183099+vec3(0.1,0.2,0.3)); p*=17.0; return fract(p.x*p.y*p.z*(p.x+p.y+p.z)); }
     float noise(vec3 p) {
@@ -203,6 +242,16 @@
   `;
 
   import('./assets/vendor/three.module.min.js').then(THREE => {
+    import('./objects.js').then(module => {
+      objectController = module.createObjectViewers(THREE, { paused: () => state.paused });
+      state.objectsReady = true;
+    }).catch(() => {
+      document.querySelectorAll('[data-object-viewer]').forEach(viewer => {
+        viewer.dataset.objectState = 'unavailable';
+        viewer.dataset.ready = 'false';
+        (viewer.closest('.object-lab') || viewer).querySelectorAll('[data-object-reset], [data-object-choice]').forEach(button => { button.disabled = true; });
+      });
+    });
     try {
       const attributes = { alpha: true, antialias: true, powerPreference: 'high-performance', premultipliedAlpha: true };
       const context = canvas.getContext('webgl2', attributes) || canvas.getContext('webgl', attributes);
@@ -305,7 +354,7 @@
         dustPositions[i * 3 + 1] = Math.sin(a) * r;
         dustPositions[i * 3 + 2] = (random() - 0.5) * 0.09;
         const light = 0.36 + random() * 0.56;
-        dustColors.set([light, light * 0.85, light * 0.65], i * 3);
+        dustColors.set([light * 0.81, light * 0.9, light], i * 3);
       }
       const dustGeometry = new THREE.BufferGeometry();
       dustGeometry.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
@@ -343,16 +392,40 @@
 
       const starPositions = new Float32Array(650 * 3);
       const starColors = new Float32Array(650 * 3);
+      starSeeds = new Float32Array(650 * 3);
       for (let i = 0; i < 650; i++) {
         starPositions.set([(random() - 0.5) * 42, (random() - 0.5) * 26, -6 - random() * 18], i * 3);
+        starSeeds.set(starPositions.subarray(i * 3, i * 3 + 3), i * 3);
         const l = 0.16 + random() * 0.64;
-        starColors.set([l, l * 0.97, l * 0.87], i * 3);
+        starColors.set([l * 0.79, l * 0.9, l], i * 3);
       }
       const starGeometry = new THREE.BufferGeometry();
       starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
       starGeometry.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
       stars = new THREE.Points(starGeometry, new THREE.PointsMaterial({ size: 0.027, vertexColors: true, transparent: true, opacity: 0.85, depthWrite: false }));
       scene.add(stars);
+      streakPositions = new Float32Array(650 * 6);
+      const streakGeometry = new THREE.BufferGeometry();
+      streakGeometry.setAttribute('position', new THREE.BufferAttribute(streakPositions, 3));
+      streaks = new THREE.LineSegments(streakGeometry, new THREE.LineBasicMaterial({ color: '#8caed9', transparent: true, opacity: 0, depthWrite: false }));
+      streaks.frustumCulled = false;
+      scene.add(streaks);
+
+      // A second ambient subject gives the skills chapter its own visual identity.
+      satellite = new THREE.Group();
+      const silver = new THREE.MeshStandardMaterial({ color: '#bdceda', metalness: 0.78, roughness: 0.24 });
+      const blue = new THREE.MeshBasicMaterial({ color: '#93c5ff', transparent: true, opacity: 0.5 });
+      satellite.add(new THREE.Mesh(new THREE.IcosahedronGeometry(0.65, 0), silver));
+      const frameGeometry = new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(1.2, 0));
+      satellite.add(new THREE.LineSegments(frameGeometry, new THREE.LineBasicMaterial({ color: '#88add1', transparent: true, opacity: 0.35 })));
+      for (let i = 0; i < 3; i++) {
+        const orbit = new THREE.Mesh(new THREE.TorusGeometry(1.55, 0.008, 4, 96), blue);
+        orbit.rotation.set(i * 0.95, i * 0.7, 0.3);
+        satellite.add(orbit);
+      }
+      satellite.position.set(-2.2, 0.1, -1.5);
+      satellite.scale.setScalar(0.001);
+      scene.add(satellite);
       const key = new THREE.DirectionalLight('#fff0d4', 3.4);
       key.position.set(-3, 5, 5);
       scene.add(key);
@@ -367,14 +440,17 @@
         height = Math.max(1, rect.height);
         mobile = window.matchMedia('(max-width: 760px)').matches;
         const tablet = !mobile && window.matchMedia('(max-width: 1100px)').matches;
-        renderer.setPixelRatio(mobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.6));
+        renderer.setPixelRatio(mobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.5));
         renderer.setSize(width, height, false);
         camera.aspect = width / height;
         camera.fov = mobile ? 43 : 37;
-        camera.position.z = mobile ? 9.2 : tablet ? 12.2 : 10.6;
+        camera.position.z = mobile ? 10.6 : tablet ? 12.2 : 10.6;
         camera.updateProjectionMatrix();
-        sculpture.position.set(mobile ? 0.45 : tablet ? 2.05 : Math.min(2.48, (width / height) * 1.28), mobile ? -0.23 : 0.14, 0);
-        sculpture.scale.setScalar(mobile ? 0.91 : tablet ? 0.65 : 1);
+        chapters = [...document.querySelectorAll('[data-space-chapter]')];
+        scrollDirty = true;
+        updateChapter();
+        currentPose = { ...targetPose };
+        applyPose(true);
         renderStill();
       }
       if ('ResizeObserver' in window) new ResizeObserver(resize).observe(stage);
@@ -392,19 +468,110 @@
     } catch (_) { renderer?.dispose(); fallback(); }
   }).catch(fallback);
 
+  function chapterPose(name, progress = 0) {
+    const inner = document.body.classList.contains('inner-page');
+    const tablet = !mobile && window.matchMedia('(max-width: 1100px)').matches;
+    const base = {
+      x: mobile ? 0.25 : tablet ? 2.05 : Math.min(2.48, (width / height) * 1.28),
+      y: mobile ? -2.9 : 0.14, z: 0, s: mobile ? 0.7 : tablet ? 0.65 : 1,
+      rx: 0, ry: 0, cam: tablet ? 12.2 : 10.6, star: 0.75, warp: 0, sat: 0
+    };
+    if (inner) Object.assign(base, { x: mobile ? 1.48 : 3.6, y: mobile ? 1.4 : 0.55, s: mobile ? 0.4 : 0.58, cam: 11.8 });
+    if (name === 'voyage') {
+      // Scroll supplies a finite flight through the orbital plane; it never owns the wheel.
+      const flight = Math.sin(progress * Math.PI);
+      Object.assign(base, {
+        x: (mobile ? 0.5 : 2.0) - progress * (mobile ? 5.5 : 8.5),
+        y: 0.2 + progress * 0.9, z: flight * 3.2,
+        s: (mobile ? 0.74 : 1.05) + flight * 0.38,
+        rx: -0.08 + progress * 0.28, ry: progress * 0.9,
+        cam: 10.4 - flight * 1.0, star: 0.9, warp: flight
+      });
+    } else if (name === 'work') {
+      Object.assign(base, { x: mobile ? 3.5 : 5.5, y: 0.9, s: 0.55, cam: 12.3, ry: 0.9, star: 0.62 });
+    } else if (name === 'about') {
+      Object.assign(base, { x: mobile ? -2.3 : -3.4, y: mobile ? 1.0 : -0.2, s: mobile ? 0.4 : 0.66, cam: 12.7, ry: 1.0, star: 0.5 });
+    } else if (name === 'toolkit') {
+      Object.assign(base, { x: mobile ? 3.4 : 5.4, y: 1.8, s: 0.3, cam: 13.2, ry: 1.35, star: 0.62, sat: 1 });
+    } else if (name === 'contact') {
+      Object.assign(base, { x: mobile ? 0.2 : 1.1, y: mobile ? -4.8 : -4.6, s: mobile ? 2.0 : 2.3, cam: 12.0, rx: -0.2, ry: 1.4, star: 0.55 });
+    } else if (name === 'gallery') {
+      Object.assign(base, { x: mobile ? 3.0 : 4.8, y: 1.2, s: 0.48, cam: 13.6, ry: 0.7, star: 0.65 });
+    }
+    return base;
+  }
+
+  function updateChapter() {
+    scrollDirty = false;
+    let index = 0;
+    const probe = height * 0.55;
+    chapters.forEach((section, i) => { if (section.getBoundingClientRect().top <= probe) index = i; });
+    const section = chapters[index];
+    if (!section) { targetPose = chapterPose('orbit'); return; }
+    const rect = section.getBoundingClientRect();
+    const name = section.dataset.spaceChapter || 'orbit';
+    const progress = Math.max(0, Math.min(1, name === 'voyage'
+      ? (height * 0.2 - rect.top) / Math.max(height, rect.height - height * 0.6)
+      : (probe - rect.top) / Math.max(height, rect.height)));
+    targetPose = chapterPose(name, progress);
+    if (index > 0) {
+      let blend = Math.max(0, Math.min(1, (probe - rect.top) / (height * 0.62)));
+      blend = blend * blend * (3 - 2 * blend);
+      const previous = chapterPose(chapters[index - 1].dataset.spaceChapter, 1);
+      Object.keys(targetPose).forEach(key => { targetPose[key] = previous[key] + (targetPose[key] - previous[key]) * blend; });
+    }
+    state.chapter = name;
+    state.progress = progress;
+    stage.dataset.chapter = name;
+    stage.dataset.sceneProgress = progress.toFixed(3);
+  }
+
+  function applyPose(immediate = false) {
+    if (!currentPose || !targetPose || !sculpture) return;
+    if (immediate) currentPose = { ...targetPose };
+    else Object.keys(targetPose).forEach(key => { currentPose[key] += (targetPose[key] - currentPose[key]) * 0.055; });
+    const p = currentPose;
+    sculpture.position.set(p.x, p.y + (state.paused ? 0 : Math.sin(elapsed * 0.28) * 0.04), p.z);
+    sculpture.scale.setScalar(p.s);
+    sculpture.rotation.y = p.ry + targetRotation + (state.paused ? 0 : pointer.x * 0.045);
+    sculpture.rotation.x = p.rx + (state.paused ? 0 : pointer.y * 0.03);
+    camera.position.z = p.cam - departure * 0.45;
+    stars.material.opacity = p.star;
+    streaks.material.opacity = p.warp * 0.36;
+    satellite.scale.setScalar(Math.max(0.001, p.sat * (mobile ? 0.57 : 0.9)));
+    satellite.position.x = mobile ? 0.3 : -2.2;
+    satellite.position.y = mobile ? -0.1 : 0.1;
+    state.rotation = targetRotation;
+  }
+
   function animate(time) {
     frame = 0;
     if (state.paused || lost || !inView || document.hidden) return;
     const delta = lastTime ? Math.min((time - lastTime) / 1000, 0.05) : 0;
     lastTime = time;
     elapsed += delta;
+    if (scrollDirty) updateChapter();
+    departure += (departureTarget - departure) * 0.06;
     planet.rotation.y += delta * 0.035;
     ringSystem.rotation.z = -0.40 + Math.sin(elapsed * 0.13) * 0.025;
-    sculpture.rotation.y += (targetRotation + pointer.x * 0.055 - sculpture.rotation.y) * 0.045;
-    sculpture.rotation.x += (pointer.y * 0.035 + scrollProgress * 0.13 - sculpture.rotation.x) * 0.04;
-    state.rotation = sculpture.rotation.y;
-    sculpture.position.y += ((mobile ? -0.23 : 0.14) + Math.sin(elapsed * 0.28) * 0.055 - sculpture.position.y) * 0.04;
+    applyPose();
     stars.rotation.y = elapsed * 0.0008;
+    satellite.rotation.y += delta * 0.13;
+    satellite.rotation.z = Math.sin(elapsed * 0.18) * 0.12;
+    if (currentPose.warp > 0.001) {
+      for (let i = 0; i < 650; i++) {
+        const k = i * 3;
+        const output = i * 6;
+        const z = -6 - ((-starSeeds[k + 2] - 6 + state.progress * 22 + elapsed * 0.12) % 18);
+        streakPositions[output] = starSeeds[k];
+        streakPositions[output + 1] = starSeeds[k + 1];
+        streakPositions[output + 2] = z;
+        streakPositions[output + 3] = starSeeds[k] * 1.015;
+        streakPositions[output + 4] = starSeeds[k + 1] * 1.015;
+        streakPositions[output + 5] = z + currentPose.warp * 2.5;
+      }
+      streaks.geometry.attributes.position.needsUpdate = true;
+    }
     moon.rotation.y += delta * 0.045;
     renderStill();
     if (!state.fallback) frame = requestAnimationFrame(animate);

@@ -36,18 +36,24 @@
   <!-- /SEO and sharing -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="legacy.css" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="journey.css">
 
   <script defer src="script.js"></script>
+  <script defer src="experience.js"></script>
+  <script type="module" src="scene.js"></script>
 </head>
 <body class="apple-theme inner-page" data-page="inner">
+  <div class="scene-stage ambient-universe" id="scene-interaction" aria-hidden="true"><div class="scene-fallback"><div class="fallback-orbit"></div><div class="fallback-world"></div><div class="fallback-moon"></div></div><canvas id="universe" aria-hidden="true"></canvas></div>
+  <div class="page-transition" id="page-transition" aria-hidden="true"><span class="page-transition-orbit"></span><span class="page-transition-label">A new perspective.</span></div>
+
   <a class="skip-link" href="#smooth-wrapper">Skip to content</a>
 
   <header class="nav" id="navbar">
     <div class="nav-inner">
-      <a class="logo" href="index.html">SYZ.</a>
+      <a class="logo" href="index.html" aria-label="Ahmad Syahmi home">syz<span class="logo-star" aria-hidden="true">&#10035;</span></a>
       <nav class="links" aria-label="Primary navigation">
         <a href="index.html">Home</a>
         <a href="projects.html" >Projects</a>
@@ -71,18 +77,21 @@
 
   <main id="smooth-wrapper" tabindex="-1">
     <div id="smooth-content">
-      <section class="hero section-padding">
+      <section class="hero section-padding" data-space-chapter="orbit">
         <div class="container text-center">
           <p class="eyebrow">404 · SIGNAL LOST</p>
-          <h1 class="hero-title hero-title-style-59">Page not found.</h1>
-          <p class="hero-subtitle">This page could not be found. Return to the portfolio or browse the projects.</p>
+          <h1 class="hero-title hero-title-style-59" data-reveal>Page not found.</h1>
+          <p class="hero-subtitle" data-reveal>This page could not be found. Return to the portfolio or browse the projects.</p>
           <div class="hero-cta"><a class="btn btn-primary" href="index.html">Return home</a><a class="btn btn-secondary" href="projects.html">View projects</a></div>
         </div>
       </section>
     </div>
+
+    <section class="object-lab section-shell" data-space-chapter="toolkit" aria-label="Interactive 3D study"><div class="object-copy" data-reveal><p class="eyebrow">Explore in 3D</p><h2>Find a familiar orbit.</h2><p>A procedural satellite study to explore before returning to the portfolio. The projects and navigation are one click away.</p><span class="object-hint">Drag to rotate. Arrow keys work too.</span></div><div class="object-viewer" data-object-viewer data-object-kind="satellite" tabindex="0" role="group" aria-label="Interactive satellite study. Drag or use arrow keys to rotate. Press Home to reset."><canvas data-object-canvas aria-hidden="true"></canvas><div class="object-fallback"><span aria-hidden="true">&#9671;</span><p>Satellite study</p></div><button type="button" class="object-reset" data-object-reset>Reset view &#8634;</button></div></section>
+
   </main>
 
-      <footer class="footer">
+      <footer data-space-chapter="contact" class="footer">
         <div class="container text-center">
           <a class="hub-link" href="../../index.html">&#8599; Project Hub</a>
           <p class="p-style-28">
@@ -90,6 +99,9 @@
           </p>
         </div>
       </footer>
+
+
+  <aside class="motion-dock" aria-label="Animation controls"><span class="motion-dock-orbit" aria-hidden="true">&#9680;</span><button type="button" id="global-motion" aria-pressed="false"><span data-motion-label data-global-motion-label>Pause animations</span></button></aside>
 
 </body>
 </html>

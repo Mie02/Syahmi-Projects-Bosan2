@@ -23,18 +23,24 @@
   <!-- /SEO and sharing -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../legacy.css" />
   <link rel="stylesheet" href="../style.css" />
+  <link rel="stylesheet" href="../journey.css">
 
   <script defer src="../script.js"></script>
+  <script defer src="../experience.js"></script>
+  <script type="module" src="../scene.js"></script>
 </head>
 <body class="apple-theme inner-page case-page" data-page="inner">
+  <div class="scene-stage ambient-universe" id="scene-interaction" aria-hidden="true"><div class="scene-fallback"><div class="fallback-orbit"></div><div class="fallback-world"></div><div class="fallback-moon"></div></div><canvas id="universe" aria-hidden="true"></canvas></div>
+  <div class="page-transition" id="page-transition" aria-hidden="true"><span class="page-transition-orbit"></span><span class="page-transition-label">A new perspective.</span></div>
+
   <a class="skip-link" href="#smooth-wrapper">Skip to content</a>
 
   <header class="nav" id="navbar">
     <div class="nav-inner">
-      <a class="logo" href="../index.html">SYZ.</a>
+      <a class="logo" href="../index.html" aria-label="Ahmad Syahmi home">syz<span class="logo-star" aria-hidden="true">&#10035;</span></a>
       <nav class="links" aria-label="Primary navigation">
         <a href="../index.html">Home</a>
         <a href="../projects.html" class="active" aria-current="page">Projects</a>
@@ -57,21 +63,21 @@
 
   <main id="smooth-wrapper" tabindex="-1">
     <div id="smooth-content">
-      <section class="hero section-padding">
+      <section class="hero section-padding" data-space-chapter="orbit">
         <div class="container text-center">
           <div class="eyebrow reveal-up eyebrow-style-1">CASE STUDY</div>
-          <h1 class="hero-title reveal-up hero-title-style-59">Bujang Lapok<br>Recreate.</h1>
-          <p class="hero-subtitle reveal-up hero-subtitle-style-60">Premiere Pro Editing</p>
+          <h1 class="hero-title reveal-up hero-title-style-59" data-reveal>Bujang Lapok<br>Recreate.</h1>
+          <p class="hero-subtitle reveal-up hero-subtitle-style-60" data-reveal>Premiere Pro Editing</p>
           <div class="hero-cta reveal-up hero-cta-style-5">
             <a href="../projects.html" class="btn btn-outline">&larr; Back to Projects</a>
           </div>
         </div>
       </section>
 
-      <section class="expertise section-padding expertise-style-61">
+      <section class="expertise section-padding expertise-style-61" data-space-chapter="work">
         <div class="container container-style-62">
-          <div class="reveal-up content-style-63">
-            <h2 class="h2-style-64">Overview</h2>
+          <div class="reveal-up content-style-63" data-reveal>
+            <h2 class="h2-style-64">The idea.</h2>
             <p class="p-style-65">
               A creative recreation of a classic scene from P. Ramlee's 'Bujang Lapok', edited and color graded using Adobe Premiere Pro.
             </p>
@@ -81,15 +87,15 @@
             </div>
           </div>
 
-          <dl class="case-facts">
+          <dl class="case-facts" data-reveal>
 
             <div><dt>Tools</dt><dd>Premiere Pro · Video Editing</dd></div>
 
           </dl>
 
-          <section class="case-section" aria-labelledby="built-title"><h2 id="built-title">What I built</h2><ul><li>A recreation of a scene from P. Ramlee’s Bujang Lapok.</li><li>Editing and color grading in Adobe Premiere Pro.</li></ul></section>
+          <section class="case-section" aria-labelledby="built-title" data-space-chapter="work" data-reveal><h2 id="built-title">What I explored.</h2><ul><li>A recreation of a scene from P. Ramlee’s Bujang Lapok.</li><li>Editing and color grading in Adobe Premiere Pro.</li></ul></section>
 
-          <h2 class="section-title reveal-up text-center section-title-style-68">Gallery</h2>
+          <h2 class="section-title reveal-up text-center section-title-style-68">Explore the work.</h2>
           <div class="preview-pending preview-pending-wide"><span>Premiere Pro / Film Recreation</span><strong>Preview coming soon</strong><p>Project media will be added here.</p></div>
         </div>
       </section>
@@ -99,9 +105,12 @@
         <a class="case-page-link" href="fyp-ar-navigation.html"><span>Next project →</span><strong>AR Indoor Navigation FYP</strong></a>
       </nav>
     </div>
+
+    <section class="object-lab section-shell" data-space-chapter="toolkit" aria-label="Interactive 3D study"><div class="object-copy" data-reveal><p class="eyebrow">Explore in 3D</p><h2>Stories deserve a new angle.</h2><p>An abstract procedural display explores the idea of presenting film in space. The Bujang Lapok recreation preview has not been supplied.</p><span class="object-hint">Drag to rotate. Arrow keys work too.</span></div><div class="object-viewer" data-object-viewer data-object-kind="screen" tabindex="0" role="group" aria-label="Interactive screen study. Drag or use arrow keys to rotate. Press Home to reset."><canvas data-object-canvas aria-hidden="true"></canvas><div class="object-fallback"><span aria-hidden="true">&#9671;</span><p>Screen study</p></div><button type="button" class="object-reset" data-object-reset>Reset view &#8634;</button></div></section>
+
   </main>
 
-      <footer class="footer">
+      <footer data-space-chapter="contact" class="footer">
         <div class="container text-center">
           <a class="hub-link" href="../../../index.html">&#8599; Project Hub</a>
           <p class="p-style-28">
@@ -109,5 +118,8 @@
           </p>
         </div>
       </footer>
+
+  <aside class="motion-dock" aria-label="Animation controls"><span class="motion-dock-orbit" aria-hidden="true">&#9680;</span><button type="button" id="global-motion" aria-pressed="false"><span data-motion-label data-global-motion-label>Pause animations</span></button></aside>
+
 </body>
 </html>

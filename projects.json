@@ -211,13 +211,13 @@
   {
     "id": "portfolio",
     "title": "Ahmad Syahmi — Cinematic 3D Portfolio",
-    "description": "Interactive media portfolio with a procedural 3D orbital universe, three cinematic lighting atmospheres, dimensional project galleries, and seven creative case studies.",
+    "description": "A cinematic interactive media portfolio with a continuous 3D space journey across every page, scroll-driven scenes, interactive object studies, and expanding creative case studies.",
     "path": "projects/portfolio/index.html",
     "thumbnail": "projects/portfolio/images/orbital-preview.jpg",
     "category": "Web",
     "tags": ["Three.js", "WebGL", "Portfolio", "Interactive Media"],
     "status": "Complete",
-    "dateUpdated": "2026-10-29"
+    "dateUpdated": "2026-10-30"
   },
   {
     "id": "ftmk-timetable",

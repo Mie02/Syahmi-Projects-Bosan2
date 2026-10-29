@@ -23,18 +23,24 @@
   <!-- /SEO and sharing -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../legacy.css" />
   <link rel="stylesheet" href="../style.css" />
+  <link rel="stylesheet" href="../journey.css">
 
   <script defer src="../script.js"></script>
+  <script defer src="../experience.js"></script>
+  <script type="module" src="../scene.js"></script>
 </head>
 <body class="apple-theme inner-page case-page" data-page="inner">
+  <div class="scene-stage ambient-universe" id="scene-interaction" aria-hidden="true"><div class="scene-fallback"><div class="fallback-orbit"></div><div class="fallback-world"></div><div class="fallback-moon"></div></div><canvas id="universe" aria-hidden="true"></canvas></div>
+  <div class="page-transition" id="page-transition" aria-hidden="true"><span class="page-transition-orbit"></span><span class="page-transition-label">A new perspective.</span></div>
+
   <a class="skip-link" href="#smooth-wrapper">Skip to content</a>
 
   <header class="nav" id="navbar">
     <div class="nav-inner">
-      <a class="logo" href="../index.html">SYZ.</a>
+      <a class="logo" href="../index.html" aria-label="Ahmad Syahmi home">syz<span class="logo-star" aria-hidden="true">&#10035;</span></a>
       <nav class="links" aria-label="Primary navigation">
         <a href="../index.html">Home</a>
         <a href="../projects.html" class="active" aria-current="page">Projects</a>
@@ -57,21 +63,21 @@
 
   <main id="smooth-wrapper" tabindex="-1">
     <div id="smooth-content">
-      <section class="hero section-padding">
+      <section class="hero section-padding" data-space-chapter="orbit">
         <div class="container text-center">
           <div class="eyebrow reveal-up eyebrow-style-1">CASE STUDY</div>
-          <h1 class="hero-title reveal-up hero-title-style-59">Blender<br>Workshop 2.</h1>
-          <p class="hero-subtitle reveal-up hero-subtitle-style-60">3D Modeling & Lighting</p>
+          <h1 class="hero-title reveal-up hero-title-style-59" data-reveal>Blender<br>Workshop 2.</h1>
+          <p class="hero-subtitle reveal-up hero-subtitle-style-60" data-reveal>3D Modeling & Lighting</p>
           <div class="hero-cta reveal-up hero-cta-style-5">
             <a href="../projects.html" class="btn btn-outline">&larr; Back to Projects</a>
           </div>
         </div>
       </section>
 
-      <section class="expertise section-padding expertise-style-61">
+      <section class="expertise section-padding expertise-style-61" data-space-chapter="work">
         <div class="container container-style-62">
-          <div class="reveal-up content-style-63">
-            <h2 class="h2-style-64">Overview</h2>
+          <div class="reveal-up content-style-63" data-reveal>
+            <h2 class="h2-style-64">The idea.</h2>
             <p class="p-style-65">
               Advanced 3D modeling scenes focusing on material nodes, global illumination, and high-fidelity texture rendering.
             </p>
@@ -81,25 +87,25 @@
             </div>
           </div>
 
-          <dl class="case-facts">
+          <dl class="case-facts" data-reveal>
 
             <div><dt>Tools</dt><dd>Blender · Lighting</dd></div>
 
           </dl>
 
-          <section class="case-section" aria-labelledby="built-title"><h2 id="built-title">What I built</h2><ul><li>3D modeling scenes focused on material nodes, global illumination and texture rendering.</li></ul></section>
+          <section class="case-section" aria-labelledby="built-title" data-space-chapter="work" data-reveal><h2 id="built-title">What I explored.</h2><ul><li>3D modeling scenes focused on material nodes, global illumination and texture rendering.</li></ul></section>
 
-          <h2 class="section-title reveal-up text-center section-title-style-68">Gallery</h2>
+          <h2 class="section-title reveal-up text-center section-title-style-68">Explore the work.</h2>
           <div class="div-style-69">
-            <button type="button" class="gallery-open" data-image="../images/ws1.png" data-caption="Blender workspace comparing color and grayscale renders of an interior scene" aria-label="Expand image: Blender workspace comparing color and grayscale renders of an interior scene"><picture><source srcset="../images/ws1.webp" type="image/webp"><img src="../images/ws1.png" alt="Blender workspace comparing color and grayscale renders of an interior scene" class="reveal-up content-style-70 media-hover-glow" loading="lazy" width="602" height="325" decoding="async"></picture></button>
-            <button type="button" class="gallery-open" data-image="../images/ws2.png" data-caption="Blender viewport showing an interior set and character models" aria-label="Expand image: Blender viewport showing an interior set and character models"><picture><source srcset="../images/ws2.webp" type="image/webp"><img src="../images/ws2.png" alt="Blender viewport showing an interior set and character models" class="reveal-up content-style-70 media-hover-glow" loading="lazy" width="602" height="311" decoding="async"></picture></button>
-            <button type="button" class="gallery-open" data-image="../images/ws3.png" data-caption="Blender viewport showing posed characters in an interior set" aria-label="Expand image: Blender viewport showing posed characters in an interior set"><picture><source srcset="../images/ws3.webp" type="image/webp"><img src="../images/ws3.png" alt="Blender viewport showing posed characters in an interior set" class="reveal-up content-style-70 media-hover-glow" loading="lazy" width="602" height="302" decoding="async"></picture></button>
-            <button type="button" class="gallery-open" data-image="../images/ws4.png" data-caption="Blender viewport with selected furniture and plant objects" aria-label="Expand image: Blender viewport with selected furniture and plant objects"><picture><source srcset="../images/ws4.webp" type="image/webp"><img src="../images/ws4.png" alt="Blender viewport with selected furniture and plant objects" class="reveal-up content-style-70 media-hover-glow" loading="lazy" width="602" height="304" decoding="async"></picture></button>
-            <button type="button" class="gallery-open" data-image="../images/ws5.png" data-caption="Blender render preview and video editing timeline" aria-label="Expand image: Blender render preview and video editing timeline"><picture><source srcset="../images/ws5.webp" type="image/webp"><img src="../images/ws5.png" alt="Blender render preview and video editing timeline" class="reveal-up content-style-70 media-hover-glow" loading="lazy" width="602" height="313" decoding="async"></picture></button>
-            <button type="button" class="gallery-open" data-image="../images/ws6.png" data-caption="Blender workspace with render settings and an output preview" aria-label="Expand image: Blender workspace with render settings and an output preview"><picture><source srcset="../images/ws6.webp" type="image/webp"><img src="../images/ws6.png" alt="Blender workspace with render settings and an output preview" class="reveal-up content-style-70 media-hover-glow" loading="lazy" width="602" height="313" decoding="async"></picture></button>
+            <figure class="case-figure"><button type="button" class="gallery-open" data-image="../images/ws1.png" data-caption="Blender workspace comparing color and grayscale renders of an interior scene" aria-label="Expand image: Blender workspace comparing color and grayscale renders of an interior scene"><picture><source srcset="../images/ws1.webp" type="image/webp"><img src="../images/ws1.png" alt="Blender workspace comparing color and grayscale renders of an interior scene" class="reveal-up content-style-70 media-hover-glow" loading="lazy" width="602" height="325" decoding="async"></picture></button><figcaption>Blender workspace comparing color and grayscale renders of an interior scene</figcaption></figure>
+            <figure class="case-figure"><button type="button" class="gallery-open" data-image="../images/ws2.png" data-caption="Blender viewport showing an interior set and character models" aria-label="Expand image: Blender viewport showing an interior set and character models"><picture><source srcset="../images/ws2.webp" type="image/webp"><img src="../images/ws2.png" alt="Blender viewport showing an interior set and character models" class="reveal-up content-style-70 media-hover-glow" loading="lazy" width="602" height="311" decoding="async"></picture></button><figcaption>Blender viewport showing an interior set and character models</figcaption></figure>
+            <figure class="case-figure"><button type="button" class="gallery-open" data-image="../images/ws3.png" data-caption="Blender viewport showing posed characters in an interior set" aria-label="Expand image: Blender viewport showing posed characters in an interior set"><picture><source srcset="../images/ws3.webp" type="image/webp"><img src="../images/ws3.png" alt="Blender viewport showing posed characters in an interior set" class="reveal-up content-style-70 media-hover-glow" loading="lazy" width="602" height="302" decoding="async"></picture></button><figcaption>Blender viewport showing posed characters in an interior set</figcaption></figure>
+            <figure class="case-figure"><button type="button" class="gallery-open" data-image="../images/ws4.png" data-caption="Blender viewport with selected furniture and plant objects" aria-label="Expand image: Blender viewport with selected furniture and plant objects"><picture><source srcset="../images/ws4.webp" type="image/webp"><img src="../images/ws4.png" alt="Blender viewport with selected furniture and plant objects" class="reveal-up content-style-70 media-hover-glow" loading="lazy" width="602" height="304" decoding="async"></picture></button><figcaption>Blender viewport with selected furniture and plant objects</figcaption></figure>
+            <figure class="case-figure"><button type="button" class="gallery-open" data-image="../images/ws5.png" data-caption="Blender render preview and video editing timeline" aria-label="Expand image: Blender render preview and video editing timeline"><picture><source srcset="../images/ws5.webp" type="image/webp"><img src="../images/ws5.png" alt="Blender render preview and video editing timeline" class="reveal-up content-style-70 media-hover-glow" loading="lazy" width="602" height="313" decoding="async"></picture></button><figcaption>Blender render preview and video editing timeline</figcaption></figure>
+            <figure class="case-figure"><button type="button" class="gallery-open" data-image="../images/ws6.png" data-caption="Blender workspace with render settings and an output preview" aria-label="Expand image: Blender workspace with render settings and an output preview"><picture><source srcset="../images/ws6.webp" type="image/webp"><img src="../images/ws6.png" alt="Blender workspace with render settings and an output preview" class="reveal-up content-style-70 media-hover-glow" loading="lazy" width="602" height="313" decoding="async"></picture></button><figcaption>Blender workspace with render settings and an output preview</figcaption></figure>
           </div>
 
-          <h2 class="section-title reveal-up text-center section-title-style-68">Showcase</h2>
+          <h2 class="section-title reveal-up text-center section-title-style-68">See it in motion.</h2>
           <div class="reveal-up content-style-71 media-hover-glow">
             <video controls preload="none" playsinline poster="../images/ws1.webp" class="video-style-72">
               <source src="../videos/ws2p.mp4" type="video/mp4">
@@ -113,9 +119,12 @@
         <a class="case-page-link" href="bujang-lapok.html"><span>Next project →</span><strong>Bujang Lapok Recreate</strong></a>
       </nav>
     </div>
+
+    <section class="object-lab section-shell" data-space-chapter="toolkit" aria-label="Interactive 3D study"><div class="object-copy" data-reveal><p class="eyebrow">Explore in 3D</p><h2>See the scene differently.</h2><p>A procedural display presents the Blender interior study. This interaction complements the original rendering screenshots and video.</p><span class="object-hint">Drag to rotate. Arrow keys work too.</span></div><div class="object-viewer" data-object-viewer data-object-kind="screen" data-object-image="../images/ws1.webp" tabindex="0" role="group" aria-label="Interactive screen study. Drag or use arrow keys to rotate. Press Home to reset."><canvas data-object-canvas aria-hidden="true"></canvas><div class="object-fallback"><span aria-hidden="true">&#9671;</span><p>Screen study</p></div><button type="button" class="object-reset" data-object-reset>Reset view &#8634;</button></div></section>
+
   </main>
 
-      <footer class="footer">
+      <footer data-space-chapter="contact" class="footer">
         <div class="container text-center">
           <a class="hub-link" href="../../../index.html">&#8599; Project Hub</a>
           <p class="p-style-28">
@@ -123,5 +132,8 @@
           </p>
         </div>
       </footer>
+
+  <aside class="motion-dock" aria-label="Animation controls"><span class="motion-dock-orbit" aria-hidden="true">&#9680;</span><button type="button" id="global-motion" aria-pressed="false"><span data-motion-label data-global-motion-label>Pause animations</span></button></aside>
+
 </body>
 </html>

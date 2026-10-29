@@ -6,10 +6,17 @@
   if (year) year.textContent = new Date().getFullYear();
   const menu = document.getElementById('mobileMenu');
   const toggle = document.getElementById('hamburger');
+  let menuOpen = false, menuOverflow = '';
   function setMenu(open, focusBack = false) {
     if (!menu || !toggle) return;
+    if (open && !menuOpen) { menuOverflow = document.body.style.overflow; document.body.style.overflow = 'hidden'; }
+    else if (!open && menuOpen) document.body.style.overflow = menuOverflow;
+    menuOpen = open;
+    document.body.classList.toggle('menu-open', open);
     menu.hidden = !open; menu.inert = !open;
     menu.setAttribute('aria-hidden', String(!open));
+    document.querySelector('main')?.toggleAttribute('inert', open);
+    document.querySelector('body > footer')?.toggleAttribute('inert', open);
     toggle.setAttribute('aria-expanded', String(open));
     toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
     if (open) menu.querySelector('a')?.focus();
@@ -17,7 +24,16 @@
   }
   toggle?.addEventListener('click', () => setMenu(toggle.getAttribute('aria-expanded') !== 'true'));
   menu?.addEventListener('click', event => { if (event.target.closest('a')) setMenu(false); });
-  document.addEventListener('keydown', event => { if (event.key === 'Escape' && toggle?.getAttribute('aria-expanded') === 'true') setMenu(false, true); });
+  document.addEventListener('keydown', event => {
+    if (toggle?.getAttribute('aria-expanded') !== 'true') return;
+    if (event.key === 'Escape') setMenu(false, true);
+    if (event.key === 'Tab') {
+      const focusable = [toggle, ...menu.querySelectorAll('a[href]')];
+      const index = focusable.indexOf(document.activeElement);
+      if (event.shiftKey && index <= 0) { event.preventDefault(); focusable.at(-1).focus(); }
+      else if (!event.shiftKey && index === focusable.length - 1) { event.preventDefault(); toggle.focus(); }
+    }
+  });
   matchMedia('(min-width: 761px)').addEventListener('change', event => { if (event.matches) setMenu(false); });
   document.addEventListener('click', event => { if (toggle?.getAttribute('aria-expanded') === 'true' && !event.target.closest('.nav, .mobile-menu')) setMenu(false); });
   let scrollPending = false;
@@ -45,7 +61,7 @@
   document.querySelectorAll('[data-tilt], .project-card, .fancy-skill-card').forEach(card => {
     let frame = 0;
     card.addEventListener('pointermove', event => {
-      if (event.pointerType !== 'mouse' || reduced.matches || !matchMedia('(hover: hover)').matches) return;
+      if (event.pointerType !== 'mouse' || document.body.classList.contains('motion-paused') || !matchMedia('(hover: hover)').matches) return;
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         const box = card.getBoundingClientRect();
@@ -74,20 +90,7 @@
       if (status) status.textContent = 'Select the address below to copy it.';
     }
   });
-  const galleryButtons = document.querySelectorAll('.gallery-open[data-image]');
-  if (galleryButtons.length && typeof HTMLDialogElement !== 'undefined') {
-    const dialog = document.createElement('dialog'); dialog.className = 'lightbox'; dialog.setAttribute('aria-label', 'Project image preview');
-    const close = document.createElement('button'); close.type = 'button'; close.textContent = '×'; close.setAttribute('aria-label', 'Close image preview');
-    const image = document.createElement('img'), caption = document.createElement('p');
-    dialog.append(close, image, caption); document.body.append(dialog);
-    close.addEventListener('click', () => dialog.close());
-    dialog.addEventListener('click', event => {
-      if (event.target === dialog) { const rect = dialog.getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close(); }
-    });
-    galleryButtons.forEach(button => button.addEventListener('click', () => {
-      image.src = button.dataset.image; image.alt = button.dataset.caption || button.querySelector('img')?.alt || 'Project preview'; caption.textContent = image.alt; dialog.showModal();
-    }));
-  }
+  // Gallery buttons (including fetched project previews) are delegated by experience.js.
   setTimeout(() => {
     if (document.querySelector('#universe') && !document.body.classList.contains('scene-ready')) {
       const status = document.getElementById('scene-status'); if (status) status.textContent = 'Still universe';
