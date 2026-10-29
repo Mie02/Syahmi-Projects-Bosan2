@@ -210,14 +210,14 @@
   },
   {
     "id": "portfolio",
-    "title": "Deep Space Observatory — Portfolio",
-    "description": "Personal portfolio with a sci-fi HUD aesthetic. Starfield constellation canvas, animated skill nodes, and a mission-log timeline.",
+    "title": "Ahmad Syahmi — Cinematic 3D Portfolio",
+    "description": "Interactive media portfolio with a procedural 3D orbital universe, three cinematic lighting atmospheres, dimensional project galleries, and seven creative case studies.",
     "path": "projects/portfolio/index.html",
-    "thumbnail": "assets/thumbnails/portfolio.svg",
+    "thumbnail": "projects/portfolio/images/orbital-preview.jpg",
     "category": "Web",
-    "tags": ["Three.js", "GSAP", "Portfolio", "CSS Art"],
+    "tags": ["Three.js", "WebGL", "Portfolio", "Interactive Media"],
     "status": "Complete",
-    "dateUpdated": "2026-06-10"
+    "dateUpdated": "2026-10-29"
   },
   {
     "id": "ftmk-timetable",

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mie02.github.io/Syahmi-Projects-Bosan2/projects/portfolio/sitemap.xml
